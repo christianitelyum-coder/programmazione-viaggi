@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Centrale Operativa — Programmazione Viaggi</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ── TOKEN SYSTEM ─────────────────────────────────────── */
+:root {
+  --ink:    #0f1923;
+  --ink2:   #4a5568;
+  --ink3:   #8896aa;
+  --bg:     #f2f4f8;
+  --surface:#ffffff;
+  --s2:     #f7f9fc;
+  --border: #dde3ef;
+
+  --teal:   #0b7c6e;
+  --teal-l: #e0f5f2;
+  --teal-d: #075549;
+  --amber:  #b45309;
+  --amber-l:#fef3c7;
+  --red:    #c0392b;
+  --red-l:  #fdf0ee;
+  --blue:   #1a4f8a;
+  --blue-l: #e8f0fc;
+
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --r:    8px;
+  --sh:   0 2px 12px rgba(15,25,35,.08);
+  --sh2:  0 6px 28px rgba(15,25,35,.13);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
+
+/* ── HEADER ──────────────────────────────────────────── */
+.header{background:var(--ink);color:#fff;padding:0 1.5rem;height:54px;display:flex;align-items:center;gap:0;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
+.logo{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.08em;margin-right:auto;display:flex;align-items:center;gap:8px}
+.logo em{background:var(--teal);color:#fff;padding:2px 8px;border-radius:4px;font-style:normal;font-size:10px;letter-spacing:.1em}
+.nav-pills{display:flex;gap:2px}
+.npill{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:none;color:rgba(255,255,255,.5);transition:all .15s;font-family:var(--sans)}
+.npill.act{background:rgba(255,255,255,.12);color:#fff}
+.npill:hover:not(.act){color:rgba(255,255,255,.8)}
+.fb-dot{width:7px;height:7px;border-radius:50%;background:#444;margin-left:14px;transition:background .3s;flex-shrink:0}
+.fb-dot.on{background:var(--teal)}
+.fb-dot.err{background:var(--red)}
+
+/* ── LAYOUT ──────────────────────────────────────────── */
+.view{display:none;padding:1.25rem 1.5rem;max-width:1400px;margin:0 auto}
+.view.active{display:block}
+
+/* ── TOOLBAR ─────────────────────────────────────────── */
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap}
+.week-nav{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px 8px;box-shadow:var(--sh)}
+.wnav-btn{background:none;border:none;cursor:pointer;color:var(--ink2);font-size:16px;padding:2px 8px;border-radius:5px;transition:background .1s}
+.wnav-btn:hover{background:var(--s2)}
+.week-label{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--ink);min-width:180px;text-align:center}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:var(--r);border:none;font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;transition:all .15s}
+.btn-primary{background:var(--teal);color:#fff}
+.btn-primary:hover{background:var(--teal-d)}
+.btn-ghost{background:var(--surface);color:var(--ink2);border:1px solid var(--border)}
+.btn-ghost:hover{background:var(--s2)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.ml-auto{margin-left:auto}
+
+/* ── WEEK GRID ───────────────────────────────────────── */
+.week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.day-col{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;min-height:400px;display:flex;flex-direction:column;box-shadow:var(--sh)}
+.day-col.today{border-color:var(--teal);box-shadow:0 0 0 2px var(--teal-l),var(--sh)}
+.day-header{padding:8px 10px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.day-name{font-family:var(--mono);font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3)}
+.day-date{font-family:var(--mono);font-size:16px;font-weight:600;color:var(--ink)}
+.day-col.today .day-date{color:var(--teal)}
+.day-count{font-size:10px;font-weight:600;color:var(--ink3);background:var(--s2);padding:2px 6px;border-radius:10px}
+.day-body{padding:6px;flex:1;display:flex;flex-direction:column;gap:4px}
+.add-btn{width:100%;padding:6px;border:1.5px dashed var(--border);border-radius:6px;background:none;color:var(--ink3);font-size:12px;cursor:pointer;transition:all .15s;font-family:var(--sans);margin-top:auto}
+.add-btn:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-l)}
+
+/* ── VIAGGIO CARD ────────────────────────────────────── */
+.vcard{border-radius:6px;padding:8px 10px;border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:all .15s;position:relative}
+.vcard:hover{border-color:var(--teal);box-shadow:var(--sh)}
+.vcard.done{background:var(--teal-l);border-color:#a7e5cc}
+.vcard.partial{background:var(--amber-l);border-color:#fcd34d}
+.vcard.none{background:var(--red-l);border-color:#f0b8b3}
+.vc-top{display:flex;align-items:flex-start;gap:6px;margin-bottom:5px}
+.vc-sem{width:8px;height:8px;border-radius:50%;flex-shrink:0;margin-top:3px}
+.sem-done{background:var(--teal)}
+.sem-partial{background:var(--amber)}
+.sem-none{background:var(--red)}
+.vc-client{font-size:12px;font-weight:700;color:var(--ink);flex:1;line-height:1.3}
+.vc-carrier{font-size:10px;color:var(--ink2);margin-bottom:4px}
+.vc-checks{display:flex;gap:4px;flex-wrap:wrap}
+.chk-pill{font-size:9px;font-weight:700;padding:2px 6px;border-radius:10px;letter-spacing:.03em;transition:all .15s}
+.chk-done{background:#d1fae5;color:#065f46}
+.chk-todo{background:#f3f4f6;color:#9ca3af}
+.vc-del{position:absolute;top:4px;right:4px;background:none;border:none;color:transparent;font-size:13px;cursor:pointer;padding:2px;border-radius:4px;transition:all .1s}
+.vcard:hover .vc-del{color:#ddd}
+.vc-del:hover{color:var(--red)!important;background:var(--red-l)}
+
+/* ── MODAL ───────────────────────────────────────────── */
+.overlay{position:fixed;inset:0;background:rgba(15,25,35,.55);z-index:500;display:none;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
+.overlay.open{display:flex}
+.modal{background:var(--surface);border-radius:12px;box-shadow:var(--sh2);width:min(560px,100%);margin:auto}
+.modal-header{padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:10px}
+.modal-icon{width:36px;height:36px;border-radius:8px;background:var(--teal-l);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.modal-title{font-size:15px;font-weight:700;flex:1}
+.modal-close{background:none;border:none;font-size:22px;cursor:pointer;color:var(--ink3);line-height:1}
+.modal-body{padding:1.25rem 1.5rem}
+.form-row{margin-bottom:1rem}
+.form-lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--ink3);display:block;margin-bottom:5px}
+.form-lbl span{color:var(--teal);margin-left:2px}
+.form-ctrl{width:100%;font-family:var(--sans);font-size:13px;padding:9px 12px;border:1.5px solid var(--border);border-radius:var(--r);color:var(--ink);background:var(--s2);outline:none;transition:border-color .15s}
+.form-ctrl:focus{border-color:var(--teal);background:#fff}
+.form-row-2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.checklist-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:4px}
+.chk-item{display:flex;align-items:center;gap:8px;padding:10px 12px;border-radius:var(--r);border:1.5px solid var(--border);background:var(--s2);cursor:pointer;transition:all .15s}
+.chk-item:hover{border-color:var(--teal)}
+.chk-item.checked{background:var(--teal-l);border-color:#a7e5cc}
+.chk-item input[type=checkbox]{width:16px;height:16px;accent-color:var(--teal);cursor:pointer;flex-shrink:0}
+.chk-label{font-size:12px;font-weight:500;color:var(--ink);line-height:1.3}
+.modal-footer{padding:.9rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--s2);border-radius:0 0 12px 12px}
+
+/* ── LISTA VIEW ──────────────────────────────────────── */
+.lista-filters{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
+.lista-filters input,.lista-filters select{font-family:var(--sans);font-size:13px;padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--ink);outline:none}
+.lista-filters input:focus,.lista-filters select:focus{border-color:var(--teal)}
+.vtable{width:100%;border-collapse:collapse;font-size:13px;background:var(--surface);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+.vtable thead th{background:var(--ink);color:#fff;padding:9px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;white-space:nowrap}
+.vtable tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+.vtable tbody tr:hover{background:var(--s2)}
+.vtable td{padding:10px 12px;vertical-align:middle}
+.progress-bar{height:6px;border-radius:3px;background:var(--border);overflow:hidden;width:80px}
+.progress-fill{height:100%;border-radius:3px;transition:width .3s}
+.fill-done{background:var(--teal)}
+.fill-partial{background:var(--amber)}
+.fill-none{background:var(--red)}
+
+/* ── SETUP ───────────────────────────────────────────── */
+.setup-wrap{max-width:500px;margin:2rem auto}
+.setup-card{background:var(--surface);border-radius:12px;padding:2rem;box-shadow:var(--sh2);border:1px solid var(--border)}
+.setup-card h2{font-size:18px;font-weight:700;margin-bottom:.5rem}
+.setup-card p{font-size:13px;color:var(--ink2);margin-bottom:1.5rem;line-height:1.6}
+
+/* ── TOAST ───────────────────────────────────────────── */
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--ink);color:#fff;padding:10px 18px;border-radius:var(--r);font-size:13px;font-weight:600;box-shadow:var(--sh2);transform:translateY(60px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);z-index:999}
+.toast.show{transform:translateY(0);opacity:1}
+.toast.ok{background:var(--teal)}
+.toast.err{background:var(--red)}
+
+/* ── RESPONSIVE ──────────────────────────────────────── */
+@media(max-width:900px){
+  .week-grid{grid-template-columns:repeat(3,1fr)}
+  .header .nav-pills{display:none}
+}
+@media(max-width:600px){
+  .week-grid{grid-template-columns:1fr 1fr}
+  .view{padding:1rem}
+  .form-row-2{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<header class="header">
+  <div class="logo"><em>CR</em> Centrale Operativa</div>
+  <div class="nav-pills">
+    <button class="npill act" onclick="switchView('settimana')">Settimana</button>
+    <button class="npill" onclick="switchView('lista')">Lista</button>
+    <button class="npill" onclick="switchView('setup')">Config</button>
+  </div>
+  <div class="fb-dot" id="fb-dot" title="Firebase"></div>
+</header>
+
+<!-- ══ SETTIMANA ══════════════════════════════════════ -->
+<div class="view active" id="view-settimana">
+  <div class="toolbar">
+    <div class="week-nav">
+      <button class="wnav-btn" onclick="shiftWeek(-1)">‹</button>
+      <span class="week-label" id="week-label">—</span>
+      <button class="wnav-btn" onclick="shiftWeek(1)">›</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="goToday()">Oggi</button>
+    <button class="btn btn-primary ml-auto" onclick="openModal()">+ Nuovo viaggio</button>
+  </div>
+  <div class="week-grid" id="week-grid"></div>
+</div>
+
+<!-- ══ LISTA ══════════════════════════════════════════ -->
+<div class="view" id="view-lista">
+  <div class="lista-filters">
+    <input type="text" id="f-cerca" placeholder="🔍 Cliente, trasportatore..." oninput="renderLista()" style="flex:1;min-width:180px">
+    <select id="f-stato" onchange="renderLista()">
+      <option value="">Tutti gli stati</option>
+      <option value="done">✅ Completati</option>
+      <option value="partial">🟡 Parziali</option>
+      <option value="none">🔴 Da iniziare</option>
+    </select>
+    <input type="date" id="f-dal" onchange="renderLista()">
+    <input type="date" id="f-al"  onchange="renderLista()">
+    <button class="btn btn-ghost btn-sm" onclick="resetFiltri()">✕ Reset</button>
+    <button class="btn btn-ghost btn-sm" onclick="exportCSV()">⬇ CSV</button>
+    <button class="btn btn-primary btn-sm ml-auto" onclick="openModal()">+ Nuovo viaggio</button>
+  </div>
+  <table class="vtable">
+    <thead><tr>
+      <th>Data</th><th>Cliente</th><th>Trasportatore</th><th>Origine → Dest.</th>
+      <th>Avanzamento</th><th>Stato</th><th></th>
+    </tr></thead>
+    <tbody id="lista-tbody"></tbody>
+  </table>
+</div>
+
+<!-- ══ SETUP ══════════════════════════════════════════ -->
+<div class="view" id="view-setup">
+<div class="setup-wrap">
+  <div class="setup-card">
+    <h2>⚙️ Configurazione Firebase</h2>
+    <p>Usa le stesse credenziali del Tracker Cassoni — i dati vivono sullo stesso progetto Firebase.</p>
+    <div class="form-row"><label class="form-lbl">API Key</label><input class="form-ctrl" id="cfg-apikey" placeholder="AIza..."></div>
+    <div class="form-row"><label class="form-lbl">Auth Domain</label><input class="form-ctrl" id="cfg-domain" placeholder="progetto.firebaseapp.com"></div>
+    <div class="form-row"><label class="form-lbl">Database URL</label><input class="form-ctrl" id="cfg-dburl" placeholder="https://progetto-rtdb.europe-west1.firebasedatabase.app"></div>
+    <div class="form-row"><label class="form-lbl">Project ID</label><input class="form-ctrl" id="cfg-pid" placeholder="nome-progetto"></div>
+    <div style="display:flex;gap:8px;margin-top:1.25rem">
+      <button class="btn btn-primary" onclick="salvaConfig()">💾 Salva e connetti</button>
+      <button class="btn btn-ghost" onclick="testConn()">🔌 Testa</button>
+    </div>
+    <div id="cfg-status" style="margin-top:.75rem;font-size:12px;color:var(--ink3)"></div>
+
+    <hr style="margin:1.5rem 0;border:none;border-top:1px solid var(--border)">
+    <h3 style="font-size:13px;font-weight:700;margin-bottom:.5rem">📋 Attività predefinite</h3>
+    <p style="font-size:12px;color:var(--ink2);margin-bottom:.75rem">Queste attività appaiono nella checklist di ogni viaggio.</p>
+    <div id="tasks-editor" style="display:flex;flex-direction:column;gap:6px"></div>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <input class="form-ctrl" id="new-task-input" placeholder="Nuova attività..." style="flex:1;font-size:13px;padding:7px 10px">
+      <button class="btn btn-primary btn-sm" onclick="aggiungiTask()">+ Aggiungi</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%" onclick="salvaTaskConfig()">💾 Salva attività</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ MODAL VIAGGIO ══════════════════════════════════ -->
+<div class="overlay" id="modal-overlay" onclick="if(event.target===this)chiudiModal()">
+  <div class="modal">
+    <div class="modal-header">
+      <div class="modal-icon">🚛</div>
+      <span class="modal-title" id="modal-title">Nuovo viaggio</span>
+      <button class="modal-close" onclick="chiudiModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="form-row-2">
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-lbl">Data viaggio <span>*</span></label>
+          <input class="form-ctrl" id="m-data" type="date">
+        </div>
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-lbl">Ora (opzionale)</label>
+          <input class="form-ctrl" id="m-ora" type="time" placeholder="es. 07:30">
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:1rem">
+        <label class="form-lbl">Cliente <span>*</span></label>
+        <input class="form-ctrl" id="m-cliente" placeholder="Ragione sociale cliente">
+      </div>
+      <div class="form-row-2">
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-lbl">Trasportatore</label>
+          <input class="form-ctrl" id="m-trasportatore" placeholder="Vettore / Autista">
+        </div>
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-lbl">Targa / Mezzo</label>
+          <input class="form-ctrl" id="m-targa" placeholder="es. FW361VJ">
+        </div>
+      </div>
+      <div class="form-row-2" style="margin-top:1rem">
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-lbl">Origine</label>
+          <input class="form-ctrl" id="m-origine" placeholder="Luogo di partenza">
+        </div>
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-lbl">Destinazione</label>
+          <input class="form-ctrl" id="m-dest" placeholder="Luogo di arrivo">
+        </div>
+      </div>
+      <div class="form-row" style="margin-top:1rem">
+        <label class="form-lbl">Note</label>
+        <textarea class="form-ctrl" id="m-note" rows="2" placeholder="Riferimenti, istruzioni speciali..."></textarea>
+      </div>
+      <div class="form-row" style="margin-top:1rem">
+        <label class="form-lbl">Checklist attività</label>
+        <div class="checklist-grid" id="modal-checklist"></div>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="chiudiModal()">Annulla</button>
+      <button class="btn btn-primary" onclick="salvaViaggio()">✓ Salva viaggio</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script type="module">
+import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, set, push, onValue, update, remove }
+  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+// ── STATE ──────────────────────────────────────────────
+let db = null;
+let STATE = { viaggi: {}, tasks: [] };
+let _editId  = null;
+let _weekOffset = 0;
+
+const DEFAULT_TASKS = [
+  'Mail richiesta al trasportatore',
+  'Ordine di servizio creato',
+  'FAC SIMILE formulario inviato',
+  'Cliente avvisato del ritiro'
+];
+
+// ── UTILS ──────────────────────────────────────────────
+function toast(msg, type='') {
+  const el = document.getElementById('toast');
+  el.textContent = msg; el.className = 'toast show' + (type?' '+type:'');
+  clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+function fmtDate(iso) {
+  if (!iso) return '—';
+  const [y,m,g] = iso.split('-');
+  return `${g}/${m}/${y}`;
+}
+
+function getMondayOf(offset=0) {
+  const d = new Date();
+  d.setHours(0,0,0,0);
+  const day = d.getDay() || 7;
+  d.setDate(d.getDate() - day + 1 + offset*7);
+  return d;
+}
+
+function addDays(d, n) {
+  const r = new Date(d);
+  r.setDate(r.getDate()+n);
+  return r;
+}
+
+function toISO(d) {
+  return d.toISOString().slice(0,10);
+}
+
+function semaforo(viaggio) {
+  const tasks = STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS;
+  const done = tasks.filter(t => viaggio.checks && viaggio.checks[slugify(t)]).length;
+  if (done === 0) return 'none';
+  if (done === tasks.length) return 'done';
+  return 'partial';
+}
+
+function semLabel(s) {
+  return s === 'done' ? '✅ Completo' : s === 'partial' ? '🟡 In corso' : '🔴 Da iniziare';
+}
+
+function slugify(s) {
+  return s.toLowerCase().replace(/[^a-z0-9]/g,'_').replace(/_+/g,'_');
+}
+
+function progress(viaggio) {
+  const tasks = STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS;
+  const done = tasks.filter(t => viaggio.checks && viaggio.checks[slugify(t)]).length;
+  return Math.round(done / tasks.length * 100);
+}
+
+// ── RENDER SETTIMANA ───────────────────────────────────
+const GIORNI = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
+
+function renderSettimana() {
+  const lun = getMondayOf(_weekOffset);
+  const dom = addDays(lun, 6);
+  document.getElementById('week-label').textContent =
+    `${fmtDate(toISO(lun))}  —  ${fmtDate(toISO(dom))}`;
+
+  const today = toISO(new Date());
+  const grid  = document.getElementById('week-grid');
+  grid.innerHTML = '';
+
+  for (let i=0; i<7; i++) {
+    const d    = addDays(lun, i);
+    const iso  = toISO(d);
+    const isToday = iso === today;
+    const viaggi = Object.entries(STATE.viaggi)
+      .filter(([,v]) => v.data === iso)
+      .sort((a,b) => (a[1].ora||'') < (b[1].ora||'') ? -1 : 1);
+
+    const col = document.createElement('div');
+    col.className = 'day-col' + (isToday?' today':'');
+    col.innerHTML = `
+      <div class="day-header">
+        <div>
+          <div class="day-name">${GIORNI[i]}</div>
+          <div class="day-date">${d.getDate().toString().padStart(2,'0')}/${(d.getMonth()+1).toString().padStart(2,'0')}</div>
+        </div>
+        <span class="day-count">${viaggi.length}</span>
+      </div>
+      <div class="day-body" id="day-${iso}">
+        ${viaggi.map(([id,v]) => vcardHTML(id,v)).join('')}
+        <button class="add-btn" onclick="openModal('${iso}')">+ Aggiungi</button>
+      </div>`;
+    grid.appendChild(col);
+  }
+}
+
+function vcardHTML(id, v) {
+  const sem   = semaforo(v);
+  const tasks = STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS;
+  const pills = tasks.map(t => {
+    const done = v.checks && v.checks[slugify(t)];
+    const short = t.split(' ').slice(0,2).join(' ');
+    return `<span class="chk-pill ${done?'chk-done':'chk-todo'}">${short}</span>`;
+  }).join('');
+  return `<div class="vcard ${sem}" onclick="openModal(null,'${id}')">
+    <button class="vc-del" onclick="event.stopPropagation();eliminaViaggio('${id}')" title="Elimina">×</button>
+    <div class="vc-top">
+      <div class="vc-sem sem-${sem}"></div>
+      <div class="vc-client">${v.ora?'<span style="font-family:var(--mono);font-size:10px;color:var(--ink3);margin-right:4px">'+v.ora+'</span>':''}${v.cliente||'—'}</div>
+    </div>
+    ${v.trasportatore?`<div class="vc-carrier">🚛 ${v.trasportatore}${v.targa?' · '+v.targa:''}</div>`:''}
+    ${v.origine||v.dest?`<div class="vc-carrier" style="font-size:9px">📍 ${v.origine||'—'} → ${v.dest||'—'}</div>`:''}
+    <div class="vc-checks">${pills}</div>
+  </div>`;
+}
+
+// ── RENDER LISTA ───────────────────────────────────────
+function renderLista() {
+  const cerca = document.getElementById('f-cerca').value.toLowerCase();
+  const stato = document.getElementById('f-stato').value;
+  const dal   = document.getElementById('f-dal').value;
+  const al    = document.getElementById('f-al').value;
+
+  let rows = Object.entries(STATE.viaggi)
+    .sort((a,b) => (a[1].data+a[1].ora) < (b[1].data+b[1].ora) ? -1 : 1);
+
+  if (cerca) rows = rows.filter(([,v]) =>
+    (v.cliente||'').toLowerCase().includes(cerca) ||
+    (v.trasportatore||'').toLowerCase().includes(cerca) ||
+    (v.origine||'').toLowerCase().includes(cerca) ||
+    (v.dest||'').toLowerCase().includes(cerca));
+  if (stato) rows = rows.filter(([,v]) => semaforo(v) === stato);
+  if (dal)   rows = rows.filter(([,v]) => v.data >= dal);
+  if (al)    rows = rows.filter(([,v]) => v.data <= al);
+
+  const tbody = document.getElementById('lista-tbody');
+  if (!rows.length) {
+    tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--ink3);padding:2rem;font-size:13px">Nessun viaggio trovato</td></tr>';
+    return;
+  }
+  tbody.innerHTML = rows.map(([id,v]) => {
+    const sem  = semaforo(v);
+    const pct  = progress(v);
+    const fillCls = sem==='done'?'fill-done':sem==='partial'?'fill-partial':'fill-none';
+    return `<tr>
+      <td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${fmtDate(v.data)}${v.ora?' <span style="color:var(--ink3)">'+v.ora+'</span>':''}</td>
+      <td style="font-weight:600">${v.cliente||'—'}</td>
+      <td style="color:var(--ink2)">${v.trasportatore||'—'}${v.targa?' <span style="font-size:10px;color:var(--ink3)">'+v.targa+'</span>':''}</td>
+      <td style="font-size:12px;color:var(--ink2)">${v.origine||'—'} → ${v.dest||'—'}</td>
+      <td>
+        <div class="progress-bar"><div class="progress-fill ${fillCls}" style="width:${pct}%"></div></div>
+        <div style="font-size:10px;color:var(--ink3);margin-top:2px">${pct}%</div>
+      </td>
+      <td><span style="font-size:11px;font-weight:600">${semLabel(sem)}</span></td>
+      <td style="white-space:nowrap">
+        <button class="btn btn-ghost btn-sm" onclick="openModal(null,'${id}')">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="eliminaViaggio('${id}')" style="color:var(--red)">🗑</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+// ── MODAL ──────────────────────────────────────────────
+window.openModal = function(data, id) {
+  _editId = id || null;
+  const v  = id ? STATE.viaggi[id] : null;
+  const tasks = STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS;
+
+  document.getElementById('modal-title').textContent = v ? 'Modifica viaggio' : 'Nuovo viaggio';
+  document.getElementById('m-data').value         = v?.data  || data || toISO(new Date());
+  document.getElementById('m-ora').value          = v?.ora   || '';
+  document.getElementById('m-cliente').value      = v?.cliente || '';
+  document.getElementById('m-trasportatore').value= v?.trasportatore || '';
+  document.getElementById('m-targa').value        = v?.targa || '';
+  document.getElementById('m-origine').value      = v?.origine || '';
+  document.getElementById('m-dest').value         = v?.dest || '';
+  document.getElementById('m-note').value         = v?.note || '';
+
+  // Checklist
+  const cl = document.getElementById('modal-checklist');
+  cl.innerHTML = tasks.map(t => {
+    const key = slugify(t);
+    const done = v?.checks?.[key] || false;
+    return `<label class="chk-item ${done?'checked':''}" id="cli-${key}">
+      <input type="checkbox" ${done?'checked':''} onchange="toggleCheck('${key}',this)">
+      <span class="chk-label">${t}</span>
+    </label>`;
+  }).join('');
+
+  document.getElementById('modal-overlay').classList.add('open');
+  setTimeout(() => document.getElementById('m-data').focus(), 100);
+};
+
+window.toggleCheck = function(key, el) {
+  const lbl = el.closest('label');
+  lbl.classList.toggle('checked', el.checked);
+};
+
+window.chiudiModal = function() {
+  document.getElementById('modal-overlay').classList.remove('open');
+  _editId = null;
+};
+
+window.salvaViaggio = async function() {
+  if (!db) { toast('Firebase non connesso', 'err'); return; }
+  const data     = document.getElementById('m-data').value;
+  const cliente  = document.getElementById('m-cliente').value.trim();
+  if (!data)    { toast('Inserisci la data', 'err'); return; }
+  if (!cliente) { toast('Inserisci il cliente', 'err'); return; }
+
+  // Leggi stato checklist
+  const tasks = STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS;
+  const checks = {};
+  tasks.forEach(t => {
+    const key = slugify(t);
+    const el  = document.querySelector(`#cli-${key} input`);
+    if (el) checks[key] = el.checked;
+  });
+
+  const obj = {
+    data, ora: document.getElementById('m-ora').value,
+    cliente, trasportatore: document.getElementById('m-trasportatore').value.trim(),
+    targa: document.getElementById('m-targa').value.trim(),
+    origine: document.getElementById('m-origine').value.trim(),
+    dest: document.getElementById('m-dest').value.trim(),
+    note: document.getElementById('m-note').value.trim(),
+    checks, updatedAt: new Date().toISOString()
+  };
+
+  if (_editId) {
+    await update(ref(db, `viaggi_programmazione/${_editId}`), obj);
+    toast('✓ Viaggio aggiornato', 'ok');
+  } else {
+    await push(ref(db, 'viaggi_programmazione'), obj);
+    toast('✓ Viaggio aggiunto', 'ok');
+  }
+  chiudiModal();
+};
+
+window.eliminaViaggio = async function(id) {
+  if (!confirm('Eliminare questo viaggio?')) return;
+  await remove(ref(db, `viaggi_programmazione/${id}`));
+  toast('Viaggio eliminato');
+};
+
+// ── TASK CONFIG ────────────────────────────────────────
+function renderTaskEditor() {
+  const tasks = STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS;
+  document.getElementById('tasks-editor').innerHTML = tasks.map((t,i) =>
+    `<div style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--s2);border-radius:6px;border:1px solid var(--border)">
+      <span style="flex:1;font-size:13px">${t}</span>
+      <button onclick="rimuoviTask(${i})" style="background:none;border:none;color:var(--ink3);cursor:pointer;font-size:14px" title="Rimuovi">×</button>
+    </div>`
+  ).join('');
+}
+
+window.aggiungiTask = function() {
+  const inp = document.getElementById('new-task-input');
+  const val = inp.value.trim();
+  if (!val) return;
+  const tasks = STATE.tasks.length ? [...STATE.tasks] : [...DEFAULT_TASKS];
+  tasks.push(val);
+  STATE.tasks = tasks;
+  inp.value = '';
+  renderTaskEditor();
+};
+
+window.rimuoviTask = function(i) {
+  const tasks = STATE.tasks.length ? [...STATE.tasks] : [...DEFAULT_TASKS];
+  tasks.splice(i,1);
+  STATE.tasks = tasks;
+  renderTaskEditor();
+};
+
+window.salvaTaskConfig = async function() {
+  if (!db) { toast('Firebase non connesso', 'err'); return; }
+  await set(ref(db, 'viaggi_tasks'), STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS);
+  toast('✓ Attività salvate', 'ok');
+};
+
+// ── SETTIMANA NAV ──────────────────────────────────────
+window.shiftWeek = function(n) { _weekOffset += n; renderSettimana(); };
+window.goToday   = function()  { _weekOffset = 0;  renderSettimana(); };
+
+// ── FILTRI LISTA ───────────────────────────────────────
+window.resetFiltri = function() {
+  ['f-cerca','f-dal','f-al'].forEach(id => document.getElementById(id).value='');
+  document.getElementById('f-stato').value='';
+  renderLista();
+};
+
+// ── CSV ────────────────────────────────────────────────
+window.exportCSV = function() {
+  const tasks = STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS;
+  const rows  = [['Data','Ora','Cliente','Trasportatore','Targa','Origine','Destinazione','Note',...tasks,'% Completamento']];
+  Object.values(STATE.viaggi)
+    .sort((a,b) => a.data < b.data ? -1 : 1)
+    .forEach(v => {
+      const checks = tasks.map(t => (v.checks?.[slugify(t)] ? 'SI' : 'NO'));
+      rows.push([v.data,v.ora||'',v.cliente||'',v.trasportatore||'',v.targa||'',v.origine||'',v.dest||'',v.note||'',...checks,progress(v)+'%']);
+    });
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(';')).join('\n');
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download = 'viaggi_' + toISO(new Date()) + '.csv';
+  a.click();
+};
+
+// ── RENDER ALL ─────────────────────────────────────────
+function renderAll() {
+  renderSettimana();
+  renderLista();
+  renderTaskEditor();
+}
+
+// ── VIEW SWITCH ────────────────────────────────────────
+window.switchView = function(name) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.npill').forEach(b => b.classList.remove('act'));
+  document.getElementById('view-'+name).classList.add('active');
+  const idx = {settimana:0,lista:1,setup:2}[name];
+  document.querySelectorAll('.npill')[idx]?.classList.add('act');
+  if (name==='lista') renderLista();
+  if (name==='setup') renderTaskEditor();
+};
+
+// ── FIREBASE CONFIG ────────────────────────────────────
+function loadCfg() {
+  try { return JSON.parse(localStorage.getItem('viaggio_cfg_v1')||'null'); } catch { return null; }
+}
+function saveCfg(c) { localStorage.setItem('viaggio_cfg_v1', JSON.stringify(c)); }
+
+async function connectFirebase(cfg) {
+  try {
+    const app = initializeApp(cfg, 'viaggi-'+Date.now());
+    db = getDatabase(app);
+    document.getElementById('fb-dot').className = 'fb-dot on';
+    // Subscribe
+    onValue(ref(db,'viaggi_programmazione'), snap => {
+      STATE.viaggi = snap.val() || {};
+      renderAll();
+    });
+    onValue(ref(db,'viaggi_tasks'), snap => {
+      STATE.tasks = snap.val() || [];
+      renderTaskEditor();
+    });
+    return true;
+  } catch(e) {
+    document.getElementById('fb-dot').className = 'fb-dot err';
+    return false;
+  }
+}
+
+window.salvaConfig = async function() {
+  const cfg = {
+    apiKey:      document.getElementById('cfg-apikey').value.trim(),
+    authDomain:  document.getElementById('cfg-domain').value.trim(),
+    databaseURL: document.getElementById('cfg-dburl').value.trim(),
+    projectId:   document.getElementById('cfg-pid').value.trim(),
+  };
+  if (!cfg.apiKey||!cfg.databaseURL) { document.getElementById('cfg-status').textContent='⚠️ Compila API Key e Database URL'; return; }
+  saveCfg(cfg);
+  const ok = await connectFirebase(cfg);
+  document.getElementById('cfg-status').textContent = ok ? '✅ Connesso!' : '❌ Errore — controlla le credenziali';
+};
+
+window.testConn = async function() {
+  const cfg = loadCfg();
+  if (!cfg) { document.getElementById('cfg-status').textContent='⚠️ Nessuna config salvata'; return; }
+  document.getElementById('cfg-status').textContent='🔄 Connessione...';
+  const ok = await connectFirebase(cfg);
+  document.getElementById('cfg-status').textContent = ok ? '✅ Connesso!' : '❌ Errore';
+};
+
+// ── ESC ────────────────────────────────────────────────
+document.addEventListener('keydown', e => { if(e.key==='Escape') chiudiModal(); });
+
+// ── BOOT ───────────────────────────────────────────────
+(async function boot() {
+  // Hardcoded — stesse credenziali del tracker cassoni
+  const hardcoded = {
+    apiKey:      'AIzaSyCixZmG-Pc2hbXc-sKeuCZXvknzC_Bo52k',
+    authDomain:  'cassoni-centrorisorse.firebaseapp.com',
+    databaseURL: 'https://cassoni-centrorisorse-default-rtdb.europe-west1.firebasedatabase.app',
+    projectId:   'cassoni-centrorisorse',
+  };
+  const cfg = loadCfg() || hardcoded;
+  document.getElementById('cfg-apikey').value  = cfg.apiKey     || '';
+  document.getElementById('cfg-domain').value  = cfg.authDomain || '';
+  document.getElementById('cfg-dburl').value   = cfg.databaseURL|| '';
+  document.getElementById('cfg-pid').value     = cfg.projectId  || '';
+  await connectFirebase(cfg);
+  renderSettimana();
+})();
+</script>
+</body>
+</html>
