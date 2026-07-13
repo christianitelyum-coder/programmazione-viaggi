@@ -6,8 +6,27 @@
 <title>Centrale Operativa — Programmazione Viaggi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css">
 <style>
-/* ── TOKEN SYSTEM ─────────────────────────────────────── */
+/* ------- */
+#map-container{height:calc(100vh - 54px - 130px);min-height:400px;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh2);border:1px solid var(--border)}
+#map{height:100%;width:100%;background:#e8edf2}
+.map-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap}
+.map-legend{display:flex;gap:12px;align-items:center;padding:6px 12px;background:var(--surface);border-radius:var(--r);border:1px solid var(--border);font-size:11px;font-weight:600}
+.leg-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:4px}
+.leg-done{background:#0b7c6e}
+.leg-partial{background:#b45309}
+.leg-none{background:#c0392b}
+/* Popup Leaflet custom */
+.leaflet-popup-content-wrapper{border-radius:10px!important;box-shadow:0 4px 20px rgba(15,25,35,.18)!important;padding:0!important;overflow:hidden}
+.leaflet-popup-content{margin:0!important;width:260px!important}
+.map-popup-header{padding:10px 14px;font-weight:700;font-size:13px;color:#fff}
+.map-popup-body{padding:10px 14px;font-size:12px;color:#374151}
+.map-popup-task{display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #f3f4f6}
+.map-popup-task:last-child{border-bottom:none}
+.map-route-line{stroke-dasharray:6,4}
+
+/* ------- */
 :root {
   --ink:    #0f1923;
   --ink2:   #4a5568;
@@ -36,7 +55,7 @@
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
 
-/* ── HEADER ──────────────────────────────────────────── */
+/* ------- */
 .header{background:var(--ink);color:#fff;padding:0 1.5rem;height:54px;display:flex;align-items:center;gap:0;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 .logo{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.08em;margin-right:auto;display:flex;align-items:center;gap:8px}
 .logo em{background:var(--teal);color:#fff;padding:2px 8px;border-radius:4px;font-style:normal;font-size:10px;letter-spacing:.1em}
@@ -48,11 +67,11 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .fb-dot.on{background:var(--teal)}
 .fb-dot.err{background:var(--red)}
 
-/* ── LAYOUT ──────────────────────────────────────────── */
+/* ------- */
 .view{display:none;padding:1.25rem 1.5rem;max-width:1400px;margin:0 auto}
 .view.active{display:block}
 
-/* ── TOOLBAR ─────────────────────────────────────────── */
+/* ------- */
 .toolbar{display:flex;align-items:center;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap}
 .week-nav{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:4px 8px;box-shadow:var(--sh)}
 .wnav-btn{background:none;border:none;cursor:pointer;color:var(--ink2);font-size:16px;padding:2px 8px;border-radius:5px;transition:background .1s}
@@ -66,7 +85,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .btn-sm{padding:5px 10px;font-size:12px}
 .ml-auto{margin-left:auto}
 
-/* ── WEEK GRID ───────────────────────────────────────── */
+/* ------- */
 .week-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
 .day-col{background:var(--surface);border-radius:var(--r);border:1px solid var(--border);overflow:hidden;min-height:400px;display:flex;flex-direction:column;box-shadow:var(--sh)}
 .day-col.today{border-color:var(--teal);box-shadow:0 0 0 2px var(--teal-l),var(--sh)}
@@ -79,7 +98,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .add-btn{width:100%;padding:6px;border:1.5px dashed var(--border);border-radius:6px;background:none;color:var(--ink3);font-size:12px;cursor:pointer;transition:all .15s;font-family:var(--sans);margin-top:auto}
 .add-btn:hover{border-color:var(--teal);color:var(--teal);background:var(--teal-l)}
 
-/* ── VIAGGIO CARD ────────────────────────────────────── */
+/* ------- */
 .vcard{border-radius:6px;padding:8px 10px;border:1px solid var(--border);background:var(--surface);cursor:pointer;transition:all .15s;position:relative}
 .vcard:hover{border-color:var(--teal);box-shadow:var(--sh)}
 .vcard.done{background:var(--teal-l);border-color:#a7e5cc}
@@ -100,7 +119,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .vcard:hover .vc-del{color:#ddd}
 .vc-del:hover{color:var(--red)!important;background:var(--red-l)}
 
-/* ── MODAL ───────────────────────────────────────────── */
+/* ------- */
 .overlay{position:fixed;inset:0;background:rgba(15,25,35,.55);z-index:500;display:none;align-items:flex-start;justify-content:center;padding:2rem 1rem;overflow-y:auto}
 .overlay.open{display:flex}
 .modal{background:var(--surface);border-radius:12px;box-shadow:var(--sh2);width:min(560px,100%);margin:auto}
@@ -123,7 +142,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .chk-label{font-size:12px;font-weight:500;color:var(--ink);line-height:1.3}
 .modal-footer{padding:.9rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;background:var(--s2);border-radius:0 0 12px 12px}
 
-/* ── LISTA VIEW ──────────────────────────────────────── */
+/* ------- */
 .lista-filters{display:flex;gap:8px;margin-bottom:1rem;flex-wrap:wrap;align-items:center}
 .lista-filters input,.lista-filters select{font-family:var(--sans);font-size:13px;padding:7px 12px;border:1.5px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--ink);outline:none}
 .lista-filters input:focus,.lista-filters select:focus{border-color:var(--teal)}
@@ -138,19 +157,19 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .fill-partial{background:var(--amber)}
 .fill-none{background:var(--red)}
 
-/* ── SETUP ───────────────────────────────────────────── */
+/* ------- */
 .setup-wrap{max-width:500px;margin:2rem auto}
 .setup-card{background:var(--surface);border-radius:12px;padding:2rem;box-shadow:var(--sh2);border:1px solid var(--border)}
 .setup-card h2{font-size:18px;font-weight:700;margin-bottom:.5rem}
 .setup-card p{font-size:13px;color:var(--ink2);margin-bottom:1.5rem;line-height:1.6}
 
-/* ── TOAST ───────────────────────────────────────────── */
+/* ------- */
 .toast{position:fixed;bottom:1.5rem;right:1.5rem;background:var(--ink);color:#fff;padding:10px 18px;border-radius:var(--r);font-size:13px;font-weight:600;box-shadow:var(--sh2);transform:translateY(60px);opacity:0;transition:all .3s cubic-bezier(.34,1.56,.64,1);z-index:999}
 .toast.show{transform:translateY(0);opacity:1}
 .toast.ok{background:var(--teal)}
 .toast.err{background:var(--red)}
 
-/* ── RESPONSIVE ──────────────────────────────────────── */
+/* ------- */
 @media(max-width:900px){
   .week-grid{grid-template-columns:repeat(3,1fr)}
   .header .nav-pills{display:none}
@@ -160,6 +179,20 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   .view{padding:1rem}
   .form-row-2{grid-template-columns:1fr}
 }
+/* ── MESE ─────────────────────────────────────────── */
+.month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
+.month-dow{text-align:center;font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);padding:6px 0;border-bottom:1px solid var(--border);margin-bottom:4px}
+.month-cell{min-height:100px;border-radius:6px;border:1px solid var(--border);background:var(--surface);padding:4px;cursor:pointer;transition:all .15s;position:relative}
+.month-cell:hover{border-color:var(--teal);background:var(--teal-l)}
+.month-cell.today{border-color:var(--teal);border-width:2px}
+.month-cell.other-month{background:var(--s2);opacity:.55}
+.month-cell.today .month-day-num{background:var(--teal);color:#fff;border-radius:50%;width:22px;height:22px;display:flex;align-items:center;justify-content:center}
+.month-day-num{font-family:var(--mono);font-size:12px;font-weight:700;color:var(--ink);margin-bottom:4px;display:inline-block;width:22px;height:22px;line-height:22px;text-align:center}
+.month-vcard{font-size:10px;font-weight:600;padding:2px 5px;border-radius:4px;margin-bottom:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:3px}
+.mvc-done{background:#d1fae5;color:#065f46}
+.mvc-partial{background:#fef3c7;color:#92400e}
+.mvc-none{background:#fdf0ee;color:#9b1c1c}
+.month-more{font-size:9px;color:var(--ink3);font-weight:600;padding:1px 4px}
 </style>
 </head>
 <body>
@@ -167,15 +200,37 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 <header class="header">
   <div class="logo"><em>CR</em> Centrale Operativa</div>
   <div class="nav-pills">
-    <button class="npill act" onclick="switchView('settimana')">Settimana</button>
+    <button class="npill act" onclick="switchView('mese')">Mese</button>
+    <button class="npill" onclick="switchView('settimana')">Settimana</button>
     <button class="npill" onclick="switchView('lista')">Lista</button>
+    <button class="npill" onclick="switchView('mappa')">🗺 Mappa</button>
     <button class="npill" onclick="switchView('setup')">Config</button>
   </div>
   <div class="fb-dot" id="fb-dot" title="Firebase"></div>
 </header>
 
+<!-- ══ MESE ════════════════════════════════════════════ -->
+<div class="view active" id="view-mese">
+  <div class="toolbar">
+    <div class="week-nav">
+      <button class="wnav-btn" onclick="shiftMonth(-1)">‹</button>
+      <span class="week-label" id="month-label">—</span>
+      <button class="wnav-btn" onclick="shiftMonth(1)">›</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="goTodayMonth()">Oggi</button>
+    <button class="btn btn-primary ml-auto" onclick="openModal()">+ Nuovo viaggio</button>
+  </div>
+  <div id="month-dow-row" class="month-grid" style="margin-bottom:0">
+    <div class="month-dow">Lun</div><div class="month-dow">Mar</div>
+    <div class="month-dow">Mer</div><div class="month-dow">Gio</div>
+    <div class="month-dow">Ven</div><div class="month-dow">Sab</div>
+    <div class="month-dow">Dom</div>
+  </div>
+  <div class="month-grid" id="month-grid"></div>
+</div>
+
 <!-- ══ SETTIMANA ══════════════════════════════════════ -->
-<div class="view active" id="view-settimana">
+<div class="view" id="view-settimana">
   <div class="toolbar">
     <div class="week-nav">
       <button class="wnav-btn" onclick="shiftWeek(-1)">‹</button>
@@ -211,6 +266,23 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     </tr></thead>
     <tbody id="lista-tbody"></tbody>
   </table>
+</div>
+
+<!-- ══ MAPPA ════════════════════════════════════════════ -->
+<div class="view" id="view-mappa">
+  <div class="map-toolbar">
+    <div class="map-legend">
+      <span><span class="leg-dot leg-done"></span>Completo</span>
+      <span><span class="leg-dot leg-partial"></span>In corso</span>
+      <span><span class="leg-dot leg-none"></span>Da iniziare</span>
+    </div>
+    <input type="date" id="mappa-dal" onchange="aggiornaMappaFiltri()" style="font-family:var(--sans);font-size:13px;padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--ink);outline:none" placeholder="Dal">
+    <input type="date" id="mappa-al"  onchange="aggiornaMappaFiltri()" style="font-family:var(--sans);font-size:13px;padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--ink);outline:none" placeholder="Al">
+    <button class="btn btn-ghost btn-sm" onclick="resetMappaFiltri()">✕ Reset</button>
+    <button class="btn btn-primary btn-sm ml-auto" onclick="geocodificaTutti()">📍 Geolocalizza tutti</button>
+    <div id="geo-status" style="font-size:11px;color:var(--ink3)"></div>
+  </div>
+  <div id="map-container"><div id="map"></div></div>
 </div>
 
 <!-- ══ SETUP ══════════════════════════════════════════ -->
@@ -303,6 +375,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 
 <div class="toast" id="toast"></div>
 
+<script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
 <script type="module">
 import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import { getDatabase, ref, set, push, onValue, update, remove }
@@ -313,6 +386,9 @@ let db = null;
 let STATE = { viaggi: {}, tasks: [] };
 let _editId  = null;
 let _weekOffset = 0;
+let _monthOffset = 0;
+
+const MESI_IT = ['Gennaio','Febbraio','Marzo','Aprile','Maggio','Giugno','Luglio','Agosto','Settembre','Ottobre','Novembre','Dicembre'];
 
 const DEFAULT_TASKS = [
   'Mail richiesta al trasportatore',
@@ -373,6 +449,88 @@ function progress(viaggio) {
   const done = tasks.filter(t => viaggio.checks && viaggio.checks[slugify(t)]).length;
   return Math.round(done / tasks.length * 100);
 }
+
+function renderMese() {
+  const now   = new Date();
+  const base  = new Date(now.getFullYear(), now.getMonth() + _monthOffset, 1);
+  const year  = base.getFullYear();
+  const month = base.getMonth();
+
+  document.getElementById('month-label').textContent = `${MESI_IT[month]} ${year}`;
+
+  const today   = toISO(now);
+  const firstDay = new Date(year, month, 1);
+  const lastDay  = new Date(year, month + 1, 0);
+
+  // Lunedi = 0 ... Domenica = 6
+  let startDow = firstDay.getDay() - 1;
+  if (startDow < 0) startDow = 6;
+
+  const grid = document.getElementById('month-grid');
+  grid.innerHTML = '';
+
+  // Celle del mese precedente
+  for (let i = 0; i < startDow; i++) {
+    const d   = new Date(year, month, 1 - (startDow - i));
+    const iso = toISO(d);
+    grid.appendChild(makeMonthCell(iso, d.getDate(), true));
+  }
+
+  // Celle del mese corrente
+  for (let d = 1; d <= lastDay.getDate(); d++) {
+    const date = new Date(year, month, d);
+    const iso  = toISO(date);
+    grid.appendChild(makeMonthCell(iso, d, false, iso === today));
+  }
+
+  // Celle del mese successivo per completare la griglia
+  const totalCells = startDow + lastDay.getDate();
+  const remainder  = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+  for (let i = 1; i <= remainder; i++) {
+    const d   = new Date(year, month + 1, i);
+    const iso = toISO(d);
+    grid.appendChild(makeMonthCell(iso, d.getDate(), true));
+  }
+}
+
+function makeMonthCell(iso, dayNum, otherMonth, isToday) {
+  const cell     = document.createElement('div');
+  cell.className = 'month-cell' + (otherMonth?' other-month':'') + (isToday?' today':'');
+  cell.onclick   = () => openModal(iso);
+
+  const numEl  = document.createElement('div');
+  numEl.className = 'month-day-num';
+  numEl.textContent = dayNum;
+  cell.appendChild(numEl);
+
+  const viaggi = Object.entries(STATE.viaggi)
+    .filter(([,v]) => v.data === iso)
+    .sort((a,b) => (a[1].ora||'') < (b[1].ora||'') ? -1 : 1);
+
+  const MAX_SHOW = 3;
+  viaggi.slice(0, MAX_SHOW).forEach(([id, v]) => {
+    const sem = semaforo(v);
+    const cls = sem === 'done' ? 'mvc-done' : sem === 'partial' ? 'mvc-partial' : 'mvc-none';
+    const dot = sem === 'done' ? '✅' : sem === 'partial' ? '🟡' : '🔴';
+    const el  = document.createElement('div');
+    el.className = `month-vcard ${cls}`;
+    el.innerHTML = `<span>${dot}</span><span style="overflow:hidden;text-overflow:ellipsis">${v.ora?v.ora+' ':''}${v.cliente||'—'}${v.trasportatore?' · 🚛'+v.trasportatore:''}</span>`;
+    el.onclick = (e) => { e.stopPropagation(); openModal(null, id); };
+    cell.appendChild(el);
+  });
+
+  if (viaggi.length > MAX_SHOW) {
+    const more = document.createElement('div');
+    more.className = 'month-more';
+    more.textContent = `+${viaggi.length - MAX_SHOW} altri`;
+    cell.appendChild(more);
+  }
+
+  return cell;
+}
+
+window.shiftMonth  = function(n) { _monthOffset += n; renderMese(); };
+window.goTodayMonth = function() { _monthOffset = 0; renderMese(); };
 
 // ── RENDER SETTIMANA ───────────────────────────────────
 const GIORNI = ['Lun','Mar','Mer','Gio','Ven','Sab','Dom'];
@@ -627,20 +785,182 @@ window.exportCSV = function() {
 
 // ── RENDER ALL ─────────────────────────────────────────
 function renderAll() {
+  renderMese();
   renderSettimana();
   renderLista();
   renderTaskEditor();
 }
 
-// ── VIEW SWITCH ────────────────────────────────────────
+// ── MAPPA ──────────────────────────────────────────────
+let _map = null;
+let _mapLayers = [];
+let _geoCache = {};  // { "indirizzo" -> [lat,lng] }
+
+function initMap() {
+  const mapEl = document.getElementById('map');
+  if (_map) {
+    _map.invalidateSize();
+    return;
+  }
+  _map = L.map(mapEl, { zoomControl: true }).setView([45.7, 12.3], 8);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '© <a href="https://openstreetmap.org">OpenStreetMap</a>',
+    maxZoom: 18
+  }).addTo(_map);
+  try { _geoCache = JSON.parse(localStorage.getItem('viaggio_geocache')||'{}'); } catch{}
+}
+
+function saveGeoCache() {
+  localStorage.setItem('viaggio_geocache', JSON.stringify(_geoCache));
+}
+
+async function geocodeAddr(addr) {
+  if (!addr) return null;
+  const key = addr.toLowerCase().trim();
+  if (_geoCache[key]) return _geoCache[key];
+  try {
+    const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(addr+', Italia')}&format=json&limit=1&countrycodes=it`;
+    const r = await fetch(url, {headers:{'Accept-Language':'it'}});
+    const d = await r.json();
+    if (d && d[0]) {
+      const coords = [parseFloat(d[0].lat), parseFloat(d[0].lon)];
+      _geoCache[key] = coords;
+      saveGeoCache();
+      return coords;
+    }
+  } catch(e) {}
+  return null;
+}
+
+function semColor(sem) {
+  return sem==='done' ? '#0b7c6e' : sem==='partial' ? '#b45309' : '#c0392b';
+}
+
+function makeMarkerIcon(sem, isOrig) {
+  const col = semColor(sem);
+  const ico = isOrig ? '▶' : '⬛';
+  return L.divIcon({
+    className: '',
+    iconSize: [28,28],
+    iconAnchor: [14,14],
+    html: `<div style="width:28px;height:28px;border-radius:50%;background:${col};border:3px solid #fff;
+      box-shadow:0 2px 8px rgba(0,0,0,.3);display:flex;align-items:center;justify-content:center;
+      font-size:9px;color:#fff;font-weight:900">${isOrig?'P':'A'}</div>`
+  });
+}
+
+function popupHTML(v, tipo) {
+  const tasks = STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS;
+  const sem   = semaforo(v);
+  const col   = semColor(sem);
+  const label = tipo === 'origine' ? '📍 Partenza' : '🏁 Arrivo';
+  const luogo = tipo === 'origine' ? (v.origine||'—') : (v.dest||'—');
+  const taskRows = tasks.map(t => {
+    const done = v.checks?.[slugify(t)];
+    return `<div class="map-popup-task">
+      <span style="font-size:14px">${done?'✅':'⬜'}</span>
+      <span style="color:${done?'#065f46':'#9ca3af'};${done?'':'text-decoration:line-through'}">${t}</span>
+    </div>`;
+  }).join('');
+  return `<div class="map-popup-header" style="background:${col}">
+    ${label} — <strong>${v.cliente||'—'}</strong>
+  </div>
+  <div class="map-popup-body">
+    <div style="font-size:11px;color:#6b7280;margin-bottom:6px">${fmtDate(v.data)}${v.ora?' · '+v.ora:''} ${v.trasportatore?'· 🚛 '+v.trasportatore:''}</div>
+    <div style="font-weight:600;margin-bottom:8px">${luogo}</div>
+    <div>${taskRows}</div>
+    ${v.note?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid #f3f4f6;font-size:11px;color:#6b7280">📝 ${v.note}</div>`:''}
+  </div>`;
+}
+
+async function renderMappa() {
+  if (!_map) return;
+  // Rimuovi layer precedenti
+  _mapLayers.forEach(l => _map.removeLayer(l));
+  _mapLayers = [];
+
+  const dal = document.getElementById('mappa-dal').value;
+  const al  = document.getElementById('mappa-al').value;
+  let viaggi = Object.values(STATE.viaggi);
+  if (dal) viaggi = viaggi.filter(v => v.data >= dal);
+  if (al)  viaggi = viaggi.filter(v => v.data <= al);
+
+  const bounds = [];
+
+  for (const v of viaggi) {
+    const sem = semaforo(v);
+    const origCoords = v.origine ? await geocodeAddr(v.origine) : null;
+    const destCoords = v.dest    ? await geocodeAddr(v.dest)    : null;
+
+    if (origCoords) {
+      bounds.push(origCoords);
+      const m = L.marker(origCoords, {icon: makeMarkerIcon(sem, true)})
+        .bindPopup(popupHTML(v,'origine'), {maxWidth:280})
+        .addTo(_map);
+      _mapLayers.push(m);
+    }
+    if (destCoords) {
+      bounds.push(destCoords);
+      const m = L.marker(destCoords, {icon: makeMarkerIcon(sem, false)})
+        .bindPopup(popupHTML(v,'dest'), {maxWidth:280})
+        .addTo(_map);
+      _mapLayers.push(m);
+    }
+    // Traccia linea tratteggiata origine→destinazione
+    if (origCoords && destCoords) {
+      const line = L.polyline([origCoords, destCoords], {
+        color: semColor(sem), weight: 2, opacity: .6, dashArray: '6 4'
+      }).addTo(_map);
+      _mapLayers.push(line);
+    }
+  }
+
+  if (bounds.length > 0) {
+    _map.fitBounds(bounds, {padding:[40,40]});
+  } else {
+    _map.setView([45.7, 12.3], 8);
+  }
+  _map.invalidateSize();
+  setTimeout(() => _map.invalidateSize(), 300);
+}
+
+window.geocodificaTutti = async function() {
+  const st = document.getElementById('geo-status');
+  const viaggi = Object.values(STATE.viaggi);
+  let count = 0;
+  st.textContent = '⏳ Geocodifica in corso...';
+  for (const v of viaggi) {
+    if (v.origine) { await geocodeAddr(v.origine); count++; }
+    if (v.dest)    { await geocodeAddr(v.dest);    count++; }
+    await new Promise(r => setTimeout(r, 300)); // rispetta rate limit Nominatim
+  }
+  st.textContent = `✅ ${count} indirizzi elaborati`;
+  renderMappa();
+};
+
+window.aggiornaMappaFiltri = function() { renderMappa(); };
+window.resetMappaFiltri = function() {
+  document.getElementById('mappa-dal').value='';
+  document.getElementById('mappa-al').value='';
+  renderMappa();
+};
 window.switchView = function(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.npill').forEach(b => b.classList.remove('act'));
   document.getElementById('view-'+name).classList.add('active');
-  const idx = {settimana:0,lista:1,setup:2}[name];
+  const idx = {mese:0,settimana:1,lista:2,mappa:3,setup:4}[name];
   document.querySelectorAll('.npill')[idx]?.classList.add('act');
-  if (name==='lista') renderLista();
-  if (name==='setup') renderTaskEditor();
+  if (name==='mese')    renderMese();
+  if (name==='lista')   renderLista();
+  if (name==='settimana') renderSettimana();
+  if (name==='setup')   renderTaskEditor();
+  if (name==='mappa')  {
+    setTimeout(() => {
+      initMap();
+      _map.invalidateSize();
+      renderMappa();
+    }, 100);
+  }
 };
 
 // ── FIREBASE CONFIG ────────────────────────────────────
@@ -709,7 +1029,7 @@ document.addEventListener('keydown', e => { if(e.key==='Escape') chiudiModal(); 
   document.getElementById('cfg-dburl').value   = cfg.databaseURL|| '';
   document.getElementById('cfg-pid').value     = cfg.projectId  || '';
   await connectFirebase(cfg);
-  renderSettimana();
+  renderMese();
 })();
 </script>
 </body>
