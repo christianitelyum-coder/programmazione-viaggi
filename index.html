@@ -595,14 +595,14 @@ function vcardHTML(id, v) {
 }
 
 // ── RENDER LISTA ───────────────────────────────────────
-function renderLista() {
+window.renderLista = function() {
   const cerca = document.getElementById('f-cerca').value.toLowerCase();
   const stato = document.getElementById('f-stato').value;
   const dal   = document.getElementById('f-dal').value;
   const al    = document.getElementById('f-al').value;
 
   let rows = Object.entries(STATE.viaggi)
-    .sort((a,b) => (a[1].data+a[1].ora) < (b[1].data+b[1].ora) ? -1 : 1);
+    .sort((a,b) => (a[1].data+(a[1].ora||'')) < (b[1].data+(b[1].ora||'')) ? -1 : 1);
 
   if (cerca) rows = rows.filter(([,v]) =>
     (v.cliente||'').toLowerCase().includes(cerca) ||
@@ -610,10 +610,11 @@ function renderLista() {
     (v.origine||'').toLowerCase().includes(cerca) ||
     (v.dest||'').toLowerCase().includes(cerca));
   if (stato) rows = rows.filter(([,v]) => semaforo(v) === stato);
-  if (dal)   rows = rows.filter(([,v]) => v.data >= dal);
-  if (al)    rows = rows.filter(([,v]) => v.data <= al);
+  if (dal)   rows = rows.filter(([,v]) => (v.data||'') >= dal);
+  if (al)    rows = rows.filter(([,v]) => (v.data||'') <= al);
 
   const tbody = document.getElementById('lista-tbody');
+  if (!tbody) return;
   if (!rows.length) {
     tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:var(--ink3);padding:2rem;font-size:13px">Nessun viaggio trovato</td></tr>';
     return;
@@ -639,6 +640,8 @@ function renderLista() {
     </tr>`;
   }).join('');
 }
+// alias interno
+function renderLista() { window.renderLista(); }
 
 // ── MODAL ──────────────────────────────────────────────
 window.openModal = function(data, id) {
