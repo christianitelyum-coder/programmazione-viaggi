@@ -346,6 +346,21 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
           <label class="form-lbl">Targa / Mezzo</label>
           <input class="form-ctrl" id="m-targa" placeholder="es. FW361VJ">
         </div>
+        <div class="form-row" style="margin-bottom:0">
+          <label class="form-lbl">Tipologia mezzo</label>
+          <select class="form-ctrl" id="m-tipo-mezzo">
+            <option value="">— Seleziona —</option>
+            <option>Motrice</option>
+            <option>Autotreno</option>
+            <option>Bilico</option>
+            <option>Furgone</option>
+            <option>Cassone scarrabile</option>
+            <option>Cisterna</option>
+            <option>Frigorifero</option>
+            <option>Pianale</option>
+            <option>Altro</option>
+          </select>
+        </div>
       </div>
       <div class="form-row-2" style="margin-top:1rem">
         <div class="form-row" style="margin-bottom:0">
@@ -517,7 +532,7 @@ function makeMonthCell(iso, dayNum, otherMonth, isToday) {
     const dot = sem === 'done' ? '✅' : sem === 'partial' ? '🟡' : '🔴';
     const el  = document.createElement('div');
     el.className = `month-vcard ${cls}`;
-    el.innerHTML = `<span>${dot}</span><span style="overflow:hidden;text-overflow:ellipsis">${v.ora?v.ora+' ':''}${v.cliente||'—'}${v.trasportatore?' · 🚛'+v.trasportatore:''}</span>`;
+    el.innerHTML = `<span>${dot}</span><span style="overflow:hidden;text-overflow:ellipsis">${v.ora?v.ora+' ':''}${v.cliente||'—'}${v.trasportatore?' · 🚛'+v.trasportatore:''}${v.tipoMezzo?' · '+v.tipoMezzo:''}</span>`;
     el.onclick = (e) => { e.stopPropagation(); openModal(null, id); };
     cell.appendChild(el);
   });
@@ -588,7 +603,8 @@ function vcardHTML(id, v) {
       <div class="vc-sem sem-${sem}"></div>
       <div class="vc-client">${v.ora?'<span style="font-family:var(--mono);font-size:10px;color:var(--ink3);margin-right:4px">'+v.ora+'</span>':''}${v.cliente||'—'}</div>
     </div>
-    ${v.trasportatore?`<div class="vc-carrier">🚛 ${v.trasportatore}${v.targa?' · '+v.targa:''}</div>`:''}
+    ${v.trasportatore?`<div class="vc-carrier">🚛 ${v.trasportatore}${v.targa?' · '+v.targa:''}${v.tipoMezzo?' · <em>'+v.tipoMezzo+'</em>':''}</div>`:
+      v.tipoMezzo?`<div class="vc-carrier">🚛 ${v.tipoMezzo}</div>`:''}
     ${v.origine||v.dest?`<div class="vc-carrier" style="font-size:9px">📍 ${v.origine||'—'} → ${v.dest||'—'}</div>`:''}
     <div class="vc-checks">${pills}</div>
   </div>`;
@@ -626,7 +642,7 @@ window.renderLista = function() {
     return `<tr>
       <td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${fmtDate(v.data)}${v.ora?' <span style="color:var(--ink3)">'+v.ora+'</span>':''}</td>
       <td style="font-weight:600">${v.cliente||'—'}</td>
-      <td style="color:var(--ink2)">${v.trasportatore||'—'}${v.targa?' <span style="font-size:10px;color:var(--ink3)">'+v.targa+'</span>':''}</td>
+      <td style="color:var(--ink2)">${v.trasportatore||'—'}${v.targa?' <span style="font-size:10px;color:var(--ink3)">'+v.targa+'</span>':''}${v.tipoMezzo?' <span style="font-size:10px;background:var(--blue-l,#e8f0fc);color:var(--blue,#1a4f8a);padding:1px 5px;border-radius:4px">'+v.tipoMezzo+'</span>':''}</td>
       <td style="font-size:12px;color:var(--ink2)">${v.origine||'—'} → ${v.dest||'—'}</td>
       <td>
         <div class="progress-bar"><div class="progress-fill ${fillCls}" style="width:${pct}%"></div></div>
@@ -655,6 +671,7 @@ window.openModal = function(data, id) {
   document.getElementById('m-cliente').value      = v?.cliente || '';
   document.getElementById('m-trasportatore').value= v?.trasportatore || '';
   document.getElementById('m-targa').value        = v?.targa || '';
+  document.getElementById('m-tipo-mezzo').value   = v?.tipoMezzo || '';
   document.getElementById('m-origine').value      = v?.origine || '';
   document.getElementById('m-dest').value         = v?.dest || '';
   document.getElementById('m-note').value         = v?.note || '';
@@ -704,6 +721,7 @@ window.salvaViaggio = async function() {
     data, ora: document.getElementById('m-ora').value,
     cliente, trasportatore: document.getElementById('m-trasportatore').value.trim(),
     targa: document.getElementById('m-targa').value.trim(),
+    tipoMezzo: document.getElementById('m-tipo-mezzo').value,
     origine: document.getElementById('m-origine').value.trim(),
     dest: document.getElementById('m-dest').value.trim(),
     note: document.getElementById('m-note').value.trim(),
@@ -775,12 +793,12 @@ window.resetFiltri = function() {
 // ── CSV ────────────────────────────────────────────────
 window.exportCSV = function() {
   const tasks = STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS;
-  const rows  = [['Data','Ora','Cliente','Trasportatore','Targa','Origine','Destinazione','Note',...tasks,'% Completamento']];
+  const rows  = [['Data','Ora','Cliente','Trasportatore','Targa','Tipologia mezzo','Origine','Destinazione','Note',...tasks,'% Completamento']];
   Object.values(STATE.viaggi)
     .sort((a,b) => a.data < b.data ? -1 : 1)
     .forEach(v => {
       const checks = tasks.map(t => (v.checks?.[slugify(t)] ? 'SI' : 'NO'));
-      rows.push([v.data,v.ora||'',v.cliente||'',v.trasportatore||'',v.targa||'',v.origine||'',v.dest||'',v.note||'',...checks,progress(v)+'%']);
+      rows.push([v.data,v.ora||'',v.cliente||'',v.trasportatore||'',v.targa||'',v.tipoMezzo||'',v.origine||'',v.dest||'',v.note||'',...checks,progress(v)+'%']);
     });
   const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(';')).join('\n');
   const a = document.createElement('a');
