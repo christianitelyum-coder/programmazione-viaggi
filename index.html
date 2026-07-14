@@ -348,18 +348,18 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
         </div>
         <div class="form-row" style="margin-bottom:0">
           <label class="form-lbl">Tipologia mezzo</label>
-          <select class="form-ctrl" id="m-tipo-mezzo">
+          <select class="form-ctrl" id="m-tipo-mezzo" onchange="onTipoMezzoChange()">
             <option value="">— Seleziona —</option>
-            <option>Motrice</option>
-            <option>Autotreno</option>
-            <option>Bilico</option>
-            <option>Furgone</option>
-            <option>Cassone scarrabile</option>
-            <option>Cisterna</option>
-            <option>Frigorifero</option>
-            <option>Pianale</option>
-            <option>Altro</option>
+            <option>MOTRICE</option>
+            <option>MOTRICE RAGNO</option>
+            <option>BILICO CENTINATO</option>
+            <option>AUTOTRENO PIANALI</option>
+            <option>SILOS</option>
+            <option>IDROSPURGO 10 MC</option>
+            <option>IDROSPURGO 25 MC</option>
+            <option value="ALTRO">ALTRO</option>
           </select>
+          <input class="form-ctrl" id="m-tipo-mezzo-altro" placeholder="Specifica tipologia..." style="display:none;margin-top:6px">
         </div>
       </div>
       <div class="form-row-2" style="margin-top:1rem">
@@ -391,10 +391,21 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 <div class="toast" id="toast"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
-<script type="module">
-import { initializeApp }   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getDatabase, ref, set, push, onValue, update, remove }
-  from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
+<script>
+// Firebase compat SDK — funziona in iframe e senza type="module"
+var _firebaseRef, _firebaseUpdate, _firebaseSet, _firebasePush,
+    _firebaseOnValue, _firebaseRemove;
+
+function initializeApp(cfg) { return firebase.initializeApp(cfg, 'viaggi-'+Date.now()); }
+function getDatabase(app)   { return app.database(); }
+function ref(db, path)      { return db.ref(path); }
+function set(r, val)        { return r.set(val); }
+function push(r, val)       { return r.push(val); }
+function update(r, val)     { return r.update(val); }
+function remove(r)          { return r.remove(); }
+function onValue(r, cb)     { r.on('value', snap => cb(snap)); }
 
 // ── STATE ──────────────────────────────────────────────
 let db = null;
@@ -467,6 +478,19 @@ function progress(viaggio) {
   const done = tasks.filter(t => viaggio.checks && viaggio.checks[slugify(t)]).length;
   return Math.round(done / tasks.length * 100);
 }
+
+function onTipoMezzoChange() {
+  const sel   = document.getElementById('m-tipo-mezzo');
+  const altro = document.getElementById('m-tipo-mezzo-altro');
+  if (sel.value === 'ALTRO') {
+    altro.style.display = 'block';
+    altro.focus();
+  } else {
+    altro.style.display = 'none';
+    altro.value = '';
+  }
+}
+window.onTipoMezzoChange = onTipoMezzoChange;
 
 function renderMese() {
   const now   = new Date();
@@ -671,7 +695,17 @@ window.openModal = function(data, id) {
   document.getElementById('m-cliente').value      = v?.cliente || '';
   document.getElementById('m-trasportatore').value= v?.trasportatore || '';
   document.getElementById('m-targa').value        = v?.targa || '';
-  document.getElementById('m-tipo-mezzo').value   = v?.tipoMezzo || '';
+  const predefiniti = ['','MOTRICE','MOTRICE RAGNO','BILICO CENTINATO','AUTOTRENO PIANALI','SILOS','IDROSPURGO 10 MC','IDROSPURGO 25 MC','ALTRO'];
+  const tipoSalvato = v?.tipoMezzo || '';
+  if (predefiniti.includes(tipoSalvato)) {
+    document.getElementById('m-tipo-mezzo').value = tipoSalvato;
+    document.getElementById('m-tipo-mezzo-altro').style.display = 'none';
+    document.getElementById('m-tipo-mezzo-altro').value = '';
+  } else {
+    document.getElementById('m-tipo-mezzo').value = 'ALTRO';
+    document.getElementById('m-tipo-mezzo-altro').style.display = 'block';
+    document.getElementById('m-tipo-mezzo-altro').value = tipoSalvato;
+  }
   document.getElementById('m-origine').value      = v?.origine || '';
   document.getElementById('m-dest').value         = v?.dest || '';
   document.getElementById('m-note').value         = v?.note || '';
@@ -721,7 +755,13 @@ window.salvaViaggio = async function() {
     data, ora: document.getElementById('m-ora').value,
     cliente, trasportatore: document.getElementById('m-trasportatore').value.trim(),
     targa: document.getElementById('m-targa').value.trim(),
-    tipoMezzo: document.getElementById('m-tipo-mezzo').value,
+    tipoMezzo: (function(){
+      const sel = document.getElementById('m-tipo-mezzo').value;
+      if (sel === 'ALTRO') {
+        return document.getElementById('m-tipo-mezzo-altro').value.trim() || 'ALTRO';
+      }
+      return sel;
+    })(),
     origine: document.getElementById('m-origine').value.trim(),
     dest: document.getElementById('m-dest').value.trim(),
     note: document.getElementById('m-note').value.trim(),
@@ -995,10 +1035,9 @@ function saveCfg(c) { localStorage.setItem('viaggio_cfg_v1', JSON.stringify(c));
 
 async function connectFirebase(cfg) {
   try {
-    const app = initializeApp(cfg, 'viaggi-'+Date.now());
+    const app = initializeApp(cfg);
     db = getDatabase(app);
     document.getElementById('fb-dot').className = 'fb-dot on';
-    // Subscribe
     onValue(ref(db,'viaggi_programmazione'), snap => {
       STATE.viaggi = snap.val() || {};
       renderAll();
@@ -1009,6 +1048,7 @@ async function connectFirebase(cfg) {
     });
     return true;
   } catch(e) {
+    console.error('Firebase error:', e);
     document.getElementById('fb-dot').className = 'fb-dot err';
     return false;
   }
