@@ -464,8 +464,9 @@ function toISO(d) {
 function isEffettuato(viaggio) {
   if (!viaggio.data) return false;
   const now  = new Date();
-  const data = new Date(viaggio.data + 'T16:00:00'); // 16:00 del giorno del viaggio
-  return now >= data;
+  const [y, m, g] = viaggio.data.split('-').map(Number);
+  const soglia = new Date(y, m - 1, g, 16, 0, 0); // 16:00 ora locale
+  return now >= soglia;
 }
 
 function semaforo(viaggio) {
