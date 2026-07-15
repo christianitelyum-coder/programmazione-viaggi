@@ -465,12 +465,14 @@ function isEffettuato(viaggio) {
   if (!viaggio.data) return false;
   const now  = new Date();
   const [y, m, g] = viaggio.data.split('-').map(Number);
-  const soglia = new Date(y, m - 1, g, 16, 0, 0); // 16:00 ora locale
-  return now >= soglia;
+  const soglia = new Date(y, m - 1, g, 16, 0, 0);
+  const result = now >= soglia;
+  return result;
 }
 
 function semaforo(viaggio) {
-  if (isEffettuato(viaggio)) return 'effettuato';
+  const eff = isEffettuato(viaggio);
+  if (eff) return 'effettuato';
   const tasks = STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS;
   const done = tasks.filter(t => viaggio.checks && viaggio.checks[slugify(t)]).length;
   if (done === 0) return 'none';
@@ -875,6 +877,93 @@ function renderAll() {
   renderSettimana();
   renderLista();
   renderTaskEditor();
+  schedulaPromemoria();
+}
+
+// ── PROMEMORIA FAC SIMILE ──────────────────────────────
+const FAC_KEY = slugify('FAC SIMILE formulario inviato');
+const _promemoriaPendenti = {}; // { viaggioId: timeoutId }
+
+async function richiediPermessoNotifiche() {
+  if (!('Notification' in window)) return false;
+  if (Notification.permission === 'granted') return true;
+  if (Notification.permission === 'denied') return false;
+  const perm = await Notification.requestPermission();
+  return perm === 'granted';
+}
+
+function schedulaPromemoria() {
+  if (!('Notification' in window)) return;
+  const ora = new Date();
+
+  Object.entries(STATE.viaggi).forEach(([id, v]) => {
+    // Salta se già flaggato o se il viaggio è passato
+    const facFatto = v.checks && v.checks[FAC_KEY];
+    if (facFatto) {
+      // Cancella eventuale timer pendente
+      if (_promemoriaPendenti[id]) {
+        clearTimeout(_promemoriaPendenti[id]);
+        delete _promemoriaPendenti[id];
+      }
+      return;
+    }
+
+    if (!v.data) return;
+    const [y, m, g] = v.data.split('-').map(Number);
+
+    // Calcola 08:30 del giorno PRIMA del viaggio
+    const promemoria = new Date(y, m - 1, g - 1, 8, 30, 0);
+
+    // Se il promemoria è già passato o mancano più di 48h, skip
+    const msAlPromemoria = promemoria - ora;
+    if (msAlPromemoria < 0) return;           // già passato
+    if (msAlPromemoria > 48 * 3600 * 1000) return; // troppo lontano
+
+    // Evita di rischedulare se già esiste
+    if (_promemoriaPendenti[id]) return;
+
+    _promemoriaPendenti[id] = setTimeout(async () => {
+      delete _promemoriaPendenti[id];
+      // Controlla di nuovo al momento del trigger
+      const vAttuale = STATE.viaggi[id];
+      if (!vAttuale) return;
+      if (vAttuale.checks && vAttuale.checks[FAC_KEY]) return;
+
+      const ok = await richiediPermessoNotifiche();
+      if (!ok) { toast('⚠️ Abilita le notifiche del browser per i promemoria'); return; }
+
+      new Notification('📋 FAC SIMILE non inviato', {
+        body: `Viaggio domani (${fmtDate(vAttuale.data)}) per ${vAttuale.cliente||'—'}\nRicordati di inviare il FAC SIMILE del formulario!`,
+        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="%23b45309"/><text y="44" x="32" text-anchor="middle" font-size="36">📋</text></svg>',
+        tag: `fac-simile-${id}`,
+        requireInteraction: true
+      });
+
+      // Mostra anche toast in app
+      toast(`⏰ Promemoria: FAC SIMILE non inviato per ${vAttuale.cliente||'—'} (domani)`);
+    }, msAlPromemoria);
+
+    console.log(`⏰ Promemoria schedulato per ${v.cliente} alle ${promemoria.toLocaleString('it-IT')} (tra ${Math.round(msAlPromemoria/60000)} min)`);
+  });
+}
+
+// Avvisa l'utente se le notifiche non sono abilitate
+async function verificaNotifiche() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    // Mostra banner discreto
+    const banner = document.createElement('div');
+    banner.id = 'notif-banner';
+    banner.style.cssText = 'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--amber,#b45309);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:999;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.2);display:flex;align-items:center;gap:10px';
+    banner.innerHTML = '🔔 <span>Abilita le notifiche per i promemoria FAC SIMILE</span> <button style="background:rgba(255,255,255,.25);border:none;color:#fff;padding:3px 10px;border-radius:5px;cursor:pointer;font-weight:700">Abilita</button>';
+    banner.onclick = async () => {
+      const ok = await richiediPermessoNotifiche();
+      banner.remove();
+      if (ok) toast('✅ Notifiche abilitate — riceverai i promemoria FAC SIMILE');
+    };
+    document.body.appendChild(banner);
+    setTimeout(() => banner?.remove(), 12000);
+  }
 }
 
 // ── MAPPA ──────────────────────────────────────────────
@@ -1170,6 +1259,7 @@ document.addEventListener('keydown', e => { if(e.key==='Escape') chiudiModal(); 
   document.getElementById('cfg-pid').value     = cfg.projectId  || '';
   await connectFirebase(cfg);
   renderMese();
+  verificaNotifiche();
 })();
 </script>
 </body>
