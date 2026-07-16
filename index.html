@@ -743,7 +743,6 @@ window.renderLista = function() {
           ? `<button class="btn btn-ghost btn-sm" onclick="mostraSuMappa('${id}')" title="Mostra su mappa">🗺</button>`
           : `<button class="btn btn-ghost btn-sm" onclick="openModal(null,'${id}')">✏️</button>`
         }
-        <button class="btn btn-ghost btn-sm" onclick="mostraSuMappa('${id}')" title="Mostra su mappa" style="${eff?'display:none':''}">🗺</button>
         <button class="btn btn-ghost btn-sm" onclick="eliminaViaggio('${id}')" style="color:var(--red)">🗑</button>
       </td>
     </tr>`;
@@ -1119,7 +1118,7 @@ function popupHTML(v, tipo, col) {
   </div>`;
 }
 
-// Mostra un viaggio sulla mappa (geocodifica lazy) — usato da lista e pannello effettuati
+// Mostra un singolo viaggio effettuato sulla mappa (geocodifica lazy)
 window.mostraSuMappa = async function(id) {
   const v = STATE.viaggi[id];
   if (!v) return;
@@ -1127,9 +1126,7 @@ window.mostraSuMappa = async function(id) {
   setTimeout(async () => {
     initMap();
     _map.invalidateSize();
-    // Usa colore tratta se non effettuato, grigio se effettuato
-    const idx = Object.keys(STATE.viaggi).indexOf(id);
-    const col = isEffettuato(v) ? '#999' : getTrattaColor(idx);
+    const col = '#999';
     const origCoords = v.origine ? await geocodeAddr(v.origine) : null;
     const destCoords = v.dest    ? await geocodeAddr(v.dest)    : null;
     if (origCoords) {
@@ -1144,16 +1141,14 @@ window.mostraSuMappa = async function(id) {
     }
     if (origCoords && destCoords) {
       const line = L.polyline([origCoords, destCoords], {
-        color: col, weight: 4, opacity: .85, dashArray: '8 5'
+        color: col, weight: 3, opacity: .6, dashArray: '6 4'
       }).addTo(_map);
       _mapLayers.push(line);
       _map.fitBounds([origCoords, destCoords], {padding:[60,60]});
     } else if (origCoords) {
       _map.setView(origCoords, 11);
-    } else {
-      toast('Indirizzo non trovato — verifica Origine e Destinazione', 'err');
     }
-  }, 200);
+  }, 150);
 };
 
 async function renderMappa() {
