@@ -232,6 +232,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     <button class="npill" onclick="switchView('settimana')">Settimana</button>
     <button class="npill" onclick="switchView('lista')">Lista</button>
     <button class="npill" onclick="switchView('mappa')">🗺 Mappa</button>
+    <button class="npill" onclick="switchView('gestione')">🗂 Gestione</button>
     <button class="npill" onclick="switchView('setup')">Config</button>
   </div>
   <div class="fb-dot" id="fb-dot" title="Firebase"></div>
@@ -334,6 +335,16 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 </div>
 
 <!-- ══ SETUP ══════════════════════════════════════════ -->
+<!-- ════════ GESTIONE / LISTINO KEOMA ════════ -->
+<div class="view" id="view-gestione" style="padding:0;height:calc(100vh - 54px)">
+  <iframe
+    id="gestione-iframe"
+    src=""
+    style="width:100%;height:100%;border:none;display:block"
+    title="Listino KEOMA"
+  ></iframe>
+</div>
+
 <div class="view" id="view-setup">
 <div class="setup-wrap">
   <div class="setup-card">
@@ -743,6 +754,7 @@ window.renderLista = function() {
           ? `<button class="btn btn-ghost btn-sm" onclick="mostraSuMappa('${id}')" title="Mostra su mappa">🗺</button>`
           : `<button class="btn btn-ghost btn-sm" onclick="openModal(null,'${id}')">✏️</button>`
         }
+        <button class="btn btn-ghost btn-sm" onclick="mostraSuMappa('${id}')" title="Mostra su mappa" style="${eff?'display:none':''}">🗺</button>
         <button class="btn btn-ghost btn-sm" onclick="eliminaViaggio('${id}')" style="color:var(--red)">🗑</button>
       </td>
     </tr>`;
@@ -1118,7 +1130,7 @@ function popupHTML(v, tipo, col) {
   </div>`;
 }
 
-// Mostra un singolo viaggio effettuato sulla mappa (geocodifica lazy)
+// Mostra un viaggio sulla mappa (geocodifica lazy) — usato da lista e pannello effettuati
 window.mostraSuMappa = async function(id) {
   const v = STATE.viaggi[id];
   if (!v) return;
@@ -1126,7 +1138,9 @@ window.mostraSuMappa = async function(id) {
   setTimeout(async () => {
     initMap();
     _map.invalidateSize();
-    const col = '#999';
+    // Usa colore tratta se non effettuato, grigio se effettuato
+    const idx = Object.keys(STATE.viaggi).indexOf(id);
+    const col = isEffettuato(v) ? '#999' : getTrattaColor(idx);
     const origCoords = v.origine ? await geocodeAddr(v.origine) : null;
     const destCoords = v.dest    ? await geocodeAddr(v.dest)    : null;
     if (origCoords) {
@@ -1141,14 +1155,16 @@ window.mostraSuMappa = async function(id) {
     }
     if (origCoords && destCoords) {
       const line = L.polyline([origCoords, destCoords], {
-        color: col, weight: 3, opacity: .6, dashArray: '6 4'
+        color: col, weight: 4, opacity: .85, dashArray: '8 5'
       }).addTo(_map);
       _mapLayers.push(line);
       _map.fitBounds([origCoords, destCoords], {padding:[60,60]});
     } else if (origCoords) {
       _map.setView(origCoords, 11);
+    } else {
+      toast('Indirizzo non trovato — verifica Origine e Destinazione', 'err');
     }
-  }, 150);
+  }, 200);
 };
 
 async function renderMappa() {
@@ -1350,12 +1366,21 @@ window.switchView = function(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.npill').forEach(b => b.classList.remove('act'));
   document.getElementById('view-'+name).classList.add('active');
-  const idx = {mese:0,settimana:1,lista:2,mappa:3,setup:4}[name];
+  const idx = {mese:0,settimana:1,lista:2,mappa:3,gestione:4,setup:5}[name];
   document.querySelectorAll('.npill')[idx]?.classList.add('act');
-  if (name==='mese')    renderMese();
-  if (name==='lista')   renderLista();
+  if (name==='mese')      renderMese();
+  if (name==='lista')     renderLista();
   if (name==='settimana') renderSettimana();
-  if (name==='setup')   renderTaskEditor();
+  if (name==='setup')     renderTaskEditor();
+  if (name==='gestione') {
+    const iframe = document.getElementById('gestione-iframe');
+    if (!iframe.getAttribute('data-loaded')) {
+      // Costruisci URL relativo al file corrente
+      const base = window.location.href.split('/').slice(0,-1).join('/') + '/';
+      iframe.src = base + 'LISTINO_KEOMA.html';
+      iframe.setAttribute('data-loaded','1');
+    }
+  }
   if (name==='mappa')  {
     setTimeout(() => {
       initMap();
