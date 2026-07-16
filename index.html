@@ -9,7 +9,23 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css">
 <style>
 /* ------- */
-#map-container{height:calc(100vh - 54px - 130px);min-height:400px;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh2);border:1px solid var(--border)}
+/* ── PANNELLO OGGI ─────────────────────────────────── */
+.oggi-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.85rem;overflow:hidden;box-shadow:var(--sh)}
+.oggi-header{padding:.6rem 1rem;background:var(--ink);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:8px}
+.oggi-header .oggi-data{font-family:var(--mono);color:rgba(255,255,255,.6);font-weight:400;font-size:11px;margin-left:auto}
+.oggi-list{display:flex;flex-wrap:wrap;gap:6px;padding:.75rem}
+.oggi-card{display:flex;align-items:center;gap:8px;padding:7px 12px;border-radius:7px;border:1.5px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .15s;font-size:12px;min-width:200px;flex:1}
+.oggi-card:hover{border-color:var(--teal);background:var(--teal-l);transform:translateY(-1px);box-shadow:var(--sh)}
+.oggi-card.loading{opacity:.6;cursor:wait}
+.oggi-sem{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.oggi-info{flex:1;min-width:0}
+.oggi-cliente{font-weight:700;color:var(--ink);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oggi-sub{font-size:10px;color:var(--ink2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.oggi-ora{font-family:var(--mono);font-size:11px;color:var(--ink3);flex-shrink:0}
+.oggi-pin{font-size:14px;flex-shrink:0;opacity:.4}
+.oggi-card:hover .oggi-pin{opacity:1}
+.oggi-empty{padding:.75rem 1rem;font-size:12px;color:var(--ink3);font-style:italic}
+#map-container{height:calc(100vh - 54px - 380px);min-height:260px;border-radius:var(--r);overflow:hidden;box-shadow:var(--sh2);border:1px solid var(--border)}
 #map{height:100%;width:100%;background:#e8edf2}
 .map-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap}
 .map-legend{display:flex;gap:12px;align-items:center;padding:6px 12px;background:var(--surface);border-radius:var(--r);border:1px solid var(--border);font-size:11px;font-weight:600}
@@ -24,7 +40,16 @@
 .map-popup-body{padding:10px 14px;font-size:12px;color:#374151}
 .map-popup-task{display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #f3f4f6}
 .map-popup-task:last-child{border-bottom:none}
-.map-route-line{stroke-dasharray:6,4}
+.prossimi-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.85rem;overflow:hidden;box-shadow:var(--sh)}
+.prossimi-header{padding:.6rem 1rem;background:var(--blue,#1a4f8a);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.prossimi-nav{display:flex;align-items:center;gap:6px;margin-left:auto}
+.prossimi-nav button{background:rgba(255,255,255,.2);border:none;color:#fff;padding:3px 10px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--sans)}
+.prossimi-nav button:hover{background:rgba(255,255,255,.35)}
+.prossimi-nav span{font-family:var(--mono);font-size:11px;color:rgba(255,255,255,.7);white-space:nowrap}
+.prossimi-settimana{padding:.5rem .75rem}
+.sett-label{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--ink3);padding:.4rem .25rem .25rem;border-bottom:1px solid var(--border);margin-bottom:.4rem}
+.prossimi-list{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:.5rem}bottom:48px;left:50%;transform:translateX(-50%);background:rgba(15,25,35,.9);color:#fff;font-size:11px;font-weight:700;padding:4px 8px;border-radius:5px;white-space:nowrap;pointer-events:none;opacity:0;transition:opacity .15s;font-family:system-ui,sans-serif}
+.leaflet-marker-icon:hover .marker-tooltip{opacity:1}
 
 /* ------- */
 :root {
@@ -274,17 +299,36 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 
 <!-- ══ MAPPA ════════════════════════════════════════════ -->
 <div class="view" id="view-mappa">
+  <!-- VIAGGI DI OGGI -->
+  <div class="oggi-panel">
+    <div class="oggi-header">
+      🗓 Viaggi in programma oggi
+      <span class="oggi-data" id="oggi-data-label">—</span>
+    </div>
+    <div id="oggi-list-wrap"></div>
+  </div>
+
+  <!-- VIAGGI DA DOMANI -->
+  <div class="prossimi-panel">
+    <div class="prossimi-header">
+      📅 Viaggi in programma da domani
+      <div class="prossimi-nav">
+        <button onclick="shiftProssimi(-1)">‹</button>
+        <span id="prossimi-label">—</span>
+        <button onclick="shiftProssimi(1)">›</button>
+        <button onclick="resetProssimi()" style="font-size:10px;padding:2px 7px">Questa sett.</button>
+      </div>
+    </div>
+    <div id="prossimi-list-wrap"></div>
+  </div>
+
   <div class="map-toolbar">
     <div class="map-legend">
       <span><span class="leg-dot leg-done"></span>Completo</span>
       <span><span class="leg-dot leg-partial"></span>In corso</span>
       <span><span class="leg-dot leg-none"></span>Da iniziare</span>
     </div>
-    <input type="date" id="mappa-dal" onchange="aggiornaMappaFiltri()" style="font-family:var(--sans);font-size:13px;padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--ink);outline:none" placeholder="Dal">
-    <input type="date" id="mappa-al"  onchange="aggiornaMappaFiltri()" style="font-family:var(--sans);font-size:13px;padding:6px 10px;border:1.5px solid var(--border);border-radius:var(--r);background:var(--surface);color:var(--ink);outline:none" placeholder="Al">
-    <button class="btn btn-ghost btn-sm" onclick="resetMappaFiltri()">✕ Reset</button>
-    <button class="btn btn-primary btn-sm ml-auto" onclick="geocodificaTutti()">📍 Geolocalizza tutti</button>
-    <div id="geo-status" style="font-size:11px;color:var(--ink3)"></div>
+    <button class="btn btn-ghost btn-sm ml-auto" onclick="pulisciMappa()">✕ Pulisci mappa</button>
   </div>
   <div id="map-container"><div id="map"></div></div>
 </div>
@@ -699,6 +743,7 @@ window.renderLista = function() {
           ? `<button class="btn btn-ghost btn-sm" onclick="mostraSuMappa('${id}')" title="Mostra su mappa">🗺</button>`
           : `<button class="btn btn-ghost btn-sm" onclick="openModal(null,'${id}')">✏️</button>`
         }
+        <button class="btn btn-ghost btn-sm" onclick="mostraSuMappa('${id}')" title="Mostra su mappa" style="${eff?'display:none':''}">🗺</button>
         <button class="btn btn-ghost btn-sm" onclick="eliminaViaggio('${id}')" style="color:var(--red)">🗑</button>
       </td>
     </tr>`;
@@ -878,6 +923,11 @@ function renderAll() {
   renderLista();
   renderTaskEditor();
   schedulaPromemoria();
+  // Aggiorna pannello oggi se la mappa è visibile
+  if (document.getElementById('view-mappa').classList.contains('active')) {
+    renderOggiPanel();
+    renderProssimiPanel();
+  }
 }
 
 // ── PROMEMORIA FAC SIMILE ──────────────────────────────
@@ -1030,18 +1080,20 @@ function getTrattaColor(idx) {
   return TRATTA_COLORS[idx % TRATTA_COLORS.length];
 }
 
-function makeMarkerIcon(col, isOrig) {
+function makeMarkerIcon(col, isOrig, cliente) {
+  const label = isOrig ? 'P' : 'A';
+  const fontSize = 11;
   const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="32" height="42" viewBox="0 0 32 42">
     <path d="M16 0C7.16 0 0 7.16 0 16c0 10.84 14.4 25.08 15.04 25.72a1.34 1.34 0 001.92 0C17.6 41.08 32 26.84 32 16 32 7.16 24.84 0 16 0z" fill="${col}"/>
     <path d="M16 0C7.16 0 0 7.16 0 16c0 10.84 14.4 25.08 15.04 25.72a1.34 1.34 0 001.92 0C17.6 41.08 32 26.84 32 16 32 7.16 24.84 0 16 0z" fill="none" stroke="rgba(255,255,255,0.4)" stroke-width="1.5"/>
-    <text x="16" y="20" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="900" fill="#fff">${isOrig?'P':'A'}</text>
+    <text x="16" y="${isOrig && cliente ? 19 : 20}" text-anchor="middle" font-family="system-ui,sans-serif" font-size="${fontSize}" font-weight="900" fill="#fff">${label}</text>
   </svg>`;
   return L.divIcon({
     className: '',
     iconSize: [32, 42],
     iconAnchor: [16, 42],
     popupAnchor: [0, -42],
-    html: `<div style="filter:drop-shadow(0 3px 6px rgba(0,0,0,.4))">${svg}</div>`
+    html: `<div title="${isOrig && cliente ? cliente : ''}" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,.4));position:relative">${svg}${isOrig && cliente ? `<div class="marker-tooltip">${cliente}</div>` : ''}</div>`
   });
 }
 
@@ -1067,7 +1119,7 @@ function popupHTML(v, tipo, col) {
   </div>`;
 }
 
-// Mostra un singolo viaggio effettuato sulla mappa (geocodifica lazy)
+// Mostra un viaggio sulla mappa (geocodifica lazy) — usato da lista e pannello effettuati
 window.mostraSuMappa = async function(id) {
   const v = STATE.viaggi[id];
   if (!v) return;
@@ -1075,11 +1127,13 @@ window.mostraSuMappa = async function(id) {
   setTimeout(async () => {
     initMap();
     _map.invalidateSize();
-    const col = '#999';
+    // Usa colore tratta se non effettuato, grigio se effettuato
+    const idx = Object.keys(STATE.viaggi).indexOf(id);
+    const col = isEffettuato(v) ? '#999' : getTrattaColor(idx);
     const origCoords = v.origine ? await geocodeAddr(v.origine) : null;
     const destCoords = v.dest    ? await geocodeAddr(v.dest)    : null;
     if (origCoords) {
-      const m = L.marker(origCoords, {icon: makeMarkerIcon(col, true)})
+      const m = L.marker(origCoords, {icon: makeMarkerIcon(col, true, v.cliente)})
         .bindPopup(popupHTML(v,'origine',col), {maxWidth:280}).addTo(_map);
       _mapLayers.push(m);
     }
@@ -1090,89 +1144,213 @@ window.mostraSuMappa = async function(id) {
     }
     if (origCoords && destCoords) {
       const line = L.polyline([origCoords, destCoords], {
-        color: col, weight: 3, opacity: .6, dashArray: '6 4'
+        color: col, weight: 4, opacity: .85, dashArray: '8 5'
       }).addTo(_map);
       _mapLayers.push(line);
       _map.fitBounds([origCoords, destCoords], {padding:[60,60]});
     } else if (origCoords) {
       _map.setView(origCoords, 11);
+    } else {
+      toast('Indirizzo non trovato — verifica Origine e Destinazione', 'err');
     }
-  }, 150);
+  }, 200);
 };
 
 async function renderMappa() {
   if (!_map) return;
+  // Rimuovi layer precedenti ma lascia la mappa vuota —
+  // i viaggi vengono mostrati solo su clic dal pannello
   _mapLayers.forEach(l => _map.removeLayer(l));
   _mapLayers = [];
-
-  const dal = document.getElementById('mappa-dal').value;
-  const al  = document.getElementById('mappa-al').value;
-  let viaggi = Object.values(STATE.viaggi)
-    .filter(v => !isEffettuato(v)); // escludi viaggi effettuati dalla mappa
-  if (dal) viaggi = viaggi.filter(v => v.data >= dal);
-  if (al)  viaggi = viaggi.filter(v => v.data <= al);
-
-  const bounds = [];
-
-  for (let i = 0; i < viaggi.length; i++) {
-    const v   = viaggi[i];
-    const col = getTrattaColor(i); // colore unico per questa tratta
-    const origCoords = v.origine ? await geocodeAddr(v.origine) : null;
-    const destCoords = v.dest    ? await geocodeAddr(v.dest)    : null;
-
-    if (origCoords) {
-      bounds.push(origCoords);
-      const m = L.marker(origCoords, {icon: makeMarkerIcon(col, true)})
-        .bindPopup(popupHTML(v,'origine', col), {maxWidth:280})
-        .addTo(_map);
-      _mapLayers.push(m);
-    }
-    if (destCoords) {
-      bounds.push(destCoords);
-      const m = L.marker(destCoords, {icon: makeMarkerIcon(col, false)})
-        .bindPopup(popupHTML(v,'dest', col), {maxWidth:280})
-        .addTo(_map);
-      _mapLayers.push(m);
-    }
-    if (origCoords && destCoords) {
-      const line = L.polyline([origCoords, destCoords], {
-        color: col, weight: 4, opacity: .85, dashArray: '8 5'
-      }).bindPopup(`<div style="padding:8px 12px;font-weight:700;color:${col}">${v.cliente||'—'}</div>
-        <div style="padding:0 12px 8px;font-size:12px;color:#374151">${v.origine} → ${v.dest}</div>`)
-        .addTo(_map);
-      _mapLayers.push(line);
-    }
-  }
-
-  if (bounds.length > 0) {
-    _map.fitBounds(bounds, {padding:[40,40]});
-  } else {
-    _map.setView([45.7, 12.3], 8);
-  }
+  _map.setView([45.7, 12.3], 8);
   _map.invalidateSize();
   setTimeout(() => _map.invalidateSize(), 300);
 }
 
-window.geocodificaTutti = async function() {
-  const st = document.getElementById('geo-status');
-  const viaggi = Object.values(STATE.viaggi);
-  let count = 0;
-  st.textContent = '⏳ Geocodifica in corso...';
-  for (const v of viaggi) {
-    if (v.origine) { await geocodeAddr(v.origine); count++; }
-    if (v.dest)    { await geocodeAddr(v.dest);    count++; }
-    await new Promise(r => setTimeout(r, 300)); // rispetta rate limit Nominatim
+window.geocodificaTutti = function() {};
+
+// ── PANNELLO VIAGGI DI OGGI ───────────────────────────
+function renderOggiPanel() {
+  const oggi    = toISO(new Date());
+  const wrap    = document.getElementById('oggi-list-wrap');
+  const lbl     = document.getElementById('oggi-data-label');
+  if (!wrap || !lbl) return;
+
+  const d = new Date();
+  lbl.textContent = d.toLocaleDateString('it-IT', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
+
+  const viaggiOggi = Object.entries(STATE.viaggi)
+    .filter(([,v]) => v.data === oggi && !isEffettuato(v))
+    .sort((a,b) => (a[1].ora||'') < (b[1].ora||'') ? -1 : 1);
+
+  if (!viaggiOggi.length) {
+    wrap.innerHTML = '<div class="oggi-empty">Nessun viaggio in programma per oggi</div>';
+    return;
   }
-  st.textContent = `✅ ${count} indirizzi elaborati`;
-  renderMappa();
+
+  wrap.innerHTML = `<div class="oggi-list">${viaggiOggi.map(([id, v]) => {
+    const sem = semaforo(v);
+    const semCol = sem==='done'?'var(--teal)':sem==='partial'?'var(--amber)':'var(--red)';
+    const tasks  = STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS;
+    const fatti  = tasks.filter(t => v.checks?.[slugify(t)]).length;
+    return `<div class="oggi-card" id="oggi-card-${id}" onclick="geoLocalizzaViaggio('${id}')">
+      <div class="oggi-sem" style="background:${semCol}"></div>
+      <div class="oggi-info">
+        <div class="oggi-cliente">${v.cliente||'—'}</div>
+        <div class="oggi-sub">${v.trasportatore||''}${v.origine?' · '+v.origine+' → '+(v.dest||'?'):''}</div>
+        <div style="font-size:10px;color:var(--ink3);margin-top:2px">${fatti}/${tasks.length} attività · ${v.tipoMezzo||'—'}</div>
+      </div>
+      <span class="oggi-ora">${v.ora||''}</span>
+      <span class="oggi-pin">📍</span>
+    </div>`;
+  }).join('')}</div>`;
+}
+
+window.geoLocalizzaViaggio = async function(id) {
+  const card = document.getElementById(`oggi-card-${id}`);
+  const v    = STATE.viaggi[id];
+  if (!v || !card) return;
+
+  card.classList.add('loading');
+  const pin = card.querySelector('.oggi-pin');
+  if (pin) pin.textContent = '⏳';
+
+  // Assicura che la mappa sia inizializzata
+  if (!_map) { initMap(); await new Promise(r => setTimeout(r, 200)); }
+  _map.invalidateSize();
+
+  const col        = getTrattaColor(Object.keys(STATE.viaggi).indexOf(id));
+  const origCoords = v.origine ? await geocodeAddr(v.origine) : null;
+  const destCoords = v.dest    ? await geocodeAddr(v.dest)    : null;
+
+  card.classList.remove('loading');
+  if (pin) pin.textContent = origCoords || destCoords ? '✅' : '❌';
+
+  if (origCoords) {
+    const m = L.marker(origCoords, {icon: makeMarkerIcon(col, true, v.cliente)})
+      .bindPopup(popupHTML(v,'origine',col), {maxWidth:280}).addTo(_map);
+    _mapLayers.push(m);
+    m.openPopup();
+  }
+  if (destCoords) {
+    const m = L.marker(destCoords, {icon: makeMarkerIcon(col, false)})
+      .bindPopup(popupHTML(v,'dest',col), {maxWidth:280}).addTo(_map);
+    _mapLayers.push(m);
+  }
+  if (origCoords && destCoords) {
+    const line = L.polyline([origCoords, destCoords], {
+      color: col, weight: 4, opacity: .85, dashArray: '8 5'
+    }).addTo(_map);
+    _mapLayers.push(line);
+    _map.fitBounds([origCoords, destCoords], {padding:[50,50]});
+  } else if (origCoords) {
+    _map.setView(origCoords, 11);
+  } else {
+    toast('Indirizzo non trovato — verifica i campi Origine e Destinazione', 'err');
+  }
+};
+// ── PANNELLO PROSSIMI VIAGGI ──────────────────────────
+let _prossimiOffset = 0; // 0 = settimana prossima, 1 = quella dopo, ecc.
+
+const GIORNI_IT = ['Dom','Lun','Mar','Mer','Gio','Ven','Sab'];
+const MESI_SHORT = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott','Nov','Dic'];
+
+function getLunedi(offsetSettimane) {
+  const oggi = new Date();
+  oggi.setHours(0,0,0,0);
+  // Lunedì della settimana corrente
+  const dow = oggi.getDay() || 7; // 1=lun .. 7=dom
+  const lunediCorrente = new Date(oggi);
+  lunediCorrente.setDate(oggi.getDate() - dow + 1);
+  // Lunedì della settimana target (prossima + offset)
+  const target = new Date(lunediCorrente);
+  target.setDate(lunediCorrente.getDate() + 7 * (1 + offsetSettimane));
+  return target;
+}
+
+function renderProssimiPanel() {
+  const wrap  = document.getElementById('prossimi-list-wrap');
+  const label = document.getElementById('prossimi-label');
+  if (!wrap || !label) return;
+
+  const lun = getLunedi(_prossimiOffset);
+  const dom = new Date(lun); dom.setDate(lun.getDate() + 6);
+
+  const fmtShort = d => `${d.getDate()} ${MESI_SHORT[d.getMonth()]}`;
+  label.textContent = `${fmtShort(lun)} — ${fmtShort(dom)}`;
+
+  // Giorni della settimana selezionata
+  const giorni = [];
+  for (let i = 0; i < 7; i++) {
+    const g = new Date(lun); g.setDate(lun.getDate() + i);
+    giorni.push(g);
+  }
+
+  // Filtro viaggi nella settimana
+  const isoLun = toISO(lun);
+  const isoDom = toISO(dom);
+
+  // Escludi oggi (già nel pannello sopra) e viaggi effettuati
+  const oggi = toISO(new Date());
+  const viaggiSett = Object.entries(STATE.viaggi)
+    .filter(([,v]) => v.data > oggi && v.data >= isoLun && v.data <= isoDom && !isEffettuato(v))
+    .sort((a,b) => (a[1].data + (a[1].ora||'')) < (b[1].data + (b[1].ora||'')) ? -1 : 1);
+
+  if (!viaggiSett.length) {
+    wrap.innerHTML = '<div class="oggi-empty">Nessun viaggio programmato per questa settimana</div>';
+    return;
+  }
+
+  // Raggruppa per giorno
+  const perGiorno = {};
+  viaggiSett.forEach(([id, v]) => {
+    if (!perGiorno[v.data]) perGiorno[v.data] = [];
+    perGiorno[v.data].push([id, v]);
+  });
+
+  wrap.innerHTML = '<div class="prossimi-settimana">' +
+    Object.entries(perGiorno).map(([data, list]) => {
+      const d   = new Date(data + 'T00:00:00');
+      const lbl = `${GIORNI_IT[d.getDay()]} ${d.getDate()} ${MESI_SHORT[d.getMonth()]}`;
+      const cards = list.map(([id, v]) => {
+        const sem    = semaforo(v);
+        const semCol = sem==='done'?'var(--teal)':sem==='partial'?'var(--amber)':'var(--red)';
+        const tasks  = STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS;
+        const fatti  = tasks.filter(t => v.checks?.[slugify(t)]).length;
+        return `<div class="oggi-card" id="oggi-card-${id}" onclick="geoLocalizzaViaggio('${id}')">
+          <div class="oggi-sem" style="background:${semCol}"></div>
+          <div class="oggi-info">
+            <div class="oggi-cliente">${v.cliente||'—'}</div>
+            <div class="oggi-sub">${v.trasportatore||''}${v.origine?' · '+v.origine+' → '+(v.dest||'?'):''}</div>
+            <div style="font-size:10px;color:var(--ink3);margin-top:2px">${fatti}/${tasks.length} att. · ${v.tipoMezzo||'—'}</div>
+          </div>
+          <span class="oggi-ora">${v.ora||''}</span>
+          <span class="oggi-pin">📍</span>
+        </div>`;
+      }).join('');
+      return `<div class="sett-label">📅 ${lbl}</div><div class="prossimi-list">${cards}</div>`;
+    }).join('') + '</div>';
+}
+
+window.shiftProssimi = function(n) {
+  _prossimiOffset = Math.max(0, _prossimiOffset + n);
+  renderProssimiPanel();
+};
+window.resetProssimi = function() {
+  _prossimiOffset = 0;
+  renderProssimiPanel();
 };
 
-window.aggiornaMappaFiltri = function() { renderMappa(); };
-window.resetMappaFiltri = function() {
-  document.getElementById('mappa-dal').value='';
-  document.getElementById('mappa-al').value='';
-  renderMappa();
+window.pulisciMappa = function() {
+  if (_map) {
+    _mapLayers.forEach(l => _map.removeLayer(l));
+    _mapLayers = [];
+  }
+  document.querySelectorAll('.oggi-pin').forEach(p => p.textContent = '📍');
+  document.querySelectorAll('.oggi-card').forEach(c => c.classList.remove('loading'));
 };
+window.resetMappaFiltri = function() {};
+window.aggiornaMappaFiltri = function() {};
 window.switchView = function(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.npill').forEach(b => b.classList.remove('act'));
@@ -1188,6 +1366,8 @@ window.switchView = function(name) {
       initMap();
       _map.invalidateSize();
       renderMappa();
+      renderOggiPanel();
+      renderProssimiPanel();
     }, 100);
   }
 };
