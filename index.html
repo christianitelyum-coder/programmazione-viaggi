@@ -8,6 +8,33 @@
 <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css">
 <style>
+:root {
+  --ink:    #0f1923;
+  --ink2:   #4a5568;
+  --ink3:   #8896aa;
+  --bg:     #f2f4f8;
+  --surface:#ffffff;
+  --s2:     #f7f9fc;
+  --border: #dde3ef;
+
+  --teal:   #0b7c6e;
+  --teal-l: #e0f5f2;
+  --teal-d: #075549;
+  --amber:  #b45309;
+  --amber-l:#fef3c7;
+  --red:    #c0392b;
+  --red-l:  #fdf0ee;
+  --blue:   #1a4f8a;
+  --blue-l: #e8f0fc;
+
+  --mono: 'IBM Plex Mono', monospace;
+  --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --r:    8px;
+  --sh:   0 2px 12px rgba(15,25,35,.08);
+  --sh2:  0 6px 28px rgba(15,25,35,.13);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
 /* ------- */
 /* ── PANNELLO OGGI ─────────────────────────────────── */
 .oggi-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.85rem;overflow:hidden;box-shadow:var(--sh)}
@@ -52,33 +79,7 @@
 .leaflet-marker-icon:hover .marker-tooltip{opacity:1}
 
 /* ------- */
-:root {
-  --ink:    #0f1923;
-  --ink2:   #4a5568;
-  --ink3:   #8896aa;
-  --bg:     #f2f4f8;
-  --surface:#ffffff;
-  --s2:     #f7f9fc;
-  --border: #dde3ef;
 
-  --teal:   #0b7c6e;
-  --teal-l: #e0f5f2;
-  --teal-d: #075549;
-  --amber:  #b45309;
-  --amber-l:#fef3c7;
-  --red:    #c0392b;
-  --red-l:  #fdf0ee;
-  --blue:   #1a4f8a;
-  --blue-l: #e8f0fc;
-
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'IBM Plex Sans', system-ui, sans-serif;
-  --r:    8px;
-  --sh:   0 2px 12px rgba(15,25,35,.08);
-  --sh2:  0 6px 28px rgba(15,25,35,.13);
-}
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
 
 /* ------- */
 .header{background:var(--ink);color:#fff;padding:0 1.5rem;height:54px;display:flex;align-items:center;gap:0;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
@@ -197,17 +198,27 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .toast.ok{background:var(--teal)}
 .toast.err{background:var(--red)}
 
-/* ------- */
-@media(max-width:900px){
-  .week-grid{grid-template-columns:repeat(3,1fr)}
-  .header .nav-pills{display:none}
-}
-@media(max-width:600px){
-  .week-grid{grid-template-columns:1fr 1fr}
-  .view{padding:1rem}
-  .form-row-2{grid-template-columns:1fr}
-}
-/* ── MESE ─────────────────────────────────────────── */
+/* ── SIDEBAR ─────────────────────────────────────────── */
+.app-shell{display:flex;height:100vh;overflow:hidden}
+.sidebar{width:64px;background:#fff;display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px;flex-shrink:0;z-index:100;box-shadow:2px 0 12px rgba(0,0,0,.08);border-right:1px solid #e5e9f0}
+.sidebar-logo{width:40px;height:40px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;color:#fff;margin-bottom:8px;flex-shrink:0}
+.snav{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;flex:1}
+.sbtn{width:52px;height:52px;border-radius:10px;border:none;background:none;color:#94a3b8;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:all .15s;position:relative;font-family:var(--sans)}
+.sbtn:hover{background:#f1f5f9;color:#475569}
+.sbtn.act{background:var(--teal-l);color:var(--teal-d);box-shadow:none}
+.sbtn-ico{font-size:18px;line-height:1}
+.sbtn-lbl{font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;line-height:1}
+.sbtn-sep{width:36px;height:1px;background:#e5e9f0;margin:4px 0}
+.sidebar-bottom{margin-top:auto;padding-bottom:4px}
+.fb-dot{width:8px;height:8px;border-radius:50%;background:#cbd5e1;margin:8px auto 0;transition:background .3s}
+.fb-dot.on{background:var(--teal)}
+.fb-dot.err{background:var(--red)}
+
+/* ── CONTENT AREA ────────────────────────────────────── */
+.content{flex:1;overflow-y:auto;position:relative}
+.view{display:none;padding:1.25rem 1.5rem;max-width:1400px;margin:0 auto}
+.view.active{display:block}
+.view.full{padding:0;max-width:100%;height:100%}
 .month-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:3px}
 .month-dow{text-align:center;font-family:var(--mono);font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--ink3);padding:6px 0;border-bottom:1px solid var(--border);margin-bottom:4px}
 .month-cell{min-height:100px;border-radius:6px;border:1px solid var(--border);background:var(--surface);padding:4px;cursor:pointer;transition:all .15s;position:relative}
@@ -221,25 +232,56 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .mvc-partial{background:#fef3c7;color:#92400e}
 .mvc-none{background:#fdf0ee;color:#9b1c1c}
 .month-more{font-size:9px;color:var(--ink3);font-weight:600;padding:1px 4px}
-</style>
+
 </head>
 <body>
 
-<header class="header">
-  <div class="logo"><em>CR</em> Centrale Operativa</div>
-  <div class="nav-pills">
-    <button class="npill act" onclick="switchView('mese')">Mese</button>
-    <button class="npill" onclick="switchView('settimana')">Settimana</button>
-    <button class="npill" onclick="switchView('lista')">Lista</button>
-    <button class="npill" onclick="switchView('mappa')">🗺 Mappa</button>
-    <button class="npill" onclick="switchView('gestione')">🗂 Gestione</button>
-    <button class="npill" onclick="switchView('setup')">Config</button>
+</style>
+</head>
+<body>
+<div class="app-shell">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-logo">CR</div>
+  <nav class="snav">
+    <button class="sbtn act" onclick="switchView('mappa')" id="snav-mappa" title="Mappa">
+      <span class="sbtn-ico">🗺</span>
+      <span class="sbtn-lbl">Mappa</span>
+    </button>
+    <button class="sbtn" onclick="switchView('gestione')" id="snav-gestione" title="Gestione">
+      <span class="sbtn-ico">🗂</span>
+      <span class="sbtn-lbl">Gestione</span>
+    </button>
+    <div class="sbtn-sep"></div>
+    <button class="sbtn" onclick="switchView('mese')" id="snav-mese" title="Mese">
+      <span class="sbtn-ico">📅</span>
+      <span class="sbtn-lbl">Mese</span>
+    </button>
+    <button class="sbtn" onclick="switchView('settimana')" id="snav-settimana" title="Settimana">
+      <span class="sbtn-ico">📆</span>
+      <span class="sbtn-lbl">Sett.</span>
+    </button>
+    <button class="sbtn" onclick="switchView('lista')" id="snav-lista" title="Lista">
+      <span class="sbtn-ico">📋</span>
+      <span class="sbtn-lbl">Lista</span>
+    </button>
+    <div class="sbtn-sep"></div>
+    <button class="sbtn" onclick="switchView('setup')" id="snav-setup" title="Config">
+      <span class="sbtn-ico">⚙️</span>
+      <span class="sbtn-lbl">Config</span>
+    </button>
+  </nav>
+  <div class="sidebar-bottom">
+    <div class="fb-dot" id="fb-dot" title="Firebase"></div>
   </div>
-  <div class="fb-dot" id="fb-dot" title="Firebase"></div>
-</header>
+</aside>
+
+<!-- CONTENT -->
+<div class="content" id="app-content">
 
 <!-- ══ MESE ════════════════════════════════════════════ -->
-<div class="view active" id="view-mese">
+<div class="view" id="view-mese">
   <div class="toolbar">
     <div class="week-nav">
       <button class="wnav-btn" onclick="shiftMonth(-1)">‹</button>
@@ -299,7 +341,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 </div>
 
 <!-- ══ MAPPA ════════════════════════════════════════════ -->
-<div class="view" id="view-mappa">
+<div class="view active" id="view-mappa">
   <!-- VIAGGI DI OGGI -->
   <div class="oggi-panel">
     <div class="oggi-header">
@@ -336,13 +378,20 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 
 <!-- ══ SETUP ══════════════════════════════════════════ -->
 <!-- ════════ GESTIONE / LISTINO KEOMA ════════ -->
-<div class="view" id="view-gestione" style="padding:0;height:calc(100vh - 54px)">
-  <iframe
-    id="gestione-iframe"
-    src=""
-    style="width:100%;height:100%;border:none;display:block"
-    title="Listino KEOMA"
-  ></iframe>
+<div class="view" id="view-gestione" style="padding:0;height:calc(100vh - 54px);display:flex;flex-direction:column">
+  <!-- Sub-tabs gestione -->
+  <div style="display:flex;gap:0;background:#fff;border-bottom:2px solid var(--border);flex-shrink:0">
+    <button id="gtab-listino" onclick="switchGestione('listino')"
+      style="padding:10px 22px;border:none;background:none;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--teal);border-bottom:2px solid var(--teal);margin-bottom:-2px;cursor:pointer">
+      📊 Listino KEOMA
+    </button>
+    <button id="gtab-ordine" onclick="switchGestione('ordine')"
+      style="padding:10px 22px;border:none;background:none;font-family:var(--sans);font-size:13px;font-weight:600;color:var(--ink3);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer">
+      📋 Ordine di Servizio
+    </button>
+  </div>
+  <iframe id="gestione-iframe-listino" src=""  style="width:100%;flex:1;border:none;display:block" title="Listino KEOMA"></iframe>
+  <iframe id="gestione-iframe-ordine"  src=""  style="width:100%;flex:1;border:none;display:none" title="Ordine di Servizio"></iframe>
 </div>
 
 <div class="view" id="view-setup">
@@ -442,10 +491,14 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="chiudiModal()">Annulla</button>
+      <button class="btn btn-ghost" style="color:var(--blue,#1a4f8a);border-color:var(--blue,#1a4f8a)" onclick="apriOrdineServizio()" title="Crea ordine di servizio con i dati di questo viaggio">📋 Ordine di servizio</button>
       <button class="btn btn-primary" onclick="salvaViaggio()">✓ Salva viaggio</button>
     </div>
   </div>
 </div>
+
+</div><!-- /content -->
+</div><!-- /app-shell -->
 
 <div class="toast" id="toast"></div>
 
@@ -1362,23 +1415,81 @@ window.pulisciMappa = function() {
 };
 window.resetMappaFiltri = function() {};
 window.aggiornaMappaFiltri = function() {};
+window.switchGestione = function(tab) {
+  const iListino = document.getElementById('gestione-iframe-listino');
+  const iOrdine  = document.getElementById('gestione-iframe-ordine');
+  const tListino = document.getElementById('gtab-listino');
+  const tOrdine  = document.getElementById('gtab-ordine');
+  if (tab === 'listino') {
+    iListino.style.display = 'block'; iOrdine.style.display = 'none';
+    tListino.style.color = 'var(--teal)'; tListino.style.borderBottom = '2px solid var(--teal)';
+    tOrdine.style.color  = 'var(--ink3)'; tOrdine.style.borderBottom  = '2px solid transparent';
+  } else {
+    iListino.style.display = 'none'; iOrdine.style.display = 'block';
+    tOrdine.style.color  = 'var(--teal)'; tOrdine.style.borderBottom  = '2px solid var(--teal)';
+    tListino.style.color = 'var(--ink3)'; tListino.style.borderBottom = '2px solid transparent';
+    if (!iOrdine.getAttribute('data-loaded')) {
+      const base = window.location.href.split('/').slice(0,-1).join('/') + '/';
+      iOrdine.src = base + 'ordine_di_servizio.html';
+      iOrdine.setAttribute('data-loaded','1');
+    }
+  }
+};
+
+window.apriOrdineServizio = function() {
+  // Raccoglie i dati dal modal viaggio corrente
+  const data         = document.getElementById('m-data').value;
+  const cliente      = document.getElementById('m-cliente').value.trim();
+  const trasportatore= document.getElementById('m-trasportatore').value.trim();
+  const tipoMezzo    = (function(){
+    const sel = document.getElementById('m-tipo-mezzo').value;
+    return sel === 'ALTRO'
+      ? document.getElementById('m-tipo-mezzo-altro').value.trim()
+      : sel;
+  })();
+  const origine      = document.getElementById('m-origine').value.trim();
+  const dest         = document.getElementById('m-dest').value.trim();
+  const note         = document.getElementById('m-note').value.trim();
+
+  // Salva i dati in sessionStorage così l'iframe li legge
+  const payload = { data, cliente, trasportatore, tipoMezzo, origine, dest, note };
+  sessionStorage.setItem('ordine_prefill', JSON.stringify(payload));
+
+  // Apri la tab Gestione > Ordine di Servizio
+  chiudiModal();
+  switchView('gestione');
+  switchGestione('ordine');
+
+  // Manda i dati all'iframe quando è pronto
+  const iframe = document.getElementById('gestione-iframe-ordine');
+  const send = () => {
+    try { iframe.contentWindow.postMessage({ type: 'prefill_ordine', payload }, '*'); }
+    catch(e) {}
+  };
+  if (iframe.getAttribute('data-loaded')) {
+    setTimeout(send, 300);
+  } else {
+    iframe.addEventListener('load', () => setTimeout(send, 200), { once: true });
+  }
+  toast('📋 Apertura ordine di servizio...');
+};
+
 window.switchView = function(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  document.querySelectorAll('.npill').forEach(b => b.classList.remove('act'));
+  document.querySelectorAll('.sbtn').forEach(b => b.classList.remove('act'));
   document.getElementById('view-'+name).classList.add('active');
-  const idx = {mese:0,settimana:1,lista:2,mappa:3,gestione:4,setup:5}[name];
-  document.querySelectorAll('.npill')[idx]?.classList.add('act');
+  const btn = document.getElementById('snav-'+name);
+  if (btn) btn.classList.add('act');
   if (name==='mese')      renderMese();
   if (name==='lista')     renderLista();
   if (name==='settimana') renderSettimana();
   if (name==='setup')     renderTaskEditor();
   if (name==='gestione') {
-    const iframe = document.getElementById('gestione-iframe');
-    if (!iframe.getAttribute('data-loaded')) {
-      // Costruisci URL relativo al file corrente
-      const base = window.location.href.split('/').slice(0,-1).join('/') + '/';
-      iframe.src = base + 'LISTINO_KEOMA.html';
-      iframe.setAttribute('data-loaded','1');
+    const base = window.location.href.split('/').slice(0,-1).join('/') + '/';
+    const iListino = document.getElementById('gestione-iframe-listino');
+    if (!iListino.getAttribute('data-loaded')) {
+      iListino.src = base + 'LISTINO_KEOMA.html';
+      iListino.setAttribute('data-loaded','1');
     }
   }
   if (name==='mappa')  {
@@ -1458,7 +1569,7 @@ document.addEventListener('keydown', e => { if(e.key==='Escape') chiudiModal(); 
   document.getElementById('cfg-dburl').value   = cfg.databaseURL|| '';
   document.getElementById('cfg-pid').value     = cfg.projectId  || '';
   await connectFirebase(cfg);
-  renderMese();
+  switchView('mappa');
   verificaNotifiche();
 })();
 </script>

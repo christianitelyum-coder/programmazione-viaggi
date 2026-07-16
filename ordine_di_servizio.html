@@ -1,0 +1,3902 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ordine di Servizio</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --blue-900: #0d2b4e;
+  --blue-700: #1a4f8a;
+  --blue-500: #2b7bd4;
+  --blue-400: #4d9ae8;
+  --blue-200: #b8d8f7;
+  --blue-100: #daeeff;
+  --blue-50:  #f0f7ff;
+  --white:    #ffffff;
+  --gray-700: #374151;
+  --gray-500: #6b7280;
+  --gray-300: #d1d8e0;
+  --gray-100: #f3f6fa;
+  --green:    #1a7a4a;
+  --green-bg: #e6f4ed;
+  --red:      #b91c1c;
+  --red-bg:   #fef2f2;
+  --shadow-sm: 0 1px 3px rgba(13,43,78,0.08);
+  --shadow-md: 0 4px 16px rgba(13,43,78,0.12);
+  --shadow-lg: 0 8px 32px rgba(13,43,78,0.16);
+  --radius:   10px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Inter', sans-serif;
+  background: linear-gradient(160deg, #e8f3ff 0%, #f8fbff 50%, #eaf4ff 100%);
+  min-height: 100vh;
+  color: var(--gray-700);
+}
+
+/* ───── TOP NAV ───── */
+.topnav {
+  background: var(--white);
+  border-bottom: 1px solid var(--blue-200);
+  box-shadow: var(--shadow-sm);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 60px;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+.nav-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.nav-icon {
+  width: 34px; height: 34px;
+  background: linear-gradient(135deg, var(--blue-700), var(--blue-400));
+  border-radius: 8px;
+  display: flex; align-items: center; justify-content: center;
+  color: #fff; font-size: 16px;
+}
+.nav-title { font-family: 'Sora', sans-serif; font-size: 15px; font-weight: 700; color: var(--blue-900); }
+.nav-sub   { font-size: 11px; color: var(--blue-500); font-weight: 500; margin-left: 2px; }
+.nav-tabs  { display: flex; gap: 4px; }
+.nav-tab {
+  padding: 7px 18px;
+  border-radius: 6px;
+  font-size: 13px; font-weight: 500;
+  cursor: pointer; border: none;
+  background: transparent; color: var(--gray-500);
+  font-family: 'Inter', sans-serif;
+  transition: all 0.15s;
+  display: flex; align-items: center; gap: 6px;
+}
+.nav-tab:hover { background: var(--blue-50); color: var(--blue-700); }
+.nav-tab.active { background: var(--blue-100); color: var(--blue-700); font-weight: 600; }
+.nav-badge {
+  background: var(--blue-500); color: #fff;
+  font-size: 10px; font-weight: 700;
+  padding: 1px 6px; border-radius: 10px;
+  min-width: 18px; text-align: center;
+}
+
+/* ───── VIEWS ───── */
+.view { display: none; }
+.view.active { display: block; }
+
+/* ───── FORM VIEW ───── */
+.form-view {
+  max-width: 900px;
+  margin: 2rem auto;
+  padding: 0 1.5rem 4rem;
+}
+.form-heading {
+  margin-bottom: 1.5rem;
+}
+.form-heading h1 {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.5rem; font-weight: 700;
+  color: var(--blue-900);
+}
+.form-heading p { font-size: 13px; color: var(--gray-500); margin-top: 4px; }
+
+/* Card sezione */
+.card {
+  background: var(--white);
+  border: 1px solid var(--blue-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  margin-bottom: 1.25rem;
+  overflow: hidden;
+}
+.card-header {
+  padding: 12px 20px;
+  background: linear-gradient(90deg, var(--blue-50), #f8fbff);
+  border-bottom: 1px solid var(--blue-100);
+  display: flex; align-items: center; gap: 8px;
+}
+.card-icon {
+  width: 26px; height: 26px;
+  background: var(--blue-100);
+  border-radius: 6px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; color: var(--blue-700);
+}
+.card-title {
+  font-size: 12px; font-weight: 700;
+  letter-spacing: 0.08em; text-transform: uppercase;
+  color: var(--blue-700);
+}
+.card-body { padding: 18px 20px; }
+
+/* Grid form */
+.fg { display: grid; gap: 14px; }
+.fg-2 { grid-template-columns: 1fr 1fr; }
+.fg-3 { grid-template-columns: 1fr 1fr 1fr; }
+.fg-13 { grid-template-columns: 1fr 3fr; }
+.fg-span2 { grid-column: span 2; }
+.fg-span3 { grid-column: span 3; }
+
+.field { display: flex; flex-direction: column; gap: 5px; }
+.field label {
+  font-size: 11.5px; font-weight: 600;
+  color: var(--blue-700);
+  letter-spacing: 0.04em;
+}
+.field label .req { color: var(--blue-500); }
+.field input, .field textarea, .field select {
+  font-family: 'Inter', sans-serif;
+  font-size: 13.5px;
+  color: var(--gray-700);
+  background: var(--white);
+  border: 1.5px solid var(--gray-300);
+  border-radius: 7px;
+  padding: 9px 12px;
+  outline: none;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  width: 100%;
+  resize: none;
+}
+.field input:focus, .field textarea:focus, .field select:focus {
+  border-color: var(--blue-400);
+  box-shadow: 0 0 0 3px rgba(45,123,212,0.12);
+}
+.field textarea { min-height: 72px; }
+.field input::placeholder, .field textarea::placeholder { color: #b0bec5; }
+
+/* Buttons */
+.btn-row {
+  display: flex; gap: 10px; justify-content: flex-end;
+  margin-top: 1.5rem; flex-wrap: wrap;
+}
+.btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-family: 'Inter', sans-serif;
+  font-size: 13px; font-weight: 600;
+  cursor: pointer; border: none;
+  transition: all 0.15s;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--blue-700), var(--blue-500));
+  color: #fff;
+  box-shadow: 0 2px 8px rgba(27,79,138,0.3);
+}
+.btn-primary:hover { background: linear-gradient(135deg, #163d70, var(--blue-700)); box-shadow: 0 4px 12px rgba(27,79,138,0.4); transform: translateY(-1px); }
+.btn-secondary {
+  background: var(--blue-50); color: var(--blue-700);
+  border: 1.5px solid var(--blue-200);
+}
+.btn-secondary:hover { background: var(--blue-100); }
+.btn-ghost {
+  background: transparent; color: var(--gray-500);
+  border: 1.5px solid var(--gray-300);
+}
+.btn-ghost:hover { background: var(--gray-100); color: var(--gray-700); }
+.btn-green {
+  background: linear-gradient(135deg, #15643d, var(--green));
+  color: #fff; box-shadow: 0 2px 8px rgba(26,122,74,0.3);
+}
+.btn-green:hover { background: linear-gradient(135deg, #0f4a2c, #15643d); transform: translateY(-1px); }
+.btn-red {
+  background: var(--red-bg); color: var(--red);
+  border: 1.5px solid #fecaca;
+}
+.btn-red:hover { background: #fee2e2; }
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+/* Toast */
+.toast {
+  position: fixed; bottom: 2rem; right: 2rem;
+  background: var(--blue-900); color: #fff;
+  padding: 12px 20px; border-radius: 10px;
+  font-size: 13px; font-weight: 500;
+  box-shadow: var(--shadow-lg);
+  transform: translateY(80px); opacity: 0;
+  transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
+  z-index: 999;
+  display: flex; align-items: center; gap: 8px;
+}
+.toast.show { transform: translateY(0); opacity: 1; }
+.toast.success { background: #14532d; }
+.toast.error   { background: var(--red); }
+
+/* ───── ARCHIVE VIEW ───── */
+.arch-view {
+  max-width: 1200px;
+  margin: 2rem auto;
+  padding: 0 1.5rem 4rem;
+}
+.arch-heading {
+  display: flex; align-items: center; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px;
+  margin-bottom: 1.5rem;
+}
+.arch-heading h1 {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.5rem; font-weight: 700; color: var(--blue-900);
+}
+.arch-heading p { font-size: 13px; color: var(--gray-500); margin-top: 4px; }
+.arch-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* KPI */
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 14px;
+  margin-bottom: 1.5rem;
+}
+.kpi-card {
+  background: var(--white);
+  border: 1px solid var(--blue-200);
+  border-radius: var(--radius);
+  padding: 1.1rem 1.2rem;
+  box-shadow: var(--shadow-sm);
+  border-top: 3px solid var(--blue-400);
+}
+.kpi-label {
+  font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em;
+  color: var(--blue-500); margin-bottom: 6px;
+}
+.kpi-value {
+  font-family: 'Sora', sans-serif;
+  font-size: 1.8rem; font-weight: 700;
+  color: var(--blue-900); line-height: 1;
+}
+.kpi-sub { font-size: 11px; color: var(--gray-500); margin-top: 4px; }
+
+/* Filter bar */
+.filter-bar {
+  background: var(--white);
+  border: 1px solid var(--blue-200);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  display: flex; gap: 10px; flex-wrap: wrap;
+  align-items: center;
+  margin-bottom: 1rem;
+  box-shadow: var(--shadow-sm);
+}
+.filter-bar input, .filter-bar select {
+  font-family: 'Inter', sans-serif;
+  font-size: 13px; color: var(--gray-700);
+  background: var(--blue-50);
+  border: 1.5px solid var(--blue-200);
+  border-radius: 7px;
+  padding: 7px 11px;
+  outline: none;
+  transition: border-color 0.15s;
+}
+.filter-bar input:focus, .filter-bar select:focus { border-color: var(--blue-400); }
+.filter-bar input[type=text] { flex: 1; min-width: 200px; }
+
+/* Table */
+.table-card {
+  background: var(--white);
+  border: 1px solid var(--blue-200);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-sm);
+  overflow: hidden;
+}
+.arch-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.arch-table thead th {
+  background: var(--blue-900);
+  color: #fff;
+  font-size: 10.5px; font-weight: 700;
+  letter-spacing: 0.09em; text-transform: uppercase;
+  padding: 11px 14px; text-align: left;
+  white-space: nowrap; cursor: pointer; user-select: none;
+}
+.arch-table thead th:hover { background: var(--blue-700); }
+.arch-table thead th .sort-icon { font-size: 10px; margin-left: 4px; opacity: 0.5; }
+.arch-table thead th.sorted .sort-icon { opacity: 1; color: var(--blue-200); }
+.arch-table tbody tr { border-bottom: 1px solid var(--blue-100); transition: background 0.1s; }
+.arch-table tbody tr:last-child { border-bottom: none; }
+.arch-table tbody tr:hover { background: var(--blue-50); }
+.arch-table td { padding: 10px 14px; vertical-align: middle; max-width: 180px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tag-mezzo {
+  display: inline-block; padding: 2px 9px;
+  border-radius: 20px; font-size: 11px; font-weight: 600;
+  background: var(--blue-100); color: var(--blue-700);
+  border: 1px solid var(--blue-200);
+}
+.price-cell { font-weight: 700; color: var(--blue-900); }
+.del-btn {
+  padding: 4px 9px; border-radius: 5px;
+  font-size: 13px; cursor: pointer;
+  background: #fee2e2; border: 1px solid #fca5a5;
+  color: #dc2626; font-family: inherit;
+  transition: all 0.15s;
+}
+.del-btn:hover { background: var(--red-bg); border-color: #fca5a5; color: var(--red); }
+.empty-state {
+  text-align: center; padding: 3.5rem 1rem;
+  color: var(--gray-500);
+}
+.empty-icon { font-size: 2.5rem; margin-bottom: 0.75rem; }
+.empty-state h3 { font-size: 15px; font-weight: 600; color: var(--blue-900); margin-bottom: 6px; }
+.arch-footer { padding: 10px 16px; font-size: 11.5px; color: var(--gray-500); border-top: 1px solid var(--blue-100); }
+
+/* ───── PRINT ───── */
+.doc-print { display: none; }
+@media print {
+  body * { visibility: hidden; }
+  .doc-print, .doc-print * { visibility: visible; }
+  .doc-print {
+    display: block !important;
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    padding: 18mm 20mm 15mm 20mm;
+    transform-origin: top left;
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+    font-size: 16.1pt;
+    color: #111;
+    line-height: 1.45;
+  }
+  .doc-print-company { font-size: 29.4pt; font-weight: 700; margin-bottom: 1mm; }
+  .doc-print-address { font-size: 14.7pt; color: #333; }
+  .doc-print-phone   { font-size: 14.7pt; font-weight: 700; }
+  .doc-print-piva    { font-size: 14.7pt; color: #333; margin-bottom: 3mm; }
+  hr.doc-hr { border: none; border-top: 0.5pt solid #bbb; margin: 3mm 0; }
+  .doc-print-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 2mm; }
+  .doc-print-logo { height: 21mm; width: auto; object-fit: contain; }
+  .doc-print-meta    { margin-bottom: 6mm; display: flex; justify-content: space-between; align-items: flex-start; }
+  .doc-print-spett   { font-size: 14.7pt; color: #555; margin-bottom: 0.5mm; text-align: right; }
+  .doc-print-dest    { font-size: 16.8pt; font-weight: 700; text-align: right; }
+  .doc-print-dest-block { text-align: right; }
+  .doc-print-dateblock { font-size: 14.7pt; color: #333; }
+  .doc-print-oggetto { margin-top: 15mm; margin-bottom: 4mm; font-size: 16.1pt; }
+  .doc-print-oggetto strong { font-weight: 700; text-decoration: underline; }
+  .doc-print-intro  { margin-top: 15mm; margin-bottom: 3mm; }
+  .doc-print-giorno { font-weight: 700; margin-top: 10mm; margin-bottom: 4mm; }
+  .doc-print-table  { width: 100%; border-collapse: collapse; margin-bottom: 5mm; }
+  .doc-print-table td { vertical-align: top; padding: 1mm 0; font-size: 16.1pt; }
+  .doc-print-table td:first-child { width: 38mm; color: #444; }
+  .doc-print-saluti { margin-top: 24mm; margin-bottom: 6mm; }
+  .doc-print-firma  { font-weight: 700; font-size: 16.1pt; margin-top: 1mm; }
+  .doc-print-footer {
+    margin-top: 6mm;
+    padding-top: 2mm;
+    border-top: 0.5pt solid #999;
+    font-size: 9.5pt;
+    color: #444;
+    line-height: 1.35;
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  .doc-print-firma-block { display: flex; justify-content: flex-end; margin-top: 4mm; margin-right: -3mm; }
+  .doc-print-firma-inner { text-align: left; display: inline-block; }
+  .doc-print-firma-name  { font-weight: 700; font-size: 16.1pt; }
+  .doc-print-firma-svg   { display: block; margin: 0; }
+  @page { size: A4; margin: 0; }
+}
+
+/* ───── RUBRICA VIEW ───── */
+.rubrica-view {
+  max-width: 1000px;
+  margin: 2rem auto;
+  padding: 0 1.5rem 4rem;
+}
+.rubrica-heading {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  flex-wrap: wrap; gap: 12px; margin-bottom: 1.5rem;
+}
+.rubrica-heading h1 { font-family: 'Sora', sans-serif; font-size: 1.5rem; font-weight: 700; color: var(--blue-900); }
+.rubrica-heading p  { font-size: 13px; color: var(--gray-500); margin-top: 4px; }
+
+/* Upload drop zone */
+.drop-zone {
+  border: 2px dashed var(--blue-300, #7bb8f0);
+  border-radius: var(--radius);
+  background: var(--blue-50);
+  padding: 2rem 1.5rem;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 1.25rem;
+}
+.drop-zone:hover, .drop-zone.drag-over { background: var(--blue-100); border-color: var(--blue-500); }
+.drop-icon  { font-size: 2rem; margin-bottom: 8px; }
+.drop-label { font-size: 14px; font-weight: 600; color: var(--blue-700); margin-bottom: 4px; }
+.drop-sub   { font-size: 12px; color: var(--gray-500); }
+.drop-input { display: none; }
+.upload-hint {
+  font-size: 11.5px; color: var(--blue-700); background: var(--blue-100);
+  border: 1px solid var(--blue-200); border-radius: 6px;
+  padding: 8px 12px; margin-bottom: 1.25rem; line-height: 1.6;
+}
+.upload-hint strong { color: var(--blue-900); }
+
+/* Rubrica manual form */
+.rubrica-add-card { margin-bottom: 1.25rem; }
+
+/* Rubrica table */
+.rub-search-bar {
+  display: flex; gap: 10px; align-items: center;
+  margin-bottom: 1rem; flex-wrap: wrap;
+}
+.rub-search-bar input {
+  flex: 1; min-width: 200px;
+  font-family: 'Inter', sans-serif; font-size: 13px;
+  color: var(--gray-700); background: var(--blue-50);
+  border: 1.5px solid var(--blue-200); border-radius: 7px;
+  padding: 7px 11px; outline: none;
+  transition: border-color 0.15s;
+}
+.rub-search-bar input:focus { border-color: var(--blue-400); }
+.rub-count { font-size: 12px; color: var(--gray-500); white-space: nowrap; }
+
+.rub-table-card {
+  background: var(--white); border: 1px solid var(--blue-200);
+  border-radius: var(--radius); box-shadow: var(--shadow-sm); overflow: hidden;
+}
+.rub-table { width: 100%; min-width: 600px; border-collapse: collapse; font-size: 13px; }
+.rub-table thead th {
+  background: var(--blue-900); color: #fff;
+  font-size: 10.5px; font-weight: 700; letter-spacing: 0.09em;
+  text-transform: uppercase; padding: 10px 14px; text-align: left; white-space: nowrap;
+}
+.rub-table tbody tr { border-bottom: 1px solid var(--blue-100); transition: background 0.1s; }
+.rub-table tbody tr:last-child { border-bottom: none; }
+.rub-table tbody tr:hover { background: var(--blue-50); }
+.rub-table td { padding: 9px 14px; vertical-align: middle; }
+.rub-tag {
+  display: inline-block; padding: 2px 9px; border-radius: 20px;
+  font-size: 11px; font-weight: 600;
+  background: var(--blue-100); color: var(--blue-700);
+  border: 1px solid var(--blue-200);
+}
+.use-btn {
+  padding: 4px 11px; border-radius: 5px; font-size: 11px; font-weight: 600;
+  cursor: pointer; background: var(--blue-100); border: 1.5px solid var(--blue-200);
+  color: var(--blue-700); font-family: inherit; transition: all 0.15s;
+}
+.use-btn:hover { background: var(--blue-500); border-color: var(--blue-500); color: #fff; }
+
+/* Autocomplete dropdown on form */
+.ac-wrap { position: relative; }
+.ac-drop {
+  position: absolute; top: 100%; left: 0; right: 0; z-index: 200;
+  background: var(--white); border: 1.5px solid var(--blue-300, #7bb8f0);
+  border-radius: 8px; box-shadow: var(--shadow-md);
+  max-height: 220px; overflow-y: auto;
+  margin-top: 3px; display: none;
+}
+.ac-drop.open { display: block; }
+.ac-item {
+  padding: 9px 12px; font-size: 13px; cursor: pointer;
+  border-bottom: 1px solid var(--blue-50); color: var(--gray-700);
+  display: flex; flex-direction: column; gap: 2px;
+}
+.ac-item:last-child { border-bottom: none; }
+.ac-item:hover { background: var(--blue-50); }
+.ac-name  { font-weight: 600; color: var(--blue-900); }
+.ac-addr  { font-size: 11px; color: var(--gray-500); }
+
+
+/* ───── BACKUP VIEW ───── */
+.bak-view {
+  max-width: 820px; margin: 2rem auto; padding: 0 1.5rem 4rem;
+}
+.bak-heading { margin-bottom: 1.5rem; }
+.bak-heading h1 { font-family:'Sora',sans-serif; font-size:1.5rem; font-weight:700; color:var(--blue-900); }
+.bak-heading p  { font-size:13px; color:var(--gray-500); margin-top:4px; }
+.bak-grid { display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:1.5rem; }
+.bak-card {
+  background:var(--white); border:1px solid var(--blue-200);
+  border-radius:var(--radius); box-shadow:var(--shadow-sm);
+  padding:1.5rem; display:flex; flex-direction:column; gap:10px;
+}
+.bak-card-icon { font-size:2rem; }
+.bak-card-title { font-family:'Sora',sans-serif; font-size:1rem; font-weight:700; color:var(--blue-900); }
+.bak-card-desc  { font-size:12.5px; color:var(--gray-500); line-height:1.5; flex:1; }
+.bak-list {
+  background:var(--white); border:1px solid var(--blue-200);
+  border-radius:var(--radius); box-shadow:var(--shadow-sm); overflow:hidden;
+}
+.bak-list-header {
+  padding:12px 16px; background:var(--blue-50);
+  border-bottom:1px solid var(--blue-200);
+  font-size:12px; font-weight:700; color:var(--blue-700);
+  letter-spacing:0.08em; text-transform:uppercase;
+}
+.bak-item {
+  display:flex; align-items:center; justify-content:space-between;
+  padding:12px 16px; border-bottom:1px solid var(--blue-100);
+  gap:12px;
+}
+.bak-item:last-child { border-bottom:none; }
+.bak-item-left { display:flex; flex-direction:column; gap:2px; }
+.bak-item-name { font-size:13px; font-weight:600; color:var(--blue-900); }
+.bak-item-meta { font-size:11px; color:var(--gray-500); }
+.bak-item-actions { display:flex; gap:6px; }
+.bak-empty { text-align:center; padding:2rem; color:var(--gray-500); font-size:13px; }
+.counter-display {
+  background:linear-gradient(135deg,var(--blue-900),var(--blue-700));
+  border-radius:var(--radius); padding:1.2rem 1.5rem;
+  display:flex; align-items:center; gap:16px; margin-bottom:1.5rem;
+  color:#fff;
+}
+.counter-num  { font-family:'Sora',sans-serif; font-size:2.5rem; font-weight:700; line-height:1; }
+.counter-info { display:flex; flex-direction:column; gap:2px; }
+.counter-label { font-size:12px; opacity:0.7; text-transform:uppercase; letter-spacing:0.1em; }
+.counter-next  { font-size:14px; font-weight:600; }
+.rif-preview {
+  display:inline-block; padding:4px 12px; border-radius:20px;
+  background:var(--blue-100); color:var(--blue-700); font-weight:700;
+  font-size:13px; margin-top:2px;
+}
+
+
+/* ── Modal modifica ordine ── */
+.modal-overlay {
+  display:none; position:fixed; inset:0;
+  background:rgba(13,43,78,0.45); z-index:2000;
+  align-items:center; justify-content:center;
+}
+.modal-overlay.open { display:flex; }
+.modal-box {
+  background:var(--white); border-radius:12px;
+  box-shadow:0 16px 48px rgba(13,43,78,0.22);
+  width:min(720px,96vw); max-height:90vh;
+  overflow-y:auto; padding:1.75rem 1.75rem 1.5rem;
+  display:flex; flex-direction:column; gap:1rem;
+}
+.modal-header {
+  display:flex; align-items:center; justify-content:space-between;
+  padding-bottom:.75rem; border-bottom:1px solid var(--blue-200);
+}
+.modal-title { font-family:'Sora',sans-serif; font-size:1.1rem; font-weight:700; color:var(--blue-900); }
+.modal-close {
+  width:32px;height:32px;border-radius:50%;border:none;
+  background:var(--blue-50);color:var(--blue-700);cursor:pointer;
+  font-size:16px;display:flex;align-items:center;justify-content:center;
+}
+.modal-close:hover { background:var(--blue-100); }
+.modal-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.modal-field { display:flex; flex-direction:column; gap:4px; }
+.modal-field.full { grid-column:1/-1; }
+.modal-field label { font-size:11px; font-weight:600; color:var(--blue-700); text-transform:uppercase; letter-spacing:.04em; }
+.modal-field input, .modal-field textarea {
+  font-family:'Inter',sans-serif; font-size:13px; color:var(--gray-700);
+  background:var(--blue-50); border:1.5px solid var(--blue-200);
+  border-radius:7px; padding:7px 10px; outline:none; width:100%;
+  transition:border-color .15s;
+}
+.modal-field input:focus, .modal-field textarea:focus { border-color:var(--blue-400); }
+.modal-field textarea { min-height:60px; resize:vertical; }
+.modal-footer { display:flex; justify-content:flex-end; gap:8px; padding-top:.75rem; border-top:1px solid var(--blue-100); }
+
+
+/* ── Modal modifica ordine ── */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(13,43,78,.45);z-index:2000;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:var(--white,#fff);border-radius:12px;box-shadow:0 16px 48px rgba(13,43,78,.22);width:min(720px,96vw);max-height:90vh;overflow-y:auto;padding:1.75rem 1.75rem 1.5rem;display:flex;flex-direction:column;gap:1rem;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:.75rem;border-bottom:1px solid var(--blue-200,#DAEEFF);}
+.modal-title{font-family:inherit;font-size:1.1rem;font-weight:700;color:var(--blue-900,#0D2B4E);}
+.modal-close{width:32px;height:32px;border-radius:50%;border:none;background:var(--blue-50,#EEF5FF);color:var(--blue-700,#1A4F8A);cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center;}
+.modal-close:hover{background:var(--blue-100,#DAEEFF);}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-field{display:flex;flex-direction:column;gap:4px;}
+.modal-field.full{grid-column:1/-1;}
+.modal-field label{font-size:11px;font-weight:600;color:var(--blue-700,#1A4F8A);text-transform:uppercase;letter-spacing:.04em;}
+.modal-field input,.modal-field textarea{font-family:inherit;font-size:13px;color:#374151;background:#F7F9FC;border:1.5px solid #D1DFF0;border-radius:7px;padding:7px 10px;outline:none;width:100%;transition:border-color .15s;}
+.modal-field input:focus,.modal-field textarea:focus{border-color:#1A4F8A;}
+.modal-field textarea{min-height:60px;resize:vertical;}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;padding-top:.75rem;border-top:1px solid #EEF5FF;}
+
+
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(13,43,78,.45);z-index:2000;align-items:center;justify-content:center;}
+.modal-overlay.open{display:flex;}
+.modal-box{background:#fff;border-radius:12px;box-shadow:0 16px 48px rgba(13,43,78,.22);width:min(720px,96vw);max-height:90vh;overflow-y:auto;padding:1.75rem;display:flex;flex-direction:column;gap:1rem;}
+.modal-header{display:flex;align-items:center;justify-content:space-between;padding-bottom:.75rem;border-bottom:1px solid #DAEEFF;}
+.modal-title{font-size:1.1rem;font-weight:700;color:#0D2B4E;}
+.modal-close{width:32px;height:32px;border-radius:50%;border:none;background:#EEF5FF;color:#1A4F8A;cursor:pointer;font-size:16px;}
+.modal-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;}
+.modal-field{display:flex;flex-direction:column;gap:4px;}
+.modal-field.full{grid-column:1/-1;}
+.modal-field label{font-size:11px;font-weight:600;color:#1A4F8A;text-transform:uppercase;letter-spacing:.04em;}
+.modal-field input,.modal-field textarea{font-family:inherit;font-size:13px;color:#374151;background:#F7F9FC;border:1.5px solid #D1DFF0;border-radius:7px;padding:7px 10px;outline:none;width:100%;}
+.modal-field input:focus,.modal-field textarea:focus{border-color:#1A4F8A;}
+.modal-field textarea{min-height:60px;resize:vertical;}
+.modal-footer{display:flex;justify-content:flex-end;gap:8px;padding-top:.75rem;border-top:1px solid #EEF5FF;}
+.modal-prezzo-wrap{display:flex;align-items:center;gap:6px;}
+.modal-prezzo-wrap .euro-sym{font-size:14px;font-weight:700;color:#1A4F8A;}
+.modal-prezzo-wrap input{flex:1;}
+
+
+/* ── Badge aggiornato ── */
+.badge-updated { 
+  display:inline-flex; align-items:center; justify-content:center;
+  width:22px; height:22px; border-radius:50%;
+  background:#dcfce7; color:#16a34a;
+  font-size:13px; font-weight:700;
+  border:1.5px solid #86efac;
+  animation: popIn .3s ease;
+}
+@keyframes popIn { 0%{transform:scale(0);opacity:0} 70%{transform:scale(1.2)} 100%{transform:scale(1);opacity:1} }
+
+
+.arch-table td:last-child {
+  max-width: none;
+  overflow: visible;
+  white-space: nowrap;
+  width: 160px;
+  min-width: 160px;
+}
+
+</style>
+</head>
+<body>
+
+<!-- TOP NAV -->
+<nav class="topnav">
+  <div class="nav-brand">
+    <div class="nav-icon">📋</div>
+    <div>
+      <div class="nav-title">Ordine di Servizio</div>
+      <div class="nav-sub">Gestionale Documenti</div>
+    </div>
+  </div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" id="tab-form" onclick="showView('form', this)">
+      ✏️ Nuovo Ordine
+    </button>
+    <button class="nav-tab" id="tab-arch" onclick="showView('arch', this)">
+      🗂 Archivio <span class="nav-badge" id="arch-badge">0</span>
+    </button>
+    <button class="nav-tab" id="tab-rub" onclick="showView('rub', this)">
+      🚛 Trasportatori <span class="nav-badge" id="rub-badge" style="background:var(--blue-700)">0</span>
+    </button>
+    <button class="nav-tab" id="tab-prod" onclick="showView('prod', this)">
+      🏭 Produttori <span class="nav-badge" id="prod-badge" style="background:var(--blue-700)">0</span>
+    </button>
+    <button class="nav-tab" id="tab-imp" onclick="showView('imp', this)">
+      🏗 Impianti <span class="nav-badge" id="imp-badge" style="background:var(--blue-700)">0</span>
+    </button>
+    <button class="nav-tab" id="tab-cont" onclick="showView('cont', this)">
+      📋 Contratti <span class="nav-badge" id="cont-badge" style="background:var(--blue-700)">0</span>
+    </button>
+    <button class="nav-tab" id="tab-bak" onclick="showView('bak', this)">
+      💾 Backup
+    </button>
+  </div>
+</nav>
+
+<!-- ═══════════════ FORM VIEW ═══════════════ -->
+<div id="view-form" class="view active">
+<div class="form-view">
+  <div class="form-heading">
+    <h1>Nuovo Ordine di Servizio</h1>
+    <p>Compila i campi e salva in archivio oppure stampa direttamente il documento.</p>
+  </div>
+
+  <!-- Mittente — scelta intestazione -->
+  <input type="hidden" id="m-nome">
+  <input type="hidden" id="m-indirizzo">
+  <input type="hidden" id="m-tel">
+  <input type="hidden" id="m-piva">
+
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🏢</div>
+      <span class="card-title">Intestazione documento</span>
+    </div>
+    <div class="card-body">
+      <div class="fg fg-2">
+        <div class="field">
+          <label style="font-size:13px">Società emittente <span class="req">*</span></label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:space-between">
+            <label style="display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:10px 16px;border-radius:7px;border:2px solid #1A4F8A;background:#1A4F8A;flex:1;text-align:center" id="lbl-cr">
+              <input type="radio" name="intestazione" value="cr" checked onchange="cambiaIntestazione(this.value)" style="accent-color:var(--blue-500)">
+              <span style="font-weight:700;font-size:13px;color:#fff">CENTRO RISORSE S.p.A.</span>
+            </label>
+            <label style="display:flex;align-items:center;justify-content:center;gap:6px;cursor:pointer;padding:10px 16px;border-radius:7px;border:2px solid #1A4F8A;background:#1A4F8A;flex:1;text-align:center" id="lbl-area">
+              <input type="radio" name="intestazione" value="area" onchange="cambiaIntestazione(this.value)" style="accent-color:var(--blue-500)">
+              <span style="font-weight:700;font-size:13px;color:#fff">AREA S.r.l.</span>
+            </label>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Documento + Destinatario -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">📄</div>
+      <span class="card-title">Dati Documento &amp; Destinatario</span>
+    </div>
+    <div class="card-body">
+      <div class="fg fg-3">
+        <div class="field fg-span2">
+          <label>Destinatario (Vettore) <span class="req">*</span></label>
+          <div class="ac-wrap">
+            <input id="d-nome" type="text" value="" placeholder="Digita o scegli dalla rubrica..." oninput="acSearch(); aggiornaPrezzoContratto()" autocomplete="off">
+            <div class="ac-drop" id="ac-drop"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Indirizzo destinatario</label>
+          <input id="d-indirizzo" type="text" placeholder="Compilato auto dalla rubrica">
+        </div>
+        <div class="field">
+          <label>P.IVA destinatario</label>
+          <input id="d-piva" type="text" placeholder="Compilato auto dalla rubrica">
+        </div>
+        <div class="field">
+          <label>Data documento <span class="req">*</span></label>
+          <input id="doc-data" type="date" value="">
+        </div>
+        <div class="field">
+          <label>Città emissione</label>
+          <input id="doc-citta" type="text" value="Motta di Livenza" readonly style="background:var(--blue-50);color:var(--blue-700);cursor:default">
+        </div>
+        <div class="field">
+          <label>Ns. Riferimento</label>
+          <input id="doc-rif" type="text" placeholder="Es. 2026/0001">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Servizio -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🚛</div>
+      <span class="card-title">Dettagli Servizio</span>
+    </div>
+    <div class="card-body">
+      <div class="fg fg-2">
+        <div class="field fg-span2">
+          <label>Giorno e modalità di esecuzione <span class="req">*</span></label>
+          <div id="giorno-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px"></div>
+          <button type="button" onclick="aggiungiGiorno()" style="margin-top:2px;padding:8px 14px;border-radius:8px;border:1.5px solid #b8d8f7;background:#daeeff;color:#0d2b4e;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">
+            + Aggiungi giorno / viaggio
+          </button>
+        </div>
+        <div class="field">
+          <label>Dalla Ditta <span class="req">*</span></label>
+          <div class="ac-wrap">
+            <input id="s-ditta" type="text" value="" placeholder="Digita o scegli dalla rubrica produttori..." oninput="acSearchProd(); aggiornaPrezzoContratto()" autocomplete="off">
+            <div class="ac-drop" id="ac-drop-prod"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Sede della ditta</label>
+          <input id="s-sede" type="text" value="" placeholder="Compilato auto dalla rubrica">
+        </div>
+        <div class="field fg-span2">
+          <label>Note</label>
+          <textarea id="s-materiale" rows="2"></textarea>
+        </div>
+        <div class="field fg-span2">
+          <label>Codici rifiuto</label>
+          <div id="codici-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px"></div>
+          <button type="button" onclick="aggiungiCodice()" style="margin-top:4px;padding:8px 14px;border-radius:8px;border:1.5px solid #b8d8f7;background:#daeeff;color:#0d2b4e;font-family:inherit;font-size:13px;font-weight:600;cursor:pointer;">
+            + Aggiungi codice rifiuto
+          </button>
+        </div>
+        <div class="field">
+          <label>A mezzo <span class="req">*</span></label>
+          <input id="s-mezzo" type="text" value="" placeholder="Es. bilico-pianale" oninput="aggiornaPrezzoContratto()">
+        </div>
+        <div class="field">
+          <label>All'impianto</label>
+          <div class="ac-wrap">
+            <input id="s-impianto" type="text" value="CENTRO RISORSE S.p.A." placeholder="Digita o scegli dalla rubrica impianti..." oninput="acSearchImp(); aggiornaPrezzoContratto()" autocomplete="off">
+            <div class="ac-drop" id="ac-drop-imp"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Sede impianto</label>
+          <input id="s-impiantosede" type="text" value="Via Lazio, 48 - MOTTA DI LIVENZA TV" placeholder="Compilato auto dalla rubrica">
+        </div>
+        <div class="field">
+          <label>Prezzo concordato <span class="req">*</span> <span id="prezzo-hint" style="font-size:10px;color:var(--blue-500);font-weight:400"></span></label>
+          <div style="display:flex;align-items:center;gap:6px">
+            <span style="font-size:14px;font-weight:700;color:var(--blue-700,#1A4F8A)">€</span>
+            <input id="s-prezzo" type="text" value="" placeholder="350,00 /Viaggio + IVA" style="flex:1">
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Trasporto organizzato da -->
+  <div class="card">
+    <div class="card-header">
+      <div class="card-icon">🚛</div>
+      <span class="card-title">Trasporto organizzato da</span>
+    </div>
+    <div class="card-body">
+      <div class="fg fg-2">
+        <div class="field fg-span2">
+          <label>Trasporto organizzato da</label>
+          <input id="f-nome" type="text" value="" placeholder="Es. CENTRO RISORSE S.p.A.">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Azioni -->
+  <div class="btn-row">
+    <button class="btn btn-ghost" onclick="resetForm()">↺ Azzera</button>
+    <button class="btn btn-secondary" onclick="stampaPDF()">🖨 Stampa / PDF</button>
+    <button class="btn btn-green" onclick="salvaInArchivio()">✚ Salva in Archivio</button>
+    <button class="btn" onclick="debugPrezzo()" style="background:#ff9800;color:#fff;font-size:12px">🔍 Test prezzo</button>
+  </div>
+</div>
+</div>
+
+<!-- ═══════════════ ARCHIVE VIEW ═══════════════ -->
+<div id="view-arch" class="view">
+<div class="arch-view">
+  <div class="arch-heading">
+    <div>
+      <h1>Archivio Ordini</h1>
+      <p>Tutti gli ordini salvati — filtrabili ed esportabili.</p>
+    </div>
+    <div class="arch-actions">
+      <button class="btn btn-ghost btn-sm" onclick="exportCSV()">⬇ CSV</button>
+      <button class="btn btn-secondary btn-sm" onclick="exportExcel()">⬇ Excel</button>
+      <button class="btn btn-red btn-sm" onclick="clearAll()">✕ Svuota archivio</button>
+    </div>
+  </div>
+
+  <!-- KPI -->
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Ordini totali</div>
+      <div class="kpi-value" id="kpi-total">0</div>
+      <div class="kpi-sub">in archivio</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Valore cumulato</div>
+      <div class="kpi-value" id="kpi-value" style="font-size:1.4rem">€ 0</div>
+      <div class="kpi-sub">somma prezzi</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Ditte distinte</div>
+      <div class="kpi-value" id="kpi-ditte">0</div>
+      <div class="kpi-sub">mittenti unici</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Mezzo più usato</div>
+      <div class="kpi-value" id="kpi-mezzo" style="font-size:1rem;padding-top:6px">—</div>
+      <div class="kpi-sub">tipo trasporto</div>
+    </div>
+  </div>
+
+  <!-- Filtri -->
+  <div class="filter-bar">
+    <input type="text" id="f-search" placeholder="🔍 Cerca ditta, rif., materiale, mezzo..." oninput="renderTable()">
+    <select id="f-mezzo-filter" onchange="renderTable()"><option value="">Tutti i mezzi</option></select>
+    <input type="date" id="f-date-from" onchange="renderTable()" title="Da data">
+    <input type="date" id="f-date-to"   onchange="renderTable()" title="A data">
+    <button class="btn btn-ghost btn-sm" onclick="clearFilters()">✕ Azzera</button>
+  </div>
+
+  <!-- Tabella -->
+  <div class="table-card">
+    <!-- Barra di scorrimento superiore -->
+    <div id="arch-scroll-top" style="overflow-x:auto;overflow-y:hidden;height:16px;margin-bottom:2px">
+      <div id="arch-scroll-phantom" style="height:1px"></div>
+    </div>
+    <div id="arch-scroll-main" style="overflow-x:auto">
+      <table class="arch-table" id="arch-table">
+        <thead>
+          <tr>
+            <th onclick="sortBy('data')"        id="th-data">Data <span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('rif')"         id="th-rif">Ns. Rif. <span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('destinatario')" id="th-destinatario">Vettore <span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('ditta')"       id="th-ditta">Dalla Ditta <span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('materiale')"   id="th-materiale">Note <span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('codici')"      id="th-codici">Cod. Rifiuto <span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('mezzo')"       id="th-mezzo">Mezzo <span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('prezzoNum')"   id="th-prezzoNum">Prezzo <span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('impianto')"    id="th-impianto">Impianto <span class="sort-icon">↕</span></th>
+            <th onclick="sortBy('trasportoOrg')"  id="th-trasportoOrg">Trasporto org. da <span class="sort-icon">↕</span></th>
+            <th style="width:50px">🖨</th>
+          </tr>
+        </thead>
+        <tbody id="arch-tbody">
+          <tr><td colspan="11">
+            <div class="empty-state">
+              <div class="empty-icon">📋</div>
+              <h3>Nessun ordine ancora salvato</h3>
+              <p>Compila il modulo e clicca <strong>Salva in Archivio</strong>.</p>
+            </div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div><!-- /arch-scroll-main -->
+    <div class="arch-footer" id="arch-count">0 ordini</div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ RUBRICA VIEW ═══════════════ -->
+<div id="view-rub" class="view">
+<div class="rubrica-view">
+  <div class="rubrica-heading">
+    <div>
+      <h1>Rubrica Trasportatori</h1>
+      <p>Gestisci l'anagrafica dei vettori/trasportatori. Usa i contatti nel form con un click.</p>
+    </div>
+    <div class="arch-actions">
+      <button class="btn btn-ghost btn-sm" onclick="esportaRubrica()">⬇ Esporta Excel</button>
+      <button class="btn btn-red btn-sm" onclick="svuotaRubrica()">✕ Svuota rubrica</button>
+    </div>
+  </div>
+
+  <!-- Upload Excel -->
+  <div class="card rubrica-add-card">
+    <div class="card-header">
+      <div class="card-icon">📤</div>
+      <span class="card-title">Importa da file Excel</span>
+    </div>
+    <div class="card-body">
+      <div class="upload-hint">
+        Il file Excel deve avere una riga di intestazione con le colonne (l'ordine non importa):<br>
+        <strong>ragione_sociale</strong> &nbsp;·&nbsp; <strong>indirizzo</strong> &nbsp;·&nbsp; <strong>citta</strong> &nbsp;·&nbsp; <strong>cap</strong> &nbsp;·&nbsp; <strong>provincia</strong> &nbsp;·&nbsp; <strong>piva</strong> &nbsp;·&nbsp; <strong>telefono</strong> &nbsp;·&nbsp; <strong>email</strong><br>
+        Sono obbligatorie solo <strong>ragione_sociale</strong> e <strong>indirizzo</strong>. I duplicati vengono ignorati.
+      </div>
+      <div class="drop-zone" id="drop-zone" onclick="document.getElementById('file-input').click()"
+           ondragover="event.preventDefault();this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="onFileDrop(event)">
+        <div class="drop-icon">📂</div>
+        <div class="drop-label">Trascina qui il file Excel oppure clicca per selezionarlo</div>
+        <div class="drop-sub">.xlsx / .xls — max 5 MB</div>
+      </div>
+      <input type="file" id="file-input" class="drop-input" accept=".xlsx,.xls" onchange="onFileSelect(event)">
+      <div id="import-status" style="font-size:13px;color:var(--gray-500);margin-top:-8px;display:none"></div>
+    </div>
+  </div>
+
+  <!-- Aggiungi manualmente -->
+  <div class="card rubrica-add-card">
+    <div class="card-header">
+      <div class="card-icon">➕</div>
+      <span class="card-title">Aggiungi manualmente</span>
+    </div>
+    <div class="card-body">
+      <div class="fg fg-3">
+        <div class="field fg-span2">
+          <label>Ragione Sociale <span class="req">*</span></label>
+          <input id="rub-nome" type="text" placeholder="Es. AUTOTRASPORTI BIANCHI S.r.l.">
+        </div>
+        <div class="field">
+          <label>P.IVA</label>
+          <input id="rub-piva" type="text" placeholder="Es. 01234567890">
+        </div>
+        <div class="field fg-span2">
+          <label>Indirizzo</label>
+          <input id="rub-indirizzo" type="text" placeholder="Es. Via Roma, 10">
+        </div>
+        <div class="field">
+          <label>CAP</label>
+          <input id="rub-cap" type="text" placeholder="Es. 31045" maxlength="5">
+        </div>
+        <div class="field fg-span2">
+          <label>Città</label>
+          <input id="rub-citta" type="text" placeholder="Es. Motta di Livenza">
+        </div>
+        <div class="field">
+          <label>Provincia</label>
+          <input id="rub-prov" type="text" placeholder="Es. TV" maxlength="2">
+        </div>
+        <div class="field">
+          <label>Telefono</label>
+          <input id="rub-tel" type="text" placeholder="Es. 0422/503711">
+        </div>
+        <div class="field fg-span2">
+          <label>Email</label>
+          <input id="rub-email" type="email" placeholder="Es. info@azienda.it">
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:1rem">
+        <button class="btn btn-ghost" onclick="svuotaFormRub()">↺ Azzera</button>
+        <button class="btn btn-primary" onclick="aggiungiContatto()">➕ Aggiungi contatto</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista rubrica -->
+  <div class="rub-search-bar">
+    <input type="text" id="rub-search" placeholder="🔍 Cerca per nome, città, P.IVA..." oninput="renderRubrica()">
+    <span class="rub-count" id="rub-count">0 contatti</span>
+  </div>
+  <div class="rub-table-card">
+    <div style="overflow-x:auto">
+      <table class="rub-table">
+        <thead>
+          <tr>
+            <th>Ragione Sociale</th>
+            <th>Indirizzo completo</th>
+            <th>P.IVA</th>
+            <th>Telefono</th>
+            <th>Email</th>
+            <th>Usa</th>
+            <th>Mod.</th>
+            <th></th>
+            <th>Del.</th>
+          </tr>
+        </thead>
+        <tbody id="rub-tbody">
+          <tr><td colspan="7">
+            <div class="empty-state">
+              <div class="empty-icon">👥</div>
+              <h3>Rubrica vuota</h3>
+              <p>Aggiungi contatti manualmente o importa un file Excel.</p>
+            </div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="arch-footer" id="rub-footer">0 contatti</div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ BACKUP VIEW ═══════════════ -->
+<div id="view-bak" class="view">
+<div class="bak-view">
+  <div class="bak-heading">
+    <h1>💾 Backup &amp; Numerazione</h1>
+    <p>Gestisci il contatore progressivo degli ordini e scarica/ripristina il database completo.</p>
+  </div>
+
+  <!-- Contatore -->
+  <div class="counter-display">
+    <div class="counter-num" id="bak-counter-num">0</div>
+    <div class="counter-info">
+      <span class="counter-label">Ordini emessi quest'anno (<span id="bak-year"></span>)</span>
+      <span class="counter-next">Prossimo riferimento: <span class="rif-preview" id="bak-next-rif">—</span></span>
+    </div>
+  </div>
+
+  <!-- Azioni principali -->
+  <div class="bak-grid">
+    <div class="bak-card">
+      <div class="bak-card-icon">⬇️</div>
+      <div class="bak-card-title">Esporta backup completo</div>
+      <div class="bak-card-desc">Scarica un file JSON con l'intero database: ordini, rubrica e contatore progressivo. Conservalo come copia di sicurezza.</div>
+      <button class="btn btn-primary" onclick="esportaBackup()">⬇ Scarica backup .json</button>
+    </div>
+    <div class="bak-card">
+      <div class="bak-card-icon">⬆️</div>
+      <div class="bak-card-title">Ripristina da backup</div>
+      <div class="bak-card-desc">Carica un file di backup precedentemente esportato. I dati attuali verranno sostituiti dopo conferma.</div>
+      <button class="btn btn-secondary" onclick="document.getElementById('bak-file').click()">⬆ Carica file backup</button>
+      <input type="file" id="bak-file" accept=".json" style="display:none" onchange="ripristinaBackup(event)">
+    </div>
+    <div class="bak-card">
+      <div class="bak-card-icon">🔄</div>
+      <div class="bak-card-title">Reset contatore anno</div>
+      <div class="bak-card-desc">Azzera il progressivo al cambio anno, ripartendo da 1. Il prefisso anno si aggiorna automaticamente.</div>
+      <button class="btn btn-ghost" onclick="resetContatore()">🔄 Reset contatore</button>
+    </div>
+    <div class="bak-card">
+      <div class="bak-card-icon">✏️</div>
+      <div class="bak-card-title">Correggi contatore</div>
+      <div class="bak-card-desc">Imposta manualmente il prossimo numero sequenziale, ad esempio per allinearlo a un registro precedente.</div>
+      <div style="display:flex;gap:8px;align-items:center">
+        <input id="bak-manual-num" type="number" min="1" step="1" placeholder="Es. 42"
+          style="width:100px;padding:7px 10px;border:1.5px solid var(--blue-200);border-radius:7px;font-family:inherit;font-size:14px;font-weight:600;color:var(--blue-900);background:var(--blue-50)">
+        <button class="btn btn-secondary btn-sm" onclick="impostaContatore()">Applica</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Storico backup auto-save -->
+  <div class="bak-list">
+    <div class="bak-list-header">📋 Storico backup automatici (ultimi 5 salvataggi)</div>
+    <div id="bak-history-list"><div class="bak-empty">Nessun backup automatico ancora creato. I backup vengono generati ad ogni salvataggio ordine.</div></div>
+  </div>
+
+</div>
+</div>
+
+
+<!-- ═══════════════ RUBRICA PRODUTTORI VIEW ═══════════════ -->
+<div id="view-prod" class="view">
+<div class="rubrica-view">
+  <div class="rubrica-heading">
+    <div>
+      <h1>Rubrica Produttori</h1>
+      <p>Gestisci l'anagrafica delle ditte produttrici/mittenti. Usa i contatti nel form con un click.</p>
+    </div>
+    <div class="arch-actions">
+      <button class="btn btn-ghost btn-sm" onclick="esportaRubricaProd()">⬇ Esporta Excel</button>
+      <button class="btn btn-red btn-sm" onclick="svuotaRubricaProd()">✕ Svuota rubrica</button>
+    </div>
+  </div>
+
+  <!-- Upload Excel -->
+  <div class="card rubrica-add-card">
+    <div class="card-header">
+      <div class="card-icon">📤</div>
+      <span class="card-title">Importa da file Excel</span>
+    </div>
+    <div class="card-body">
+      <div class="upload-hint">
+        Il file Excel deve avere una riga di intestazione con le colonne (l'ordine non importa):<br>
+        <strong>ragione_sociale</strong> &nbsp;·&nbsp; <strong>indirizzo</strong> &nbsp;·&nbsp; <strong>citta</strong> &nbsp;·&nbsp; <strong>cap</strong> &nbsp;·&nbsp; <strong>provincia</strong> &nbsp;·&nbsp; <strong>piva</strong> &nbsp;·&nbsp; <strong>telefono</strong> &nbsp;·&nbsp; <strong>email</strong><br>
+        Sono obbligatorie solo <strong>ragione_sociale</strong> e <strong>indirizzo</strong>. I duplicati vengono ignorati.
+      </div>
+      <div class="drop-zone" id="drop-zone-prod" onclick="document.getElementById('file-input-prod').click()"
+           ondragover="event.preventDefault();this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="onFileDropProd(event)">
+        <div class="drop-icon">📂</div>
+        <div class="drop-label">Trascina qui il file Excel oppure clicca per selezionarlo</div>
+        <div class="drop-sub">.xlsx / .xls — max 5 MB</div>
+      </div>
+      <input type="file" id="file-input-prod" class="drop-input" accept=".xlsx,.xls" onchange="onFileSelectProd(event)">
+      <div id="import-status-prod" style="font-size:13px;color:var(--gray-500);margin-top:-8px;display:none"></div>
+    </div>
+  </div>
+
+  <!-- Aggiungi manualmente -->
+  <div class="card rubrica-add-card">
+    <div class="card-header">
+      <div class="card-icon">➕</div>
+      <span class="card-title">Aggiungi manualmente</span>
+    </div>
+    <div class="card-body">
+      <div class="fg fg-3">
+        <div class="field fg-span2">
+          <label>Ragione Sociale <span class="req">*</span></label>
+          <input id="prod-nome" type="text" placeholder="Es. SIRMAN Spa">
+        </div>
+        <div class="field">
+          <label>P.IVA</label>
+          <input id="prod-piva" type="text" placeholder="Es. 01234567890">
+        </div>
+        <div class="field fg-span2">
+          <label>Indirizzo</label>
+          <input id="prod-indirizzo" type="text" placeholder="Es. Via dell'Industria, 9/11">
+        </div>
+        <div class="field">
+          <label>CAP</label>
+          <input id="prod-cap" type="text" placeholder="Es. 35010" maxlength="5">
+        </div>
+        <div class="field fg-span2">
+          <label>Città</label>
+          <input id="prod-citta" type="text" placeholder="Es. Curtarolo">
+        </div>
+        <div class="field">
+          <label>Provincia</label>
+          <input id="prod-prov" type="text" placeholder="Es. PD" maxlength="2">
+        </div>
+        <div class="field">
+          <label>Telefono</label>
+          <input id="prod-tel" type="text" placeholder="Es. 049/123456">
+        </div>
+        <div class="field fg-span2">
+          <label>Email</label>
+          <input id="prod-email" type="email" placeholder="Es. info@azienda.it">
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:1rem">
+        <button class="btn btn-ghost" onclick="svuotaFormProd()">↺ Azzera</button>
+        <button class="btn btn-primary" onclick="aggiungiProduttore()">➕ Aggiungi produttore</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista rubrica produttori -->
+  <div class="rub-search-bar">
+    <input type="text" id="prod-search" placeholder="🔍 Cerca per nome, città, P.IVA..." oninput="renderRubricaProd()">
+    <span class="rub-count" id="prod-count">0 produttori</span>
+  </div>
+  <div class="rub-table-card">
+    <div style="overflow-x:auto">
+      <table class="rub-table">
+        <thead>
+          <tr>
+            <th>Ragione Sociale</th>
+            <th>Indirizzo completo</th>
+            <th>P.IVA</th>
+            <th>Telefono</th>
+            <th>Email</th>
+            <th>Usa</th>
+            <th>Mod.</th>
+            <th></th>
+            <th>Del.</th>
+          </tr>
+        </thead>
+        <tbody id="prod-tbody">
+          <tr><td colspan="8">
+            <div class="empty-state">
+              <div class="empty-icon">🏭</div>
+              <h3>Rubrica vuota</h3>
+              <p>Aggiungi produttori manualmente o importa un file Excel.</p>
+            </div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="arch-footer" id="prod-footer">0 produttori</div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ RUBRICA IMPIANTI VIEW ═══════════════ -->
+<div id="view-imp" class="view">
+<div class="rubrica-view">
+  <div class="rubrica-heading">
+    <div>
+      <h1>Rubrica Impianti</h1>
+      <p>Gestisci l'anagrafica degli impianti di destinazione. Usa i contatti nel form con un click.</p>
+    </div>
+    <div class="arch-actions">
+      <button class="btn btn-ghost btn-sm" onclick="esportaRubricaImp()">⬇ Esporta Excel</button>
+      <button class="btn btn-red btn-sm" onclick="svuotaRubricaImp()">✕ Svuota rubrica</button>
+    </div>
+  </div>
+
+  <!-- Upload Excel -->
+  <div class="card rubrica-add-card">
+    <div class="card-header">
+      <div class="card-icon">📤</div>
+      <span class="card-title">Importa da file Excel</span>
+    </div>
+    <div class="card-body">
+      <div class="upload-hint">
+        Il file Excel deve avere una riga di intestazione con le colonne (l'ordine non importa):<br>
+        <strong>ragione_sociale</strong> &nbsp;·&nbsp; <strong>indirizzo</strong> &nbsp;·&nbsp; <strong>citta</strong> &nbsp;·&nbsp; <strong>cap</strong> &nbsp;·&nbsp; <strong>provincia</strong> &nbsp;·&nbsp; <strong>piva</strong> &nbsp;·&nbsp; <strong>telefono</strong> &nbsp;·&nbsp; <strong>email</strong><br>
+        Sono obbligatorie solo <strong>ragione_sociale</strong> e <strong>indirizzo</strong>. I duplicati vengono ignorati.
+      </div>
+      <div class="drop-zone" id="drop-zone-imp" onclick="document.getElementById('file-input-imp').click()"
+           ondragover="event.preventDefault();this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="onFileDropImp(event)">
+        <div class="drop-icon">📂</div>
+        <div class="drop-label">Trascina qui il file Excel oppure clicca per selezionarlo</div>
+        <div class="drop-sub">.xlsx / .xls — max 5 MB</div>
+      </div>
+      <input type="file" id="file-input-imp" class="drop-input" accept=".xlsx,.xls" onchange="onFileSelectImp(event)">
+      <div id="import-status-imp" style="font-size:13px;color:var(--gray-500);margin-top:-8px;display:none"></div>
+    </div>
+  </div>
+
+  <!-- Aggiungi manualmente -->
+  <div class="card rubrica-add-card">
+    <div class="card-header">
+      <div class="card-icon">➕</div>
+      <span class="card-title">Aggiungi manualmente</span>
+    </div>
+    <div class="card-body">
+      <div class="fg fg-3">
+        <div class="field fg-span2">
+          <label>Ragione Sociale <span class="req">*</span></label>
+          <input id="imp-nome" type="text" placeholder="Es. CENTRO RISORSE S.p.A.">
+        </div>
+        <div class="field">
+          <label>P.IVA</label>
+          <input id="imp-piva" type="text" placeholder="Es. 00584180269">
+        </div>
+        <div class="field fg-span2">
+          <label>Indirizzo</label>
+          <input id="imp-indirizzo" type="text" placeholder="Es. Via Lazio, 48">
+        </div>
+        <div class="field">
+          <label>CAP</label>
+          <input id="imp-cap" type="text" placeholder="Es. 31045" maxlength="5">
+        </div>
+        <div class="field fg-span2">
+          <label>Città</label>
+          <input id="imp-citta" type="text" placeholder="Es. Motta di Livenza">
+        </div>
+        <div class="field">
+          <label>Provincia</label>
+          <input id="imp-prov" type="text" placeholder="Es. TV" maxlength="2">
+        </div>
+        <div class="field">
+          <label>Telefono</label>
+          <input id="imp-tel" type="text" placeholder="Es. 0422/503711">
+        </div>
+        <div class="field fg-span2">
+          <label>Email</label>
+          <input id="imp-email" type="email" placeholder="Es. info@impianto.it">
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:1rem">
+        <button class="btn btn-ghost" onclick="svuotaFormImp()">↺ Azzera</button>
+        <button class="btn btn-primary" onclick="aggiungiImpianto()">➕ Aggiungi impianto</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista rubrica impianti -->
+  <div class="rub-search-bar">
+    <input type="text" id="imp-search" placeholder="🔍 Cerca per nome, città, P.IVA..." oninput="renderRubricaImp()">
+    <span class="rub-count" id="imp-count">0 impianti</span>
+  </div>
+  <div class="rub-table-card">
+    <div style="overflow-x:auto">
+      <table class="rub-table">
+        <thead>
+          <tr>
+            <th>Ragione Sociale</th>
+            <th>Indirizzo completo</th>
+            <th>P.IVA</th>
+            <th>Telefono</th>
+            <th>Email</th>
+            <th>Usa</th>
+            <th>Mod.</th>
+            <th></th>
+            <th>Del.</th>
+          </tr>
+        </thead>
+        <tbody id="imp-tbody">
+          <tr><td colspan="7">
+            <div class="empty-state">
+              <div class="empty-icon">🏗</div>
+              <h3>Rubrica vuota</h3>
+              <p>Aggiungi impianti manualmente o importa un file Excel.</p>
+            </div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="arch-footer" id="imp-footer">0 impianti</div>
+  </div>
+</div>
+</div>
+
+
+<!-- ═══════════════ CONTRATTI VIEW ═══════════════ -->
+<div id="view-cont" class="view">
+<div class="rubrica-view">
+  <div class="rubrica-heading">
+    <div>
+      <h1>Contratti</h1>
+      <p>Carica un file Excel con i contratti: il prezzo verrà inserito automaticamente nel modulo quando scegli il vettore.</p>
+    </div>
+    <div class="arch-actions">
+      <button class="btn btn-red btn-sm" onclick="svuotaContratti()">✕ Svuota contratti</button>
+    </div>
+  </div>
+
+  <!-- Upload Excel -->
+  <div class="card rubrica-add-card">
+    <div class="card-header">
+      <div class="card-icon">📤</div>
+      <span class="card-title">Importa contratti da Excel</span>
+    </div>
+    <div class="card-body">
+      <div class="upload-hint">
+        Il file Excel deve avere una riga di intestazione con almeno queste colonne:<br>
+        <strong>vettore</strong> (o: trasportatore, destinatario, nome) &nbsp;·&nbsp;
+        <strong>prezzo</strong> (o: tariffa, importo, costo)<br>
+        Colonne opzionali: <strong>note</strong>, <strong>validita</strong>, <strong>tipo_servizio</strong><br>
+        I duplicati (stesso vettore) vengono aggiornati automaticamente.
+      </div>
+      <div class="drop-zone" id="drop-zone-cont"
+           onclick="document.getElementById('file-input-cont').click()"
+           ondragover="event.preventDefault();this.classList.add('drag-over')"
+           ondragleave="this.classList.remove('drag-over')"
+           ondrop="onFileDropCont(event)">
+        <div class="drop-icon">📂</div>
+        <div class="drop-label">Trascina qui il file Excel oppure clicca per selezionarlo</div>
+        <div class="drop-sub">.xlsx / .xls — max 10 MB</div>
+      </div>
+      <input type="file" id="file-input-cont" class="drop-input" accept=".xlsx,.xls" onchange="onFileSelectCont(event)">
+      <div id="import-status-cont" style="font-size:13px;color:var(--gray-500);margin-top:8px;display:none"></div>
+    </div>
+  </div>
+
+  <!-- Aggiungi manualmente -->
+  <div class="card rubrica-add-card">
+    <div class="card-header">
+      <div class="card-icon">➕</div>
+      <span class="card-title">Aggiungi / modifica manualmente</span>
+    </div>
+    <div class="card-body">
+      <div class="fg fg-3">
+        <div class="field fg-span2">
+          <label>Vettore / Trasportatore <span class="req">*</span></label>
+          <input id="cont-nome" type="text" placeholder="Es. AUTOTRASPORTI ROSSI S.r.l.">
+        </div>
+        <div class="field">
+          <label>Prezzo concordato <span class="req">*</span></label>
+          <input id="cont-prezzo" type="text" placeholder="Es. € 350,00 /Viaggio + IVA">
+        </div>
+        <div class="field fg-span2">
+          <label>Tipo servizio</label>
+          <input id="cont-tipo" type="text" placeholder="Es. trasporto ADR, bilico-pianale...">
+        </div>
+        <div class="field">
+          <label>Validità</label>
+          <input id="cont-validita" type="text" placeholder="Es. 2026, 31/12/2026...">
+        </div>
+        <div class="field fg-span2">
+          <label>Note</label>
+          <input id="cont-note" type="text" placeholder="Note aggiuntive...">
+        </div>
+        <div class="field fg-span2" style="margin-top:6px;padding-top:10px;border-top:1px solid var(--blue-100)">
+          <label style="color:var(--blue-700);font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em">📍 Prezzi per condizione specifica</label>
+        </div>
+        <div class="field">
+          <label>Produttore</label>
+          <div class="ac-wrap">
+            <input id="cont-produttore" type="text" placeholder="Digita o scegli dalla rubrica produttori..." oninput="acSearchContProd()" autocomplete="off">
+            <div class="ac-drop" id="ac-drop-cont-prod"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Tipologia mezzo</label>
+          <input id="cont-mezzo" type="text" placeholder="Es. bilico-pianale, motrice...">
+        </div>
+        <div class="field">
+          <label>Destino (impianto specifico)</label>
+          <div class="ac-wrap">
+            <input id="cont-destino" type="text" placeholder="Digita o scegli dalla rubrica impianti..." oninput="acSearchContDestino()" autocomplete="off">
+            <div class="ac-drop" id="ac-drop-cont-destino"></div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Prezzo con destino</label>
+          <input id="cont-prezzo-destino" type="text" placeholder="Es. € 400,00 /Viaggio + IVA">
+        </div>
+        <div class="field">
+          <label>Prezzo con Extra Sosta</label>
+          <input id="cont-prezzo-sosta" type="text" placeholder="Es. € 420,00 /Viaggio + IVA">
+        </div>
+        <div class="field">
+          <label>Prezzo Destino + Extra Sosta</label>
+          <input id="cont-prezzo-destino-sosta" type="text" placeholder="Es. € 470,00 /Viaggio + IVA">
+        </div>
+      </div>
+      <div class="btn-row" style="margin-top:1rem">
+        <button class="btn btn-ghost" onclick="svuotaFormCont()">↺ Azzera</button>
+        <button class="btn btn-primary" onclick="aggiungiContratto()">➕ Aggiungi contratto</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista contratti -->
+  <div class="rub-search-bar">
+    <input type="text" id="cont-search" placeholder="🔍 Cerca per vettore, tipo servizio..." oninput="renderContratti()">
+    <span class="rub-count" id="cont-count">0 contratti</span>
+  </div>
+  <div class="rub-table-card">
+    <div style="overflow-x:auto">
+      <table class="rub-table">
+        <thead>
+          <tr>
+            <th>Vettore</th>
+            <th>Produttore</th>
+            <th>Mezzo</th>
+            <th>Prezzo base</th>
+            <th>Destino</th>
+            <th style="min-width:50px">Usa</th>
+            <th style="min-width:50px">Mod.</th>
+            <th style="min-width:60px">Del.</th>
+          </tr>
+        </thead>
+        <tbody id="cont-tbody">
+          <tr><td colspan="8">
+            <div class="empty-state">
+              <div class="empty-icon">📋</div>
+              <h3>Nessun contratto</h3>
+              <p>Importa un file Excel o aggiungi i contratti manualmente.</p>
+            </div>
+          </td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="arch-footer" id="cont-footer">0 contratti</div>
+  </div>
+</div>
+</div>
+
+<!-- PRINT TEMPLATE (invisibile, visibile solo in stampa) -->
+<div class="doc-print" id="doc-print">
+
+  <!-- Intestazione azienda mittente + logo -->
+  <div class="doc-print-top">
+    <div>
+      <div class="doc-print-company" id="dp-nome"></div>
+      <div class="doc-print-address" id="dp-indirizzo"></div>
+      <div class="doc-print-phone" id="dp-tel-wrap">
+      <span id="dp-tel"></span><br>
+      <span id="dp-mail" style="font-weight:400;font-size:14pt;"></span>
+    </div>
+      <div class="doc-print-piva">P.IVA/C.F.: <span id="dp-piva"></span></div>
+    </div>
+    <img class="doc-print-logo" src="data:image/png;base64,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" alt="Itelyum logo">
+  </div>
+  <hr class="doc-hr">
+
+  <!-- Città + data a sinistra | Spett.le + destinatario a destra -->
+  <div class="doc-print-meta">
+    <div class="doc-print-dateblock">
+      <span id="dp-citta"></span>, &nbsp;lí&nbsp; <span id="dp-data"></span>
+      &emsp;Ns. Rif.:&nbsp;<span id="dp-rif"></span>
+    </div>
+    <div class="doc-print-dest-block">
+      <div class="doc-print-spett">Spett.le</div>
+      <div class="doc-print-dest" id="dp-dest"></div>
+    </div>
+  </div>
+
+  <!-- Oggetto -->
+  <div class="doc-print-oggetto">Oggetto:&nbsp;&nbsp;&nbsp; <strong>ORDINE DI SERVIZIO</strong></div>
+
+  <!-- Corpo -->
+  <div class="doc-print-intro">Con la presente Vi incarichiamo di eseguire per ns. conto il seguente servizio da effettuarsi nel giorno:</div>
+  <div class="doc-print-giorno" id="dp-giorno" style="display:block;"></div>
+
+  <table class="doc-print-table">
+    <tr><td>Dalla Ditta:</td><td id="dp-ditta"></td></tr>
+    <tr><td>Con sede :</td><td id="dp-sede"></td></tr>
+
+    <tr><td>Codici rifiuto:</td><td id="dp-codici" style="white-space:pre-line"></td></tr>
+    <tr><td style="padding-top:2mm">All'impianto:</td><td id="dp-impianto"></td></tr>
+    <tr><td>Con sede :</td><td id="dp-impiantosede"></td></tr>
+    <tr><td style="padding-top:2mm">A mezzo:</td><td id="dp-mezzo"></td></tr>
+    <tr><td style="padding-top:2mm">Note:</td><td id="dp-materiale"></td></tr>
+    <tr><td>Prezzo:</td><td id="dp-prezzo"></td></tr>
+  </table>
+
+  <div class="doc-print-saluti">Distinti saluti</div>
+  <div class="doc-print-firma-block">
+    <div class="doc-print-firma-inner">
+      <div id="dp-firma-label" style="font-size:12.6pt;font-weight:700;margin-bottom:1mm;text-align:left;"></div>
+      <img src="data:image/png;base64,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" alt="firma" style="height:16.8mm;width:auto;display:block;margin-left:0;">
+    </div>
+  </div>
+
+  <!-- Footer legale -->
+  <div class="doc-print-footer">
+    Il vettore si obbliga a rispettare e a far rispettare ai propri dipendenti, collaboratori o prestatori d'opera tutte le normative in materia di circolazione stradale e tutti obblighi contrattualmente previsti nei rapporti con detti soggetti, risponde in proprio dell'eventuale mancata osservanza di dette normative ed espressamente manleva fin d'ora il mittente da ogni responsabilità, onere, sanzione o altra penalità che possa discendere dall'inosservanza di tali norme, ivi incluse a, pure titolo esemplificativo e non esaustivo, quelle relative ai tempi di guida e di riposo degli autisti, di cui al Reg. CE 3820/1985.
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+
+
+
+
+
+<div class="modal-overlay" id="modal-modifica">
+  <div class="modal-box">
+    <div class="modal-header">
+      <span class="modal-title">✏️ Modifica ordine</span>
+      <button class="modal-close" onclick="chiudiModal()">&#x2715;</button>
+    </div>
+    <input type="hidden" id="mod-id">
+    <div class="modal-grid">
+      <div class="modal-field"><label>Data documento</label><input id="mod-data" type="date"></div>
+      <div class="modal-field"><label>Ns. Riferimento</label><input id="mod-rif" type="text"></div>
+      <div class="modal-field full"><label>Destinatario (Vettore)</label><input id="mod-dest" type="text"></div>
+      <div class="modal-field"><label>Città emissione</label><input id="mod-citta" type="text"></div>
+      <div class="modal-field full"><label>Giorno / Modalità esecuzione</label><textarea id="mod-giorno" rows="3"></textarea></div>
+      <div class="modal-field"><label>Dalla Ditta</label><input id="mod-ditta" type="text"></div>
+      <div class="modal-field"><label>Sede Ditta</label><input id="mod-sede" type="text"></div>
+      <div class="modal-field full"><label>Note</label><textarea id="mod-materiale" rows="2"></textarea></div>
+      <div class="modal-field full"><label>Codici rifiuto</label><textarea id="mod-codici" rows="2"></textarea></div>
+      <div class="modal-field"><label>All'impianto</label><input id="mod-impianto" type="text"></div>
+      <div class="modal-field"><label>Sede impianto</label><input id="mod-impiantosede" type="text"></div>
+      <div class="modal-field"><label>A mezzo</label><input id="mod-mezzo" type="text"></div>
+      <div class="modal-field">
+        <label>Prezzo concordato</label>
+        <div class="modal-prezzo-wrap">
+          <span class="euro-sym">€</span>
+          <input id="mod-prezzo" type="text" placeholder="350,00 /Viaggio + IVA">
+        </div>
+      </div>
+      <div class="modal-field full"><label>Trasporto organizzato da</label><input id="mod-trasportoOrg" type="text"></div>
+    </div>
+    <div class="modal-footer">
+      <button style="padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:1.5px solid #D1DFF0;background:#F7F9FC;color:#6b7c93" onclick="chiudiModal()">Annulla</button>
+      <button style="padding:8px 18px;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:#1A4F8A;color:#fff" onclick="salvaModifica()">💾 Salva modifiche</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>var _editingProdId = null;
+var _editingContId = null;
+var _editingImpId = null;
+var _editingContrattoId = null;
+var _updatedIds = { rubrica: new Set(), prod: new Set(), imp: new Set(), cont: new Set() };
+var PROD_KEY = 'rubrica_produttori_v1';
+var STORAGE_KEY = 'ordini_servizio_v2';
+var COUNTER_KEY = 'ordini_counter_v1';
+var RUB_KEY = 'rubrica_destinatari_v1';
+var IMP_KEY = 'rubrica_impianti_v1';
+var CONT_KEY = 'contratti_ordini_v1';
+
+var rubricaProd = [];
+var rubrica = [];
+var rubricaImp = [];
+var archivio = [];
+var contratti = [];
+
+
+// ══════════════════════════════════════
+// CODICI RIFIUTO MULTIPLI
+// ══════════════════════════════════════
+function initCodici() {
+  var list = document.getElementById('codici-list');
+  if (!list) return;
+  if (list.children.length === 0) aggiungiCodice();
+}
+
+function aggiungiCodice(valore) {
+  var list = document.getElementById('codici-list');
+  if (!list) return;
+  var row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:6px;align-items:center';
+  var inp = document.createElement('input');
+  inp.type = 'text';
+  inp.value = valore || '';
+  inp.placeholder = 'Es. 120116';
+  inp.style.cssText = 'flex:1;font-family:inherit;font-size:13.5px;color:#374151;background:#fff;border:1.5px solid #d1d8e0;border-radius:7px;padding:8px 10px;outline:none';
+  var btn = document.createElement('button');
+  btn.type = 'button';
+  btn.title = 'Rimuovi';
+  btn.textContent = '✕';
+  btn.style.cssText = 'padding:6px 10px;border-radius:7px;border:1.5px solid #d1d8e0;background:transparent;cursor:pointer;font-size:14px;color:#6b7280';
+  btn.onclick = function(){ this.parentElement.remove(); };
+  row.appendChild(inp);
+  row.appendChild(btn);
+  list.appendChild(row);
+}
+
+function getCodiciRifiuto() {
+  var inputs = document.querySelectorAll('#codici-list input[type=text]');
+  return [...inputs].map(i => i.value.trim()).filter(Boolean).join('\n');
+}
+
+function resetCodici() {
+  var list = document.getElementById('codici-list');
+  if (!list) return;
+  list.innerHTML = '';
+  aggiungiCodice();
+}
+
+function setCodiciRifiuto(val) {
+  var list = document.getElementById('codici-list');
+  if (!list) return;
+  list.innerHTML = '';
+  var vals = (val||'').split('\n').filter(Boolean);
+  if (vals.length === 0) { aggiungiCodice(); return; }
+  vals.forEach(v => aggiungiCodice(v));
+}
+
+// ══════════════════════════════════════
+// RUBRICA PRODUTTORI
+// ══════════════════════════════════════
+
+
+
+function loadRubricaProd()    { try { rubricaProd = JSON.parse(localStorage.getItem(PROD_KEY)||'[]'); } catch(e){ rubricaProd=[]; } }
+function saveRubricaProd()    { localStorage.setItem(PROD_KEY, JSON.stringify(rubricaProd)); updateProdBadge(); }
+function updateProdBadge()    { const el=document.getElementById('prod-badge'); if(el) el.textContent=rubricaProd.length; }
+function addrStrProd(r)       { return [r.indirizzo, r.cap, r.citta, r.provincia ? '('+r.provincia+')' : ''].filter(Boolean).join(' '); }
+
+function aggiungiProduttore() {
+  var nome = document.getElementById('prod-nome').value.trim();
+  if (!nome) { showToast('⚠ Inserisci almeno la ragione sociale', 'error'); return; }
+  const record = {
+    indirizzo: document.getElementById('prod-indirizzo').value.trim(),
+    cap:       document.getElementById('prod-cap').value.trim(),
+    citta:     document.getElementById('prod-citta').value.trim(),
+    provincia: document.getElementById('prod-prov').value.trim().toUpperCase(),
+    piva:      document.getElementById('prod-piva').value.trim(),
+    telefono:  document.getElementById('prod-tel').value.trim(),
+    email:     document.getElementById('prod-email').value.trim(),
+  };
+  if (_editingProdId !== null) {
+    // Modalità aggiornamento
+    const idx = rubricaProd.findIndex(r => r.id === _editingProdId);
+    if (idx >= 0) rubricaProd[idx] = { ...rubricaProd[idx], nome, ...record };
+    saveRubricaProd(); markUpdated('prod', _editingProdId); renderRubricaProd(); svuotaFormProd();
+    showToast('✓ Produttore aggiornato', 'success');
+  } else {
+    // Nuovo inserimento
+    rubricaProd.push({ id: Date.now(), nome, ...record });
+    saveRubricaProd(); renderRubricaProd(); svuotaFormProd();
+    showToast('✓ Produttore aggiunto', 'success');
+  }
+}
+
+
+
+function modificaProduttore(id) {
+  var r = rubricaProd.find(x => x.id === id);
+  if (!r) return;
+  _editingProdId = id;
+  document.getElementById('prod-nome').value      = r.nome      || '';
+  document.getElementById('prod-piva').value      = r.piva      || '';
+  document.getElementById('prod-indirizzo').value = r.indirizzo || '';
+  document.getElementById('prod-cap').value       = r.cap       || '';
+  document.getElementById('prod-citta').value     = r.citta     || '';
+  document.getElementById('prod-prov').value      = r.provincia || '';
+  document.getElementById('prod-tel').value       = r.telefono  || '';
+  document.getElementById('prod-email').value     = r.email     || '';
+  document.getElementById('prod-nome').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  document.getElementById('prod-nome').focus();
+  setProdBtn(true);
+  showToast('✏️ Modifica i campi e clicca Aggiorna per salvare', 'success');
+}
+
+function setProdBtn(editMode) {
+  var btn = document.querySelector('[onclick="aggiungiProduttore()"]');
+  if (!btn) return;
+  if (editMode) {
+    btn.textContent = '💾 Aggiorna produttore';
+    btn.style.background = 'var(--green, #0F6E56)';
+    btn.style.borderColor = 'var(--green, #0F6E56)';
+    btn.style.color = '#fff';
+  } else {
+    btn.textContent = '➕ Aggiungi produttore';
+    btn.style.background = '';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+  }
+}
+
+function svuotaFormProd() {
+  ['prod-nome','prod-piva','prod-indirizzo','prod-cap','prod-citta','prod-prov','prod-tel','prod-email']
+    .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  _editingProdId = null;
+  setProdBtn(false);
+}
+
+function eliminaProduttore(id) {
+  if (!confirm('Eliminare questo produttore dalla rubrica?')) return;
+  rubricaProd = rubricaProd.filter(r => r.id !== id);
+  saveRubricaProd();
+  renderRubricaProd();
+}
+
+function usaProduttore(id) {
+  var r = rubricaProd.find(x => x.id === id);
+  if (!r) return;
+  var el = document.getElementById('s-ditta');
+  if (el) el.value = r.nome;
+  var sede = document.getElementById('s-sede');
+  if (sede) sede.value = addrStrProd(r);
+  closeAcDropProd();
+  var tabForm = document.getElementById('tab-form');
+  showView('form', tabForm);
+  // Aggiorna prezzo dopo selezione rubrica
+  setTimeout(aggiornaPrezzoContratto, 50);
+  showToast('✓ ' + r.nome + ' inserito nel modulo', 'success');
+}
+
+function renderRubricaProd() {
+  var q = (document.getElementById('prod-search')?.value||'').toLowerCase();
+  var list = q ? rubricaProd.filter(r =>
+    r.nome.toLowerCase().includes(q) ||
+    (r.citta||'').toLowerCase().includes(q) ||
+    (r.piva||'').toLowerCase().includes(q) ||
+    (r.indirizzo||'').toLowerCase().includes(q)
+  ) : rubricaProd;
+
+  document.getElementById('prod-count').textContent = list.length + ' produttori';
+  document.getElementById('prod-footer').textContent = list.length + ' produttori';
+
+  var tbody = document.getElementById('prod-tbody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">' +
+      (q ? '🔍' : '🏭') + '</div><h3>' +
+      (q ? 'Nessun risultato' : 'Rubrica vuota') + '</h3><p>' +
+      (q ? 'Modifica la ricerca.' : 'Aggiungi produttori o importa Excel.') +
+      '</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(r => `
+    <tr>
+      <td><strong>${esc(r.nome)}</strong></td>
+      <td>${esc(addrStrProd(r))||'—'}</td>
+      <td><span class="rub-tag">${esc(r.piva)||'—'}</span></td>
+      <td>${esc(r.telefono)||'—'}</td>
+      <td>${esc(r.email)||'—'}</td>
+      <td><button class="use-btn" onclick="usaProduttore(${r.id})">↗ Usa</button></td>
+      <td><button class="use-btn" onclick="modificaProduttore(${r.id})" style="background:var(--blue-50);border-color:var(--blue-200);color:var(--blue-700)">✏️</button></td>
+      <td>${_updatedIds.prod.has(r.id)?'<span class="badge-updated">✓</span>':''}</td>
+      <td><button class="del-btn" onclick="eliminaProduttore(${r.id})">✕</button></td>
+    </tr>`).join('');
+}
+
+function svuotaRubricaProd() {
+  if (!confirm('Svuotare tutta la rubrica produttori? Operazione irreversibile.')) return;
+  rubricaProd = []; saveRubricaProd(); renderRubricaProd();
+}
+
+// ── Autocomplete Produttori sul campo "Dalla Ditta" ──
+function acSearchProd() {
+  var q = (document.getElementById('s-ditta')?.value||'').toLowerCase().trim();
+  var drop = document.getElementById('ac-drop-prod');
+  if (!q || !rubricaProd.length) { closeAcDropProd(); return; }
+  var matches = rubricaProd.filter(r =>
+    r.nome.toLowerCase().includes(q) ||
+    (r.citta||'').toLowerCase().includes(q)
+  ).slice(0, 8);
+  if (!matches.length) { closeAcDropProd(); return; }
+  drop.innerHTML = '';
+  matches.forEach(function(r) {
+    var div = document.createElement('div');
+    div.className = 'ac-item';
+    div.style.cursor = 'pointer';
+    div.innerHTML = '<span class="ac-name">' + esc(r.nome) + '</span>' +
+      '<span class="ac-addr">' + (esc(addrStrProd(r))||'—') + (r.piva ? ' · P.IVA ' + esc(r.piva) : '') + '</span>';
+    div.addEventListener('click', function() {
+      document.getElementById('s-ditta').value = r.nome;
+      var sede = document.getElementById('s-sede');
+      if (sede) sede.value = addrStrProd(r);
+      closeAcDropProd();
+    });
+    drop.appendChild(div);
+  });
+  drop.classList.add('open');
+}
+
+function selezionaACProd(id) {
+  var r = rubricaProd.find(x => String(x.id) === String(id));
+  if (!r) return;
+  document.getElementById('s-ditta').value = r.nome;
+  var sede = document.getElementById('s-sede');
+  if (sede) sede.value = addrStrProd(r);
+  closeAcDropProd();
+}
+
+function selezionaACProdIdx(idx) {
+  var matches = window._acProdMatches || [];
+  var r = matches[idx];
+  if (!r) return;
+  document.getElementById('s-ditta').value = r.nome;
+  var sede = document.getElementById('s-sede');
+  if (sede) sede.value = addrStrProd(r);
+  closeAcDropProd();
+}
+
+function selezionaACProdNome(nome) {
+  var r = rubricaProd.find(x => x.nome === nome);
+  if (!r) return;
+  document.getElementById('s-ditta').value = r.nome;
+  var sede = document.getElementById('s-sede');
+  if (sede) sede.value = addrStrProd(r);
+  closeAcDropProd();
+}
+
+function closeAcDropProd() {
+  var d = document.getElementById('ac-drop-prod');
+  if (d) d.classList.remove('open');
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#ac-drop-prod') && !e.target.closest('#s-ditta')) closeAcDropProd();
+});
+
+// ── Import Excel Produttori ──
+function onFileSelectProd(e) { const f = e.target.files[0]; if(f) importaExcelProd(f); e.target.value=''; }
+function onFileDropProd(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone-prod').classList.remove('drag-over');
+  var f = e.dataTransfer.files[0];
+  if (f) importaExcelProd(f);
+}
+
+function importaExcelProd(file) {
+  if (!window.XLSX) { showToast('Libreria non pronta, riprova', 'error'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb   = XLSX.read(e.target.result, { type: 'binary' });
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      if (!rows.length) { showToast('File vuoto o formato non riconosciuto', 'error'); return; }
+      const norm = s => String(s).toLowerCase().replace(/[\s_\-]/g,'');
+      const colMap = {
+        ragionesociale:'nome', nome:'nome',
+        indirizzo:'indirizzo', via:'indirizzo',
+        citta:'citta', città:'citta', comune:'citta',
+        cap:'cap', provincia:'provincia', prov:'provincia',
+        piva:'piva', partitaiva:'piva',
+        telefono:'telefono', tel:'telefono', phone:'telefono',
+        email:'email', mail:'email',
+      };
+      let added = 0, skipped = 0;
+      rows.forEach(row => {
+        const rec = {};
+        Object.entries(row).forEach(([k,v]) => {
+          const mapped = colMap[norm(k)];
+          if (mapped) rec[mapped] = String(v).trim();
+        });
+        if (!rec.nome) { skipped++; return; }
+        if (rubricaProd.find(r => r.nome.toLowerCase() === rec.nome.toLowerCase())) { skipped++; return; }
+        rubricaProd.push({ id: Date.now()+Math.random(), nome:rec.nome||'', indirizzo:rec.indirizzo||'',
+          cap:rec.cap||'', citta:rec.citta||'', provincia:(rec.provincia||'').toUpperCase(),
+          piva:rec.piva||'', telefono:rec.telefono||'', email:rec.email||'' });
+        added++;
+      });
+      saveRubricaProd();
+      renderRubricaProd();
+      const st = document.getElementById('import-status-prod');
+      st.style.display = 'block';
+      st.style.color = added > 0 ? 'var(--green)' : 'var(--gray-500)';
+      st.textContent = '✓ Importati: ' + added + ' nuovi produttori' + (skipped ? ' · ' + skipped + ' ignorati' : '');
+      showToast('✓ ' + added + ' produttori importati', 'success');
+    } catch(err) {
+      showToast('Errore lettura file: ' + err.message, 'error');
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+function esportaRubricaProd() {
+  if (!window.XLSX) { showToast('Libreria non pronta', 'error'); return; }
+  if (!rubricaProd.length) { showToast('Rubrica vuota', 'error'); return; }
+  const rows = rubricaProd.map(r => ({
+    'Ragione Sociale':r.nome, 'Indirizzo':r.indirizzo, 'CAP':r.cap,
+    'Città':r.citta, 'Provincia':r.provincia, 'P.IVA':r.piva,
+    'Telefono':r.telefono, 'Email':r.email
+  }));
+  var ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:28},{wch:28},{wch:7},{wch:20},{wch:10},{wch:14},{wch:16},{wch:24}];
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Produttori');
+  XLSX.writeFile(wb, 'Rubrica_Produttori.xlsx');
+  showToast('✓ Rubrica produttori esportata');
+}
+
+// ── include produttori in backup ──
+
+
+
+
+// INIT PRODUTTORI
+loadRubricaProd();
+updateProdBadge();
+renderRubricaProd();
+
+// ── VIEW SWITCHING ──
+
+// ── Migrazione tel/mail su record esistenti ──
+function migraTelMail() {
+  var nuovoTel = 'Tel. 0422/503721 - trasporti.centrorisorse@itelyum.com';
+  var changed = false;
+  archivio = archivio.map(r => {
+    if (!r.tel || r.tel !== nuovoTel) {
+      r.tel = nuovoTel;
+      changed = true;
+    }
+    return r;
+  });
+  if (changed) {
+    saveArchivio();
+    console.log('[migrazione] tel/mail aggiornato su ' + archivio.length + ' record');
+  }
+}
+
+function showView(name, btn) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('view-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'arch') refreshArchive();
+  if (name === 'bak')  { updateCounterPanel(); renderBackupHistory(); }
+  if (name === 'prod') renderRubricaProd();
+  if (name === 'imp')  renderRubricaImp();
+  if (name === 'cont') renderContratti();
+  // form view
+}
+
+// ── TOAST ──
+function showToast(msg, type = '') {
+  var t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show ' + type;
+  setTimeout(() => { t.className = 'toast'; }, 2800);
+}
+
+// ── FORM HELPERS ──
+function gv(id) { return (document.getElementById(id)?.value || '').trim(); }
+
+function getFormData() {
+  var dataRaw = gv('doc-data');
+  const [y,m,d] = (dataRaw || '').split('-');
+  var dataIt = (y && m && d) ? `${d}/${m}/${y}` : dataRaw;
+  var prezzoStr = gv('s-prezzo');
+  var prezzoNum = parseFloat(prezzoStr.replace(/[^0-9.,]/g,'').replace(',','.')) || 0;
+  return {
+    id: Date.now(),
+    data: dataRaw, dataIt,
+    rif:           gv('doc-rif'),
+    mittente:      gv('m-nome'),
+    destinatario:  gv('d-nome'),
+    ditta:         gv('s-ditta'),
+    sede:          gv('s-sede'),
+    materiale:     gv('s-materiale'),
+    codici:        getCodiciRifiuto(),
+    impianto:      gv('s-impianto'),
+    impiantosede:  gv('s-impiantosede'),
+    mezzo:         gv('s-mezzo'),
+    prezzo:        gv('s-prezzo').replace(/^€\s*/,''),
+    prezzoNum,
+    giorno:        getGiorniList(),
+    citta:         gv('doc-citta'),
+    firma:         gv('f-nome'),
+    trasportoOrg:  gv('f-nome'),
+    piva:          gv('m-piva'),
+    tel:           gv('m-tel'),
+    indirizzo:     gv('m-indirizzo'),
+  };
+}
+
+function resetForm() {
+  const defaults = {
+    'm-nome': (document.getElementById('m-nome')?.value || 'CENTRO RISORSE S.p.A.'),
+    'm-indirizzo': (document.getElementById('m-indirizzo')?.value || 'Via Lazio, 48 - Motta di Livenza (TV)'),
+    'm-tel': (document.getElementById('m-tel')?.value || 'Tel. 0422/503721 - trasporti.centrorisorse@itelyum.com'),
+    'm-piva': (document.getElementById('m-piva')?.value || '00584180269'),
+    'd-nome':'','d-indirizzo':'','d-piva':'','doc-citta':'Motta di Livenza',
+    'doc-data':'','doc-rif':'',
+
+    's-ditta':'','s-sede':'',
+    's-materiale':'',
+    's-impianto':'CENTRO RISORSE S.p.A.',
+    's-impiantosede':'Via Lazio, 48 - MOTTA DI LIVENZA TV',
+    's-mezzo':'','s-prezzo':'','f-nome':'Centro Risorse S.p.A.',
+  };
+  Object.entries(defaults).forEach(([id,val]) => { const el=document.getElementById(id); if(el) el.value=val; });
+  resetCodici();
+  resetGiorni();
+  showToast('Modulo ripristinato');
+}
+
+function stampaPDF() {
+  var r = getFormData();
+  var fill = (id, val) => { const el=document.getElementById(id); if(el) el.textContent=val||''; };
+  fill('dp-nome', r.mittente);
+  var _firmaEl = document.getElementById('dp-firma-label'); if(_firmaEl) _firmaEl.textContent = r.mittente || 'CENTRO RISORSE S.P.A.';
+  fill('dp-indirizzo', r.indirizzo);
+  // Split tel e mail per il PDF
+  (function(){
+    const telFull = r.tel || '';
+    const mailIdx = telFull.indexOf('@');
+    if(mailIdx > -1){
+      // Trova l'inizio della mail (ultimo spazio o trattino prima della @)
+      const before = telFull.slice(0, mailIdx);
+      const spaceIdx = Math.max(before.lastIndexOf(' '), before.lastIndexOf('-'));
+      const tel  = spaceIdx > -1 ? telFull.slice(0, spaceIdx).trim() : before.trim();
+      const mail = spaceIdx > -1 ? telFull.slice(spaceIdx + 1).trim() : telFull.slice(mailIdx);
+      fill('dp-tel',  tel);
+      fill('dp-mail', mail);
+    } else {
+      fill('dp-tel', telFull);
+      fill('dp-mail', '');
+    }
+  })();
+  fill('dp-piva', r.piva);
+  fill('dp-dest', r.destinatario);
+  fill('dp-citta', r.citta);
+  fill('dp-data', r.dataIt);
+  fill('dp-rif', r.rif);
+  // Render giorno come elenco numerato in orizzontale nel PDF
+  (function(){
+    var el = document.getElementById('dp-giorno');
+    if (!el) return;
+    el.innerHTML = '';
+    var vals = (r.giorno||'').split('\n').filter(function(v){ return v.trim(); });
+    if (!vals.length) { el.textContent = r.giorno||''; return; }
+    vals.forEach(function(v, i) {
+      var item = document.createElement('div');
+      item.style.cssText = 'display:block;margin-bottom:1mm;';
+      item.textContent = (i+1) + '. ' + v.trim();
+      el.appendChild(item);
+    });
+  })();
+  fill('dp-ditta', r.ditta);
+  fill('dp-sede', r.sede);
+  fill('dp-materiale', r.materiale);
+  fill('dp-codici', r.codici);
+  fill('dp-impianto', r.impianto);
+  fill('dp-impiantosede', r.impiantosede);
+  fill('dp-mezzo', r.mezzo);
+  (function(){
+    var el = document.getElementById('dp-prezzo');
+    if(el){
+      var p = (r.prezzo||'').trim();
+      if(p && !p.startsWith('€')) p = '€ ' + p;
+      if(p && !p.includes('/Viaggio')) p += ' /Viaggio + IVA';
+      el.textContent = p;
+    }
+  })();
+  // dp-firma removed from template
+  window.print();
+}
+
+// ── ARCHIVE ──
+
+
+var sortField = 'data';
+var sortAsc   = false;
+
+function loadArchivio()  { try { archivio = JSON.parse(localStorage.getItem(STORAGE_KEY)||'[]'); } catch(e){ archivio=[]; } }
+function saveArchivio()  { localStorage.setItem(STORAGE_KEY, JSON.stringify(archivio)); updateBadge(); }
+function updateBadge()   { document.getElementById('arch-badge').textContent = archivio.length; }
+
+// salvaInArchivio definita nel blocco NUMERAZIONE
+
+function getFiltered() {
+  var q  = (document.getElementById('f-search')?.value||'').toLowerCase();
+  var mf = document.getElementById('f-mezzo-filter')?.value||'';
+  var df = document.getElementById('f-date-from')?.value||'';
+  var dt = document.getElementById('f-date-to')?.value||'';
+  return archivio.filter(r => {
+    if (q  && !JSON.stringify(r).toLowerCase().includes(q)) return false;
+    if (mf && r.mezzo !== mf) return false;
+    if (df && r.data  && r.data < df) return false;
+    if (dt && r.data  && r.data > dt) return false;
+    return true;
+  });
+}
+
+function getSorted(list) {
+  return [...list].sort((a,b) => {
+    let va = sortField==='prezzoNum' ? a.prezzoNum : (a[sortField]||'');
+    let vb = sortField==='prezzoNum' ? b.prezzoNum : (b[sortField]||'');
+    const c = String(va).localeCompare(String(vb),'it',{numeric:true});
+    return sortAsc ? c : -c;
+  });
+}
+
+function sortBy(field) {
+  if (sortField===field) sortAsc=!sortAsc; else { sortField=field; sortAsc=true; }
+  document.querySelectorAll('.arch-table thead th').forEach(th=>th.classList.remove('sorted'));
+  var th=document.getElementById('th-'+field);
+  if(th){ th.classList.add('sorted'); th.querySelector('.sort-icon').textContent=sortAsc?'↑':'↓'; }
+  renderTable();
+}
+
+function renderTable() {
+  var list = getSorted(getFiltered());
+  var tbody = document.getElementById('arch-tbody');
+  document.getElementById('arch-count').textContent = list.length + ' ordini mostrati';
+  if (!list.length) {
+    tbody.innerHTML='<tr><td colspan="11"><div class="empty-state"><div class="empty-icon">🔍</div><h3>Nessun risultato</h3><p>Prova a modificare i filtri.</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(r=>`
+    <tr>
+      <td title="${r.data}">${r.dataIt||r.data||'—'}</td>
+      <td>${esc(r.rif)||'—'}</td>
+      <td title="${esc(r.destinatario)}">${esc(r.destinatario)||'—'}</td>
+      <td title="${esc(r.ditta)}">${esc(r.ditta)||'—'}</td>
+      <td title="${esc(r.materiale)}">${esc(r.materiale)||'—'}</td>
+      <td>${esc(r.codici)||'—'}</td>
+      <td><span class="tag-mezzo">${esc(r.mezzo)||'—'}</span></td>
+      <td class="price-cell">${esc(r.prezzo)||'—'}</td>
+      <td title="${esc(r.impianto)}">${esc(r.impianto)||'—'}</td>
+      <td>${esc(r.trasportoOrg)||'—'}</td>
+      <td style="white-space:nowrap">
+        <button class="use-btn" onclick="stampaArchivio(${r.id})" title="Stampa PDF" style="margin-right:4px">🖨</button>
+        <button class="use-btn" onclick="apriModal(${r.id})" title="Modifica" style="margin-right:4px;background:var(--blue-50);border-color:var(--blue-200);color:var(--blue-700)">✏️</button>
+        <button class="use-btn" onclick="duplicaOrdine(${r.id})" title="Duplica ordine" style="margin-right:4px;background:#f0fdf4;border-color:#86efac;color:#16a34a">📋</button>
+        <button class="del-btn" onclick="eliminaRiga(${r.id})">🗑</button>
+      </td>
+    </tr>`).join('');
+
+  setTimeout(initArchScrollSync, 50);
+}
+
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function updateKPIs() {
+  document.getElementById('kpi-total').textContent = archivio.length;
+  var tot = archivio.reduce((s,r)=>s+(r.prezzoNum||0),0);
+  document.getElementById('kpi-value').textContent = '€ '+tot.toLocaleString('it-IT',{minimumFractionDigits:2,maximumFractionDigits:2});
+  document.getElementById('kpi-ditte').textContent = new Set(archivio.map(r=>r.ditta).filter(Boolean)).size;
+  var cnt={};
+  archivio.forEach(r=>{ if(r.mezzo) cnt[r.mezzo]=(cnt[r.mezzo]||0)+1; });
+  var top=Object.entries(cnt).sort((a,b)=>b[1]-a[1])[0];
+  document.getElementById('kpi-mezzo').textContent = top?top[0]:'—';
+}
+
+function updateMezzoFilter() {
+  var sel=document.getElementById('f-mezzo-filter');
+  var cur=sel.value;
+  var mezzi=[...new Set(archivio.map(r=>r.mezzo).filter(Boolean))].sort();
+  sel.innerHTML='<option value="">Tutti i mezzi</option>'+mezzi.map(m=>`<option value="${esc(m)}"${m===cur?' selected':''}>${esc(m)}</option>`).join('');
+}
+
+function refreshArchive(){ updateKPIs(); updateMezzoFilter(); renderTable(); }
+
+function eliminaRiga(id) {
+  if (!confirm('Eliminare questo ordine?')) return;
+  archivio=archivio.filter(r=>r.id!==id);
+  saveArchivio(); refreshArchive();
+}
+
+function stampaArchivio(id) {
+  var r = archivio.find(x => x.id === id);
+  if (!r) return;
+  var fill = (elId, val) => { const el=document.getElementById(elId); if(el) el.textContent=val||''; };
+  // Popola il template di stampa con i dati dell'ordine
+  fill('dp-nome',         r.mittente   || 'CENTRO RISORSE S.p.A.');
+  fill('dp-indirizzo',    r.indirizzo  || 'Via Lazio, 48 - Motta di Livenza (TV)');
+  fill('dp-tel',          r.tel        || 'Tel. 0422/503721 - trasporti.centrorisorse@itelyum.com');
+  fill('dp-piva',         r.piva       || '00584180269');
+  fill('dp-dest',         r.destinatario);
+  fill('dp-citta',        r.citta);
+  fill('dp-data',         r.dataIt || r.data);
+  fill('dp-rif',          r.rif);
+  // Render giorno come elenco numerato in orizzontale nel PDF
+  (function(){
+    var el = document.getElementById('dp-giorno');
+    if (!el) return;
+    el.innerHTML = '';
+    var vals = (r.giorno||'').split('\n').filter(function(v){ return v.trim(); });
+    if (!vals.length) { el.textContent = r.giorno||''; return; }
+    vals.forEach(function(v, i) {
+      var item = document.createElement('div');
+      item.style.cssText = 'display:block;margin-bottom:1mm;';
+      item.textContent = (i+1) + '. ' + v.trim();
+      el.appendChild(item);
+    });
+  })();
+  fill('dp-ditta',        r.ditta);
+  fill('dp-sede',         r.sede);
+  fill('dp-materiale',    r.materiale);
+  fill('dp-codici',       r.codici);
+  if(typeof setCodiciRifiuto === 'function') setCodiciRifiuto(r.codici);
+  if(typeof setGiorniList === 'function') setGiorniList(r.giorno);
+  fill('dp-impianto',     r.impianto);
+  fill('dp-impiantosede', r.impiantosede);
+  fill('dp-mezzo',        r.mezzo);
+  (function(){
+    var el = document.getElementById('dp-prezzo');
+    if(el){
+      var p = (r.prezzo||'').trim();
+      if(p && !p.startsWith('€')) p = '€ ' + p;
+      if(p && !p.includes('/Viaggio')) p += ' /Viaggio + IVA';
+      el.textContent = p;
+    }
+  })();
+  window.print();
+}
+function clearFilters() {
+  ['f-search','f-date-from','f-date-to'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  document.getElementById('f-mezzo-filter').value='';
+  renderTable();
+}
+function clearAll() {
+  if (!confirm('Svuotare completamente l\'archivio? Operazione irreversibile.')) return;
+  archivio=[]; saveArchivio(); refreshArchive();
+}
+
+function exportCSV() {
+  var list=getSorted(getFiltered());
+  if(!list.length){showToast('Nessun dato da esportare','error');return;}
+  var hdr=['Data','Ns. Rif.','Vettore','Dalla Ditta','Sede Ditta','Note','Cod. Rifiuto','Impianto','Sede Impianto','A Mezzo','Prezzo','Prezzo (€)','Giorno Servizio'];
+  var rows=list.map(r=>[r.dataIt,r.rif,r.destinatario,r.ditta,r.sede,r.materiale,r.codici,r.impianto,r.impiantosede,r.mezzo,r.prezzo,r.prezzoNum,r.giorno]);
+  var csv=[hdr,...rows].map(row=>row.map(v=>`"${String(v||'').replace(/"/g,'""')}"`).join(';')).join('\n');
+  var a=document.createElement('a');
+  a.href=URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
+  a.download=`Archivio_Ordini_${new Date().toISOString().slice(0,10)}.csv`;
+  a.click();
+  showToast('✓ CSV esportato');
+}
+
+function exportExcel() {
+  if(!window.XLSX){showToast('Libreria non pronta, riprova','error');return;}
+  var list=getSorted(getFiltered());
+  if(!list.length){showToast('Nessun dato da esportare','error');return;}
+  var rows=list.map(r=>({'Data':r.dataIt,'Ns. Rif.':r.rif,'Vettore':r.destinatario,'Dalla Ditta':r.ditta,'Sede Ditta':r.sede,'Note':r.materiale,'Cod. Rifiuto':r.codici,'Impianto':r.impianto,'Sede Impianto':r.impiantosede,'A Mezzo':r.mezzo,'Prezzo':r.prezzo,'Prezzo (€)':r.prezzoNum,'Giorno Servizio':r.giorno,'Mittente':r.mittente}));
+  var ws=XLSX.utils.json_to_sheet(rows);
+  ws['!cols']=[{wch:12},{wch:14},{wch:22},{wch:22},{wch:28},{wch:30},{wch:12},{wch:22},{wch:28},{wch:16},{wch:18},{wch:12},{wch:25},{wch:22}];
+  var wb=XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb,ws,'Ordini');
+  XLSX.writeFile(wb,`Archivio_Ordini_${new Date().toISOString().slice(0,10)}.xlsx`);
+  showToast('✓ Excel esportato');
+}
+
+// ══════════════════════════════════════
+// NUMERAZIONE PROGRESSIVA
+// ══════════════════════════════════════
+
+var BACKUP_KEY  = 'ordini_backup_history';
+
+function getCounterData() {
+  try { return JSON.parse(localStorage.getItem(COUNTER_KEY) || 'null'); } catch(e){ return null; }
+}
+function saveCounterData(obj) { localStorage.setItem(COUNTER_KEY, JSON.stringify(obj)); }
+
+function getCurrentYear() { return new Date().getFullYear(); }
+
+function initCounter() {
+  var c = getCounterData();
+  if (!c || c.anno !== getCurrentYear()) {
+    c = { anno: getCurrentYear(), prossimo: 1 };
+    saveCounterData(c);
+  }
+  return c;
+}
+
+function generaRif() {
+  var c = initCounter();
+  var num = String(c.prossimo).padStart(4, '0');
+  return `${c.anno}/${num}`;
+}
+
+function incrementaContatore() {
+  var c = initCounter();
+  c.prossimo++;
+  saveCounterData(c);
+}
+
+function aggiornaPreviewRif() {
+  var rif = generaRif();
+  var el = document.getElementById('doc-rif');
+  if (el) el.value = rif;
+  // update backup panel if visible
+  updateCounterPanel();
+}
+
+function updateCounterPanel() {
+  var c = initCounter();
+  var el = document.getElementById('bak-counter-num');
+  if (el) el.textContent = c.prossimo - 1 < 0 ? 0 : c.prossimo - 1;
+  var yr = document.getElementById('bak-year');
+  if (yr) yr.textContent = c.anno;
+  var nx = document.getElementById('bak-next-rif');
+  if (nx) nx.textContent = generaRif();
+}
+
+function resetContatore() {
+  if (!confirm('Azzerare il contatore? Il prossimo ordine ripartirà da 0001 per l\'anno corrente.')) return;
+  saveCounterData({ anno: getCurrentYear(), prossimo: 1 });
+  aggiornaPreviewRif();
+  showToast('✓ Contatore azzerato', 'success');
+}
+
+function impostaContatore() {
+  var val = parseInt(document.getElementById('bak-manual-num').value);
+  if (!val || val < 1) { showToast('⚠ Inserisci un numero valido >= 1', 'error'); return; }
+  var c = initCounter();
+  c.prossimo = val;
+  saveCounterData(c);
+  aggiornaPreviewRif();
+  showToast('✓ Contatore impostato a ' + val, 'success');
+}
+
+// ══════════════════════════════════════
+// BACKUP AUTOMATICO
+// ══════════════════════════════════════
+function getBackupHistory() {
+  try { return JSON.parse(localStorage.getItem(BACKUP_KEY) || '[]'); } catch(e){ return []; }
+}
+
+function salvaBackupAutomatico() {
+  const snapshot = {
+    ts:        new Date().toISOString(),
+    label:     'Auto — ' + new Date().toLocaleString('it-IT'),
+    archivio:  archivio.slice(),
+    rubrica:   rubrica.slice(),
+    counter:   getCounterData(),
+  };
+  var history = getBackupHistory();
+  history.unshift(snapshot);
+  history = history.slice(0, 5); // keep last 5
+  localStorage.setItem(BACKUP_KEY, JSON.stringify(history));
+  renderBackupHistory();
+}
+
+function renderBackupHistory() {
+  var list = getBackupHistory();
+  var el = document.getElementById('bak-history-list');
+  if (!el) return;
+  if (!list.length) {
+    el.innerHTML = '<div class="bak-empty">Nessun backup automatico ancora creato.</div>';
+    return;
+  }
+  el.innerHTML = list.map((b, i) => `
+    <div class="bak-item">
+      <div class="bak-item-left">
+        <span class="bak-item-name">${esc(b.label)}</span>
+        <span class="bak-item-meta">${b.archivio?.length||0} ordini · ${b.rubrica?.length||0} contatti rubrica</span>
+      </div>
+      <div class="bak-item-actions">
+        <button class="btn btn-secondary btn-sm" onclick="scaricaBackupStoria(${i})">⬇ Scarica</button>
+        <button class="btn btn-ghost btn-sm" onclick="ripristinaBackupStoria(${i})">↺ Ripristina</button>
+      </div>
+    </div>`).join('');
+}
+
+
+
+function scaricaBackupStoria(idx) {
+  var b = getBackupHistory()[idx];
+  if (!b) return;
+  var a = document.createElement('a');
+  a.href = URL.createObjectURL(new Blob([JSON.stringify(b, null, 2)], { type: 'application/json' }));
+  a.download = `Backup_${b.ts.slice(0,10)}.json`;
+  a.click();
+}
+
+function ripristinaBackupStoria(idx) {
+  var b = getBackupHistory()[idx];
+  if (!b) return;
+  applicaBackup(b);
+}
+
+function ripristinaBackup(event) {
+  var file = event.target.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const data = JSON.parse(e.target.result);
+      const dataStr = data.esportato || data.ts || data.savedAt || '';
+      const dataFmt = dataStr ? new Date(dataStr).toLocaleString('it-IT') : 'data sconosciuta';
+      if (!confirm('Ripristinare il backup del ' + dataFmt + '?\n\nI dati attuali verranno sostituiti.')) return;
+      applicaBackup(data);
+    } catch(err) {
+      showToast('⚠ File non valido: ' + err.message, 'error');
+    }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+
+
+// ══════════════════════════════════════
+// PATCH: salvaInArchivio con numerazione
+// ══════════════════════════════════════
+function salvaInArchivio() {
+  var r = getFormData();
+  if (!r.mittente || !r.destinatario || !r.ditta) {
+    showToast('⚠ Compila almeno mittente, vettore e ditta', 'error'); return;
+  }
+  archivio.unshift(r);
+  saveArchivio();
+  salvaBackupAutomatico();
+  showToast('✓ Ordine ' + (r.rif||'—') + ' salvato in archivio', 'success');
+}
+
+// INIT
+loadArchivio();
+
+// ══════════════════════════════════════
+// RUBRICA LOGIC
+// ══════════════════════════════════════
+
+
+
+function loadRubrica()  { try { rubrica = JSON.parse(localStorage.getItem(RUB_KEY)||'[]'); } catch(e){ rubrica=[]; } }
+function saveRubrica()  { localStorage.setItem(RUB_KEY, JSON.stringify(rubrica)); updateRubBadge(); }
+function updateRubBadge() { document.getElementById('rub-badge').textContent = rubrica.length; }
+
+function addrStr(r) {
+  return [r.indirizzo, r.cap, r.citta, r.provincia ? '('+r.provincia+')' : ''].filter(Boolean).join(' ');
+}
+
+
+
+function modificaContatto(id) {
+  var r = rubrica.find(x => x.id === id);
+  if (!r) return;
+  _editingContId = id;
+  document.getElementById('rub-nome').value      = r.nome      || '';
+  document.getElementById('rub-piva').value      = r.piva      || '';
+  document.getElementById('rub-indirizzo').value = r.indirizzo || '';
+  document.getElementById('rub-cap').value       = r.cap       || '';
+  document.getElementById('rub-citta').value     = r.citta     || '';
+  document.getElementById('rub-prov').value      = r.provincia || '';
+  document.getElementById('rub-tel').value       = r.telefono  || '';
+  document.getElementById('rub-email').value     = r.email     || '';
+  document.getElementById('rub-nome').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  document.getElementById('rub-nome').focus();
+  setContBtn(true);
+  showToast('✏️ Modifica i campi e clicca Aggiorna per salvare', 'success');
+}
+
+function setContBtn(editMode) {
+  var btn = document.querySelector('[onclick="aggiungiContatto()"]');
+  if (!btn) return;
+  if (editMode) {
+    btn.textContent = '💾 Aggiorna trasportatore';
+    btn.style.background = 'var(--green, #0F6E56)';
+    btn.style.borderColor = 'var(--green, #0F6E56)';
+    btn.style.color = '#fff';
+  } else {
+    btn.textContent = '➕ Aggiungi trasportatore';
+    btn.style.background = '';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+  }
+}
+
+function aggiungiContatto() {
+  var nome = document.getElementById('rub-nome').value.trim();
+  if (!nome) { showToast('Inserisci la ragione sociale', 'error'); return; }
+  var record = {
+    indirizzo: document.getElementById('rub-indirizzo').value.trim(),
+    cap:       document.getElementById('rub-cap').value.trim(),
+    citta:     document.getElementById('rub-citta').value.trim(),
+    provincia: document.getElementById('rub-prov').value.trim().toUpperCase(),
+    piva:      document.getElementById('rub-piva').value.trim(),
+    telefono:  document.getElementById('rub-tel').value.trim(),
+    email:     document.getElementById('rub-email').value.trim(),
+  };
+  if (_editingContId !== null) {
+    var idx2 = rubrica.findIndex(function(r){ return r.id === _editingContId; });
+    if (idx2 >= 0) rubrica[idx2] = Object.assign({}, rubrica[idx2], {nome:nome}, record);
+    saveRubrica(); markUpdated('rubrica', _editingContId); renderRubrica(); svuotaFormRub();
+    showToast('Trasportatore aggiornato', 'success');
+  } else {
+    if (rubrica.find(function(r){ return r.nome.toLowerCase() === nome.toLowerCase(); })) {
+      showToast('Contatto gia in rubrica', 'error'); return;
+    }
+    rubrica.push(Object.assign({id: Date.now(), nome:nome}, record));
+    saveRubrica(); renderRubrica(); svuotaFormRub();
+    showToast('Contatto aggiunto', 'success');
+  }
+}
+
+function svuotaFormRub() {
+  ['rub-nome','rub-piva','rub-indirizzo','rub-cap','rub-citta','rub-prov','rub-tel','rub-email']
+    .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+}
+
+function eliminaContatto(id) {
+  if (!confirm('Eliminare questo contatto dalla rubrica?')) return;
+  rubrica = rubrica.filter(r => r.id !== id);
+  saveRubrica();
+  renderRubrica();
+}
+
+function usaContatto(id) {
+  // Cerca prezzo contratto per questo vettore (chiamato dopo)
+  var rCont = rubrica ? rubrica.find(x => x.id === id) : null;
+  var r = rubrica.find(x => x.id === id);
+  if (!r) return;
+  var el = document.getElementById('d-nome');
+  if (el) el.value = r.nome;
+  var di = document.getElementById('d-indirizzo');
+  if (di) di.value = addrStr(r);
+  var dp = document.getElementById('d-piva');
+  if (dp) dp.value = r.piva || '';
+  closeAcDrop();
+  // switch to form view
+  var tabForm = document.getElementById('tab-form');
+  showView('form', tabForm);
+  showToast('✓ ' + r.nome + ' inserito nel modulo', 'success');
+}
+
+function renderRubrica() {
+  var q = (document.getElementById('rub-search')?.value||'').toLowerCase();
+  var list = q ? rubrica.filter(r =>
+    r.nome.toLowerCase().includes(q) ||
+    (r.citta||'').toLowerCase().includes(q) ||
+    (r.piva||'').toLowerCase().includes(q) ||
+    (r.indirizzo||'').toLowerCase().includes(q)
+  ) : rubrica;
+
+  document.getElementById('rub-count').textContent = list.length + ' contatti';
+  document.getElementById('rub-footer').textContent = list.length + ' contatti';
+
+  var tbody = document.getElementById('rub-tbody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">' +
+      (q ? '🔍' : '👥') + '</div><h3>' +
+      (q ? 'Nessun risultato' : 'Rubrica vuota') + '</h3><p>' +
+      (q ? 'Modifica la ricerca.' : 'Aggiungi contatti o importa Excel.') +
+      '</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(r => `
+    <tr>
+      <td><strong>${esc(r.nome)}</strong></td>
+      <td>${esc(addrStr(r))||'—'}</td>
+      <td><span class="rub-tag">${esc(r.piva)||'—'}</span></td>
+      <td>${esc(r.telefono)||'—'}</td>
+      <td>${esc(r.email)||'—'}</td>
+      <td><button class="use-btn" onclick="usaContatto(${r.id})">↗ Usa</button></td>
+      <td><button class="use-btn" onclick="modificaContatto(${r.id})" style="background:var(--blue-50);border-color:var(--blue-200);color:var(--blue-700)">✏️</button></td>
+      <td>${_updatedIds.rubrica.has(r.id)?'<span class="badge-updated">✓</span>':''}</td>
+      <td><button class="del-btn" onclick="eliminaContatto(${r.id})">✕</button></td>
+    </tr>`).join('');
+}
+
+function svuotaRubrica() {
+  if (!confirm('Svuotare tutta la rubrica? Operazione irreversibile.')) return;
+  rubrica = []; saveRubrica(); renderRubrica();
+}
+
+// ── EXCEL IMPORT ──
+function onFileSelect(e) { const f = e.target.files[0]; if(f) importaExcel(f); e.target.value=''; }
+function onFileDrop(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag-over');
+  var f = e.dataTransfer.files[0];
+  if (f) importaExcel(f);
+}
+
+function importaExcel(file) {
+  if (!window.XLSX) { showToast('Libreria non pronta, riprova', 'error'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb   = XLSX.read(e.target.result, { type: 'binary' });
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      if (!rows.length) { showToast('File vuoto o formato non riconosciuto', 'error'); return; }
+
+      // Normalize column names (case-insensitive, strip spaces/underscores)
+      const norm = s => String(s).toLowerCase().replace(/[\s_\-]/g,'');
+      const colMap = {
+        ragionesociale: 'nome', nome: 'nome',
+        indirizzo: 'indirizzo', via: 'indirizzo',
+        citta: 'citta', città: 'citta', comune: 'citta',
+        cap: 'cap',
+        provincia: 'provincia', prov: 'provincia',
+        piva: 'piva', partitaiva: 'piva',
+        telefono: 'telefono', tel: 'telefono', phone: 'telefono',
+        email: 'email', mail: 'email',
+      };
+
+      let added = 0, skipped = 0;
+      rows.forEach(row => {
+        const rec = {};
+        Object.entries(row).forEach(([k,v]) => {
+          const mapped = colMap[norm(k)];
+          if (mapped) rec[mapped] = String(v).trim();
+        });
+        if (!rec.nome) { skipped++; return; }
+        if (rubrica.find(r => r.nome.toLowerCase() === rec.nome.toLowerCase())) { skipped++; return; }
+        rubrica.push({ id: Date.now() + Math.random(), nome:rec.nome||'', indirizzo:rec.indirizzo||'',
+          cap:rec.cap||'', citta:rec.citta||'', provincia:(rec.provincia||'').toUpperCase(),
+          piva:rec.piva||'', telefono:rec.telefono||'', email:rec.email||'' });
+        added++;
+      });
+
+      saveRubrica();
+      renderRubrica();
+
+      const st = document.getElementById('import-status');
+      st.style.display = 'block';
+      st.style.color = added > 0 ? 'var(--green)' : 'var(--gray-500)';
+      st.textContent = `✓ Importati: ${added} nuovi contatti${skipped ? ' · ' + skipped + ' ignorati (duplicati o senza nome)' : ''}`;
+      showToast('✓ ' + added + ' contatti importati', 'success');
+    } catch(err) {
+      showToast('Errore lettura file: ' + err.message, 'error');
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+// ── EXPORT RUBRICA ──
+function esportaRubrica() {
+  if (!window.XLSX) { showToast('Libreria non pronta', 'error'); return; }
+  if (!rubrica.length) { showToast('Rubrica vuota', 'error'); return; }
+  const rows = rubrica.map(r => ({
+    'Ragione Sociale': r.nome, 'Indirizzo': r.indirizzo, 'CAP': r.cap,
+    'Città': r.citta, 'Provincia': r.provincia, 'P.IVA': r.piva,
+    'Telefono': r.telefono, 'Email': r.email
+  }));
+  var ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:28},{wch:28},{wch:7},{wch:20},{wch:10},{wch:14},{wch:16},{wch:24}];
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Rubrica');
+  XLSX.writeFile(wb, 'Rubrica_Destinatari.xlsx');
+  showToast('✓ Rubrica esportata');
+}
+
+// ── AUTOCOMPLETE sul form ──
+function acSearch() {
+  var q = (document.getElementById('d-nome')?.value||'').toLowerCase().trim();
+  var drop = document.getElementById('ac-drop');
+  if (!q || !rubrica.length) { closeAcDrop(); return; }
+  const matches = rubrica.filter(r => {
+    const nome = r.nome.toLowerCase();
+    // Cerca: il nome inizia con q, oppure una PAROLA del nome inizia con q
+    if (nome.startsWith(q)) return true;
+    const parole = nome.split(/[\s,\.&]/);
+    return parole.some(p => p.startsWith(q));
+  }).slice(0, 8);
+  if (!matches.length) { closeAcDrop(); return; }
+  drop.innerHTML = '';
+  matches.forEach(function(r) {
+    var div = document.createElement('div');
+    div.className = 'ac-item';
+    div.style.cursor = 'pointer';
+    div.innerHTML = '<span class="ac-name">' + esc(r.nome) + '</span>' +
+      '<span class="ac-addr">' + (esc(addrStr(r))||'—') + (r.piva ? ' · P.IVA ' + esc(r.piva) : '') + '</span>';
+    div.addEventListener('mousedown', function(e) {
+      e.preventDefault(); // evita blur sul campo input
+      document.getElementById('d-nome').value = r.nome;
+      const di = document.getElementById('d-indirizzo');
+      if (di) di.value = addrStr(r);
+      const dp = document.getElementById('d-piva');
+      if (dp) dp.value = r.piva || '';
+      closeAcDrop();
+      aggiornaPrezzoContratto();
+    });
+    drop.appendChild(div);
+  });
+  drop.classList.add('open');
+}
+
+function selezionaAC(id) {
+  // called when user picks from autocomplete
+  var r = rubrica.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('d-nome').value = r.nome;
+  var di = document.getElementById('d-indirizzo');
+  if (di) di.value = addrStr(r);
+  var dp = document.getElementById('d-piva');
+  if (dp) dp.value = r.piva || '';
+  closeAcDrop();
+  // Aggiorna prezzo DOPO che il campo è stato valorizzato
+  aggiornaPrezzoContratto();
+}
+
+function closeAcDrop() {
+  var d = document.getElementById('ac-drop');
+  if (d) d.classList.remove('open');
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('.ac-wrap')) closeAcDrop();
+});
+
+// INIT RUBRICA
+loadRubrica();
+updateRubBadge();
+renderRubrica();
+
+// INIT CONTATORE & UI
+aggiornaPreviewRif();
+renderBackupHistory();
+migraTelMail();
+
+// Aggiorna preview rif ogni volta che si torna al form
+var _origShowView = showView;
+
+updateBadge();
+
+// ══════════════════════════════════════
+// RUBRICA IMPIANTI
+// ══════════════════════════════════════
+
+
+
+function loadRubricaImp()   { try { rubricaImp = JSON.parse(localStorage.getItem(IMP_KEY)||'[]'); } catch(e){ rubricaImp=[]; } }
+function saveRubricaImp()   { localStorage.setItem(IMP_KEY, JSON.stringify(rubricaImp)); updateImpBadge(); }
+function updateImpBadge()   { const el=document.getElementById('imp-badge'); if(el) el.textContent=rubricaImp.length; }
+function addrStrImp(r)      { return [r.indirizzo, r.cap, r.citta, r.provincia ? '('+r.provincia+')' : ''].filter(Boolean).join(' '); }
+
+
+
+function modificaImpianto(id) {
+  var r = rubricaImp.find(x => x.id === id);
+  if (!r) return;
+  _editingImpId = id;
+  document.getElementById('imp-nome').value      = r.nome      || '';
+  document.getElementById('imp-piva').value      = r.piva      || '';
+  document.getElementById('imp-indirizzo').value = r.indirizzo || '';
+  document.getElementById('imp-cap').value       = r.cap       || '';
+  document.getElementById('imp-citta').value     = r.citta     || '';
+  document.getElementById('imp-prov').value      = r.provincia || '';
+  document.getElementById('imp-tel').value       = r.telefono  || '';
+  document.getElementById('imp-email').value     = r.email     || '';
+  document.getElementById('imp-nome').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  document.getElementById('imp-nome').focus();
+  setImpBtn(true);
+  showToast('✏️ Modifica i campi e clicca Aggiorna per salvare', 'success');
+}
+
+function setImpBtn(editMode) {
+  var btn = document.querySelector('[onclick="aggiungiImpianto()"]');
+  if (!btn) return;
+  if (editMode) {
+    btn.textContent = '💾 Aggiorna impianto';
+    btn.style.background = 'var(--green, #0F6E56)';
+    btn.style.borderColor = 'var(--green, #0F6E56)';
+    btn.style.color = '#fff';
+  } else {
+    btn.textContent = '➕ Aggiungi impianto';
+    btn.style.background = '';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+  }
+}
+
+function aggiungiImpianto() {
+  var nome = document.getElementById('imp-nome').value.trim();
+  if (!nome) { showToast('⚠ Inserisci almeno la ragione sociale', 'error'); return; }
+  const record = {
+    indirizzo: document.getElementById('imp-indirizzo').value.trim(),
+    cap:       document.getElementById('imp-cap').value.trim(),
+    citta:     document.getElementById('imp-citta').value.trim(),
+    provincia: document.getElementById('imp-prov').value.trim().toUpperCase(),
+    piva:      document.getElementById('imp-piva').value.trim(),
+    telefono:  document.getElementById('imp-tel').value.trim(),
+    email:     document.getElementById('imp-email').value.trim(),
+  };
+  if (_editingImpId !== null) {
+    const idx = rubricaImp.findIndex(r => r.id === _editingImpId);
+    if (idx >= 0) rubricaImp[idx] = { ...rubricaImp[idx], nome, ...record };
+    saveRubricaImp(); markUpdated('imp', _editingImpId); renderRubricaImp(); svuotaFormImp();
+    showToast('✓ Impianto aggiornato', 'success');
+  } else {
+    rubricaImp.push({ id: Date.now(), nome, ...record });
+    saveRubricaImp(); renderRubricaImp(); svuotaFormImp();
+    showToast('✓ Impianto aggiunto', 'success');
+  }
+}
+
+function svuotaFormImp() {
+  ['imp-nome','imp-piva','imp-indirizzo','imp-cap','imp-citta','imp-prov','imp-tel','imp-email']
+    .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  _editingImpId = null; setImpBtn(false);
+}
+
+function eliminaImpianto(id) {
+  if (!confirm('Eliminare questo impianto dalla rubrica?')) return;
+  rubricaImp = rubricaImp.filter(r => r.id !== id);
+  saveRubricaImp();
+  renderRubricaImp();
+}
+
+function usaImpianto(id) {
+  var r = rubricaImp.find(x => x.id === id);
+  if (!r) return;
+  var el = document.getElementById('s-impianto');
+  if (el) el.value = r.nome;
+  var sede = document.getElementById('s-impiantosede');
+  if (sede) sede.value = addrStrImp(r);
+  closeAcDropImp();
+  var tabForm = document.getElementById('tab-form');
+  showView('form', tabForm);
+  showToast('✓ ' + r.nome + ' inserito nel modulo', 'success');
+}
+
+function renderRubricaImp() {
+  var q = (document.getElementById('imp-search')?.value||'').toLowerCase();
+  var list = q ? rubricaImp.filter(r =>
+    r.nome.toLowerCase().includes(q) ||
+    (r.citta||'').toLowerCase().includes(q) ||
+    (r.piva||'').toLowerCase().includes(q) ||
+    (r.indirizzo||'').toLowerCase().includes(q)
+  ) : rubricaImp;
+
+  document.getElementById('imp-count').textContent = list.length + ' impianti';
+  document.getElementById('imp-footer').textContent = list.length + ' impianti';
+
+  var tbody = document.getElementById('imp-tbody');
+  if (!list.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">' +
+      (q ? '🔍' : '🏗') + '</div><h3>' +
+      (q ? 'Nessun risultato' : 'Rubrica vuota') + '</h3><p>' +
+      (q ? 'Modifica la ricerca.' : 'Aggiungi impianti o importa Excel.') +
+      '</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(r => `
+    <tr>
+      <td><strong>${esc(r.nome)}</strong></td>
+      <td>${esc(addrStrImp(r))||'—'}</td>
+      <td><span class="rub-tag">${esc(r.piva)||'—'}</span></td>
+      <td>${esc(r.telefono)||'—'}</td>
+      <td>${esc(r.email)||'—'}</td>
+      <td><button class="use-btn" onclick="usaImpianto(${r.id})">↗ Usa</button></td>
+      <td><button class="use-btn" onclick="modificaImpianto(${r.id})" style="background:var(--blue-50);border-color:var(--blue-200);color:var(--blue-700)">✏️</button></td>
+      <td>${_updatedIds.imp.has(r.id)?'<span class="badge-updated">✓</span>':''}</td>
+      <td><button class="del-btn" onclick="eliminaImpianto(${r.id})">✕</button></td>
+    </tr>`).join('');
+}
+
+function svuotaRubricaImp() {
+  if (!confirm('Svuotare tutta la rubrica impianti? Operazione irreversibile.')) return;
+  rubricaImp = []; saveRubricaImp(); renderRubricaImp();
+}
+
+// ── Autocomplete Impianti sul campo "All'impianto" ──
+function acSearchImp() {
+  var q = (document.getElementById('s-impianto')?.value||'').toLowerCase().trim();
+  var drop = document.getElementById('ac-drop-imp');
+  if (!q || !rubricaImp.length) { closeAcDropImp(); return; }
+  var matches = rubricaImp.filter(r =>
+    r.nome.toLowerCase().includes(q) ||
+    (r.citta||'').toLowerCase().includes(q)
+  ).slice(0, 8);
+  if (!matches.length) { closeAcDropImp(); return; }
+  drop.innerHTML = matches.map(r => `
+    <div class="ac-item" onclick="selezionaACImp(${r.id})">
+      <span class="ac-name">${esc(r.nome)}</span>
+      <span class="ac-addr">${esc(addrStrImp(r))||'—'}${r.piva ? ' · P.IVA '+esc(r.piva) : ''}</span>
+    </div>`).join('');
+  drop.classList.add('open');
+}
+
+function selezionaACImp(id) {
+  var r = rubricaImp.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('s-impianto').value = r.nome;
+  var sede = document.getElementById('s-impiantosede');
+  if (sede) sede.value = addrStrImp(r);
+  closeAcDropImp();
+}
+
+function closeAcDropImp() {
+  var d = document.getElementById('ac-drop-imp');
+  if (d) d.classList.remove('open');
+}
+
+document.addEventListener('click', e => {
+  if (!e.target.closest('#ac-drop-imp') && !e.target.closest('#s-impianto')) closeAcDropImp();
+});
+
+// ── Import Excel Impianti ──
+function onFileSelectImp(e) { const f = e.target.files[0]; if(f) importaExcelImp(f); e.target.value=''; }
+function onFileDropImp(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone-imp').classList.remove('drag-over');
+  var f = e.dataTransfer.files[0];
+  if (f) importaExcelImp(f);
+}
+
+function importaExcelImp(file) {
+  if (!window.XLSX) { showToast('Libreria non pronta, riprova', 'error'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb   = XLSX.read(e.target.result, { type: 'binary' });
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      if (!rows.length) { showToast('File vuoto o formato non riconosciuto', 'error'); return; }
+      const norm = s => String(s).toLowerCase().replace(/[\s_\-]/g,'');
+      const colMap = {
+        ragionesociale:'nome', nome:'nome',
+        indirizzo:'indirizzo', via:'indirizzo',
+        citta:'citta', città:'citta', comune:'citta',
+        cap:'cap', provincia:'provincia', prov:'provincia',
+        piva:'piva', partitaiva:'piva',
+        telefono:'telefono', tel:'telefono', phone:'telefono',
+        email:'email', mail:'email',
+      };
+      let added = 0, skipped = 0;
+      rows.forEach(row => {
+        const rec = {};
+        Object.entries(row).forEach(([k,v]) => {
+          const mapped = colMap[norm(k)];
+          if (mapped) rec[mapped] = String(v).trim();
+        });
+        if (!rec.nome) { skipped++; return; }
+        if (rubricaImp.find(r => r.nome.toLowerCase() === rec.nome.toLowerCase())) { skipped++; return; }
+        rubricaImp.push({ id: Date.now()+Math.random(), nome:rec.nome||'', indirizzo:rec.indirizzo||'',
+          cap:rec.cap||'', citta:rec.citta||'', provincia:(rec.provincia||'').toUpperCase(),
+          piva:rec.piva||'', telefono:rec.telefono||'', email:rec.email||'' });
+        added++;
+      });
+      saveRubricaImp();
+      renderRubricaImp();
+      const st = document.getElementById('import-status-imp');
+      st.style.display = 'block';
+      st.style.color = added > 0 ? 'var(--green)' : 'var(--gray-500)';
+      st.textContent = '✓ Importati: ' + added + ' nuovi impianti' + (skipped ? ' · ' + skipped + ' ignorati' : '');
+      showToast('✓ ' + added + ' impianti importati', 'success');
+    } catch(err) {
+      showToast('Errore lettura file: ' + err.message, 'error');
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+function esportaRubricaImp() {
+  if (!window.XLSX) { showToast('Libreria non pronta', 'error'); return; }
+  if (!rubricaImp.length) { showToast('Rubrica vuota', 'error'); return; }
+  const rows = rubricaImp.map(r => ({
+    'Ragione Sociale':r.nome, 'Indirizzo':r.indirizzo, 'CAP':r.cap,
+    'Città':r.citta, 'Provincia':r.provincia, 'P.IVA':r.piva,
+    'Telefono':r.telefono, 'Email':r.email
+  }));
+  var ws = XLSX.utils.json_to_sheet(rows);
+  ws['!cols'] = [{wch:28},{wch:28},{wch:7},{wch:20},{wch:10},{wch:14},{wch:16},{wch:24}];
+  var wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'Impianti');
+  XLSX.writeFile(wb, 'Rubrica_Impianti.xlsx');
+  showToast('✓ Rubrica impianti esportata');
+}
+
+// ── include impianti nel backup ──
+// override esportaBackup and applicaBackup to include rubricaImp
+function esportaBackup() {
+  const blob = JSON.stringify({
+    versione:    5,
+    esportato:   new Date().toISOString(),
+    archivio,
+    rubrica,       // Rubrica Trasportatori
+    rubricaProd,   // Rubrica Produttori
+    rubricaImp,    // Rubrica Impianti
+    contratti,     // Contratti
+    counter:     getCounterData(),
+  }, null, 2);
+  var _burl = URL.createObjectURL(new Blob([blob], { type: 'application/json' }));
+  var a = document.createElement('a');
+  a.href = _burl;
+  a.download = 'Backup_OrdiniServizio_' + new Date().toISOString().slice(0,10) + '.json';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  setTimeout(() => URL.revokeObjectURL(_burl), 1000);
+  showToast('✓ Backup scaricato', 'success');
+}
+
+function applicaBackup(data) {
+  var stats = { archivio:0, rubrica:0, prod:0, imp:0, contratti:0 };
+
+  // ── Unione per archivio (chiave: id) ──
+  if (data.archivio && data.archivio.length) {
+    var ids = new Set(archivio.map(function(r){ return r.id; }));
+    data.archivio.forEach(function(r){
+      if (!ids.has(r.id)) { archivio.push(r); stats.archivio++; }
+    });
+    saveArchivio();
+  }
+
+  // ── Unione per rubrica trasportatori (chiave: nome) ──
+  if (data.rubrica && data.rubrica.length) {
+    var nomi = new Set(rubrica.map(function(r){ return (r.nome||'').toLowerCase(); }));
+    data.rubrica.forEach(function(r){
+      if (!nomi.has((r.nome||'').toLowerCase())) { rubrica.push(r); stats.rubrica++; }
+    });
+    saveRubrica();
+  }
+
+  // ── Unione per rubrica produttori (chiave: nome) ──
+  if (data.rubricaProd && data.rubricaProd.length) {
+    var nomiP = new Set(rubricaProd.map(function(r){ return (r.nome||'').toLowerCase(); }));
+    data.rubricaProd.forEach(function(r){
+      if (!nomiP.has((r.nome||'').toLowerCase())) { rubricaProd.push(r); stats.prod++; }
+    });
+    saveRubricaProd();
+  }
+
+  // ── Unione per rubrica impianti (chiave: nome) ──
+  if (data.rubricaImp && data.rubricaImp.length) {
+    var nomiI = new Set(rubricaImp.map(function(r){ return (r.nome||'').toLowerCase(); }));
+    data.rubricaImp.forEach(function(r){
+      if (!nomiI.has((r.nome||'').toLowerCase())) { rubricaImp.push(r); stats.imp++; }
+    });
+    saveRubricaImp();
+  }
+
+  // ── Unione per contratti (chiave: nome vettore + produttore) ──
+  if (data.contratti && data.contratti.length) {
+    var keyCont = new Set(contratti.map(function(c){
+      return (c.nome||'').toLowerCase() + '|' + (c.produttore||'').toLowerCase();
+    }));
+    data.contratti.forEach(function(c){
+      var k = (c.nome||'').toLowerCase() + '|' + (c.produttore||'').toLowerCase();
+      if (!keyCont.has(k)) { contratti.push(c); stats.contratti++; }
+    });
+    saveContratti();
+  }
+
+  aggiornaPreviewRif();
+  renderBackupHistory();
+  if (typeof renderRubrica     === 'function') renderRubrica();
+  if (typeof renderRubricaProd === 'function') renderRubricaProd();
+  if (typeof renderRubricaImp  === 'function') renderRubricaImp();
+  if (typeof renderContratti   === 'function') renderContratti();
+  if (typeof refreshArchive    === 'function') refreshArchive();
+
+  showToast(
+    '✓ Aggiunti: ' + stats.archivio + ' ordini · ' +
+    stats.rubrica + ' trasportatori · ' +
+    stats.prod    + ' produttori · ' +
+    stats.imp     + ' impianti · ' +
+    stats.contratti + ' contratti',
+    'success'
+  );
+}
+
+// INIT IMPIANTI
+loadRubricaImp();
+updateImpBadge();
+renderRubricaImp();
+
+window.addEventListener("load", function(){ initCodici(); initGiorni(); initCampiDefault(); initIntestazione(); });
+// ── Scala il documento per stare in una pagina A4 ──
+
+// Imposta data corrente e città fissa
+
+// ── Tracking record aggiornati ──
+
+
+function markUpdated(tipo, id) {
+  _updatedIds[tipo].add(id);
+}
+function clearUpdated(tipo) {
+  _updatedIds[tipo].clear();
+}
+
+
+// ── Dati intestazioni ──
+var INTESTAZIONI = {
+  cr: {
+    nome:      'CENTRO RISORSE S.p.A.',
+    indirizzo: 'Via Lazio, 48 - Motta di Livenza (TV)',
+    tel:       'Tel. 0422/503721 - trasporti.centrorisorse@itelyum.com',
+    piva:      '00584180269',
+    firmaLabel:'CENTRO RISORSE S.P.A.'
+  },
+  area: {
+    nome:      'AREA S.r.l.',
+    indirizzo: 'Via Lazio, 48 - 31045 Motta di Livenza (TV) Italy',
+    tel:       'T +39 0422 50 37 94 - F +39 0422 50 37 77 - Info.area@itelyum.com - area.motta@pec.it - www.itelyum-ambiente.com',
+    piva:      'C.F., P.IVA e Reg. Imprese TV n. 03318910274 - R.E.A. TV n. 322110 - Cap. Soc. € 100.000 i.v.',
+    firmaLabel:'AREA S.r.l.'
+  }
+};
+
+function cambiaIntestazione(val) {
+  var d = INTESTAZIONI[val];
+  document.getElementById('m-nome').value      = d.nome;
+  document.getElementById('m-indirizzo').value = d.indirizzo;
+  document.getElementById('m-tel').value       = d.tel;
+  document.getElementById('m-piva').value      = d.piva;
+  // Aggiorna stile radio labels
+  document.getElementById('lbl-cr').style.background    = val==='cr'   ? '#1A4F8A' : '#DAEEFF';
+  document.getElementById('lbl-cr').style.borderColor   = '#1A4F8A';
+  document.getElementById('lbl-cr').querySelector('span').style.color = val==='cr' ? '#fff' : '#1A4F8A';
+  document.getElementById('lbl-area').style.background  = val==='area' ? '#1A4F8A' : '#DAEEFF';
+  document.getElementById('lbl-area').style.borderColor = '#1A4F8A';
+  document.getElementById('lbl-area').querySelector('span').style.color = val==='area' ? '#fff' : '#1A4F8A';
+}
+// Inizializza con CENTRO RISORSE al caricamento
+function initIntestazione() {
+  cambiaIntestazione('cr');
+}
+
+function initCampiDefault() {
+  var oggi = new Date().toISOString().slice(0, 10);
+  var docData = document.getElementById('doc-data');
+  if (docData && !docData.value) docData.value = oggi;
+  var docCitta = document.getElementById('doc-citta');
+  if (docCitta) docCitta.value = 'Motta di Livenza';
+}
+
+function scalaPDF() {
+  var doc = document.getElementById('doc-print');
+  if (!doc) return;
+  // Reset any previous scale
+  doc.style.transform = '';
+  doc.style.fontSize = '';
+  // A4 at 96dpi = 794px wide, 1123px tall
+  // Our content area with 18mm top + 15mm bottom padding at 96dpi (1mm≈3.78px)
+  var pageH = 1123;
+  var contentH = doc.scrollHeight;
+  if (contentH > pageH) {
+    var scale = pageH / contentH;
+    doc.style.transform = 'scale(' + scale + ')';
+    doc.style.transformOrigin = 'top left';
+    doc.style.width = (100 / scale) + '%';
+  }
+}
+
+window.addEventListener('beforeprint', scalaPDF);
+window.addEventListener('afterprint', function() {
+  var doc = document.getElementById('doc-print');
+  if (doc) { doc.style.transform = ''; doc.style.width = ''; }
+});
+
+
+// ══════════════════════════════════════
+// GIORNI / VIAGGI MULTIPLI
+// ══════════════════════════════════════
+function initGiorni() {
+  var list = document.getElementById('giorno-list');
+  if (!list) return;
+  if (list.children.length === 0) aggiungiGiorno();
+}
+
+function aggiungiGiorno(valore) {
+  var list = document.getElementById('giorno-list');
+  if (!list) return;
+  var row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:6px;align-items:center';
+  var inp = document.createElement('input');
+  inp.type = 'text';
+  inp.value = valore || '';
+  inp.placeholder = 'Es. 26/03/26 — 1 viaggio in mattinata, dopo scarico';
+  inp.style.cssText = 'flex:1;font-family:inherit;font-size:13.5px;color:#374151;background:#fff;border:1.5px solid #d1d8e0;border-radius:7px;padding:8px 10px;outline:none';
+  var btn = document.createElement('button');
+  btn.type = 'button';
+  btn.title = 'Rimuovi';
+  btn.textContent = '✕';
+  btn.style.cssText = 'padding:6px 10px;border-radius:7px;border:1.5px solid #d1d8e0;background:transparent;cursor:pointer;font-size:14px;color:#6b7280';
+  btn.onclick = function(){ this.parentElement.remove(); };
+  row.appendChild(inp);
+  row.appendChild(btn);
+  list.appendChild(row);
+}
+
+function getGiorniList() {
+  var inputs = document.querySelectorAll('#giorno-list input[type=text]');
+  return Array.from(inputs).map(function(i){ return i.value.trim(); }).filter(Boolean).join('\n');
+}
+
+function resetGiorni() {
+  var list = document.getElementById('giorno-list');
+  if (!list) return;
+  list.innerHTML = '';
+  aggiungiGiorno();
+}
+
+function setGiorniList(val) {
+  var list = document.getElementById('giorno-list');
+  if (!list) return;
+  list.innerHTML = '';
+  var vals = (val||'').split('\n').filter(Boolean);
+  if (!vals.length) { aggiungiGiorno(); return; }
+  vals.forEach(function(v){ aggiungiGiorno(v); });
+}
+
+
+// ── Modal modifica ordine ──
+function apriModal(id) {
+  var r = archivio.find(x => x.id === id);
+  if (!r) return;
+  document.getElementById('mod-id').value = id;
+  document.getElementById('mod-data').value         = r.data || '';
+  document.getElementById('mod-rif').value          = r.rif || '';
+  document.getElementById('mod-dest').value         = r.destinatario || '';
+  document.getElementById('mod-citta').value        = r.citta || '';
+  document.getElementById('mod-giorno').value       = (r.giorno||'').split('\n').join('\n');
+  document.getElementById('mod-ditta').value        = r.ditta || '';
+  document.getElementById('mod-sede').value         = r.sede || '';
+  document.getElementById('mod-materiale').value    = r.materiale || '';
+  document.getElementById('mod-codici').value       = (r.codici||'').split('\n').join('\n');
+  document.getElementById('mod-impianto').value     = r.impianto || '';
+  document.getElementById('mod-impiantosede').value = r.impiantosede || '';
+  document.getElementById('mod-mezzo').value        = r.mezzo || '';
+  document.getElementById('mod-prezzo').value       = r.prezzo || '';
+  document.getElementById('mod-trasportoOrg').value = r.trasportoOrg || '';
+  document.getElementById('modal-modifica').classList.add('open');
+}
+
+function chiudiModal() {
+  document.getElementById('modal-modifica').classList.remove('open');
+}
+document.addEventListener('click', e => {
+  if(e.target.id === 'modal-modifica') chiudiModal();
+});
+document.addEventListener('keydown', e => {
+  if(e.key === 'Escape') chiudiModal();
+});
+
+// Close modal clicking outside
+document.addEventListener('click', function(e) {
+  var overlay = document.getElementById('modal-modifica');
+  if (e.target === overlay) chiudiModal();
+});
+
+function salvaModifica() {
+  var id = parseInt(document.getElementById('mod-id').value);
+  var idx = archivio.findIndex(x => x.id === id);
+  if (idx === -1) return;
+  var r = archivio[idx];
+  var dataRaw = document.getElementById('mod-data').value;
+  const [y,m,d] = (dataRaw||'').split('-');
+  r.data        = dataRaw;
+  r.dataIt      = (y&&m&&d) ? d+'/'+m+'/'+y : dataRaw;
+  r.rif         = document.getElementById('mod-rif').value.trim();
+  r.destinatario= document.getElementById('mod-dest').value.trim();
+  r.citta       = document.getElementById('mod-citta').value.trim();
+  r.giorno      = document.getElementById('mod-giorno').value.trim();
+  r.ditta       = document.getElementById('mod-ditta').value.trim();
+  r.sede        = document.getElementById('mod-sede').value.trim();
+  r.materiale   = document.getElementById('mod-materiale').value.trim();
+  r.codici      = document.getElementById('mod-codici').value.trim();
+  r.impianto    = document.getElementById('mod-impianto').value.trim();
+  r.impiantosede= document.getElementById('mod-impiantosede').value.trim();
+  r.mezzo       = document.getElementById('mod-mezzo').value.trim();
+  var prezzoStr = document.getElementById('mod-prezzo').value.trim().replace(/^€\s*/,'');
+  r.prezzo      = prezzoStr;
+  r.prezzoNum   = parseFloat(prezzoStr.replace(/[^0-9.,]/g,'').replace(',','.')) || 0;
+  archivio[idx] = r;
+  saveArchivio();
+  refreshArchive();
+  chiudiModal();
+  showToast('✓ Ordine aggiornato', 'success');
+}
+
+
+// ══════════════════════════════════════
+// CONTRATTI
+// ══════════════════════════════════════
+
+
+
+function loadContratti()   { try { contratti = JSON.parse(localStorage.getItem(CONT_KEY)||'[]'); } catch(e){ contratti=[]; } }
+function saveContratti()   { localStorage.setItem(CONT_KEY, JSON.stringify(contratti)); updateContBadge(); }
+function updateContBadge() { const el=document.getElementById('cont-badge'); if(el) el.textContent=contratti.length; }
+
+function svuotaFormCont() {
+  ['cont-nome','cont-prezzo','cont-tipo','cont-validita','cont-note','cont-produttore','cont-mezzo','cont-destino','cont-prezzo-destino','cont-prezzo-sosta','cont-prezzo-destino-sosta']
+    .forEach(id => { const el=document.getElementById(id); if(el) el.value=''; });
+  _editingContrattoId = null; setContrattoBtn(false);
+}
+
+function modificaContratto(id) {
+  var c = contratti.find(x => x.id === id);
+  if(!c) return;
+  // Precompila il form manuale
+  document.getElementById('cont-nome').value               = c.nome               || '';
+  document.getElementById('cont-prezzo').value             = c.prezzo             || '';
+  document.getElementById('cont-tipo').value               = c.tipo               || '';
+  document.getElementById('cont-validita').value           = c.validita           || '';
+  document.getElementById('cont-note').value               = c.note               || '';
+  document.getElementById('cont-destino').value            = c.destino            || '';
+  document.getElementById('cont-prezzo-destino').value     = c.prezzoDestino      || '';
+  document.getElementById('cont-prezzo-sosta').value       = c.prezzoSosta        || '';
+  document.getElementById('cont-prezzo-destino-sosta').value = c.prezzoDestinoSosta || '';
+  // Scroll al form e evidenzia
+  document.getElementById('cont-nome').scrollIntoView({ behavior: 'smooth', block: 'center' });
+  document.getElementById('cont-nome').focus();
+  // Cambia label pulsante temporaneamente
+  var btn = document.querySelector('[onclick="aggiungiContratto()"]');
+  if(btn) {
+    btn.textContent = '💾 Aggiorna contratto';
+    btn.style.background = 'var(--green)';
+    setTimeout(() => {
+      btn.textContent = '➕ Aggiungi contratto';
+      btn.style.background = '';
+    }, 5000);
+  }
+  showToast('✏️ Modifica il contratto e clicca Aggiungi per salvare', 'success');
+}
+
+
+
+function modificaContrattoBtn(id) {
+  var c = contratti.find(x => x.id === id);
+  if (!c) return;
+  _editingContrattoId = id;
+  var set = (elId, val) => { const el=document.getElementById(elId); if(el) el.value=val||''; };
+  set('cont-nome',                c.nome);
+  set('cont-prezzo',              c.prezzo);
+  set('cont-tipo',                c.tipo);
+  set('cont-validita',            c.validita);
+  set('cont-note',                c.note);
+  set('cont-produttore',          c.produttore);
+  set('cont-mezzo',               c.mezzo);
+  set('cont-destino',             c.destino);
+  set('cont-prezzo-destino',      c.prezzoDestino);
+  set('cont-prezzo-sosta',        c.prezzoSosta);
+  set('cont-prezzo-destino-sosta',c.prezzoDestinoSosta);
+  document.getElementById('cont-nome').scrollIntoView({ behavior:'smooth', block:'center' });
+  document.getElementById('cont-nome').focus();
+  setContrattoBtn(true);
+  showToast('✏️ Modifica il contratto e clicca Aggiorna per salvare', 'success');
+}
+
+function modificaContratto(id) { modificaContrattoBtn(id); }
+
+function setContrattoBtn(editMode) {
+  var btn = document.querySelector('[onclick="aggiungiContratto()"]');
+  if (!btn) return;
+  if (editMode) {
+    btn.textContent = '💾 Aggiorna contratto';
+    btn.style.background = '#0F6E56';
+    btn.style.borderColor = '#0F6E56';
+    btn.style.color = '#fff';
+  } else {
+    btn.textContent = '➕ Aggiungi contratto';
+    btn.style.background = '';
+    btn.style.borderColor = '';
+    btn.style.color = '';
+  }
+}
+
+function aggiungiContratto() {
+  var nome   = document.getElementById('cont-nome')?.value.trim();
+  var prezzo = document.getElementById('cont-prezzo')?.value.trim();
+  if(!nome || !prezzo) { showToast('⚠ Inserisci almeno il vettore e il prezzo', 'error'); return; }
+  const record = {
+    nome, prezzo,
+    tipo:              document.getElementById('cont-tipo')?.value.trim()              || '',
+    validita:          document.getElementById('cont-validita')?.value.trim()          || '',
+    note:              document.getElementById('cont-note')?.value.trim()              || '',
+    produttore:        document.getElementById('cont-produttore')?.value.trim()        || '',
+    mezzo:             document.getElementById('cont-mezzo')?.value.trim()             || '',
+    destino:           document.getElementById('cont-destino')?.value.trim()           || '',
+    prezzoDestino:     document.getElementById('cont-prezzo-destino')?.value.trim()    || '',
+    prezzoSosta:       document.getElementById('cont-prezzo-sosta')?.value.trim()      || '',
+    prezzoDestinoSosta:document.getElementById('cont-prezzo-destino-sosta')?.value.trim() || '',
+  };
+  if (_editingContrattoId !== null) {
+    const idx = contratti.findIndex(c => c.id === _editingContrattoId);
+    if (idx >= 0) contratti[idx] = { ...contratti[idx], ...record };
+    saveContratti(); markUpdated('cont', _editingContrattoId); renderContratti(); svuotaFormCont();
+    showToast('✓ Contratto aggiornato', 'success');
+  } else {
+    contratti.push({ id: Date.now(), ...record });
+    saveContratti(); renderContratti(); svuotaFormCont();
+    showToast('✓ Contratto aggiunto', 'success');
+  }
+}
+
+function eliminaContratto(id) {
+  if(!confirm('Eliminare questo contratto?')) return;
+  contratti = contratti.filter(c => c.id !== id);
+  saveContratti();
+  renderContratti();
+}
+
+function usaContratto(id) {
+  var c = contratti.find(x => x.id === id);
+  if(!c) return;
+  var el = document.getElementById('s-prezzo');
+  // Non pre-compilare il prezzo concordato
+  aggiornaPrezzoHint(c.nome, c.prezzo);
+  var tabForm = document.getElementById('tab-form');
+  showView('form', tabForm);
+  showToast('✓ Prezzo ' + c.prezzo + ' inserito nel modulo', 'success');
+}
+
+function svuotaContratti() {
+  if(!confirm('Eliminare tutti i contratti? Operazione irreversibile.')) return;
+  contratti = []; saveContratti(); renderContratti();
+}
+
+function renderContratti() {
+  var q = (document.getElementById('cont-search')?.value||'').toLowerCase();
+  var list = q ? contratti.filter(c =>
+    c.nome.toLowerCase().includes(q) ||
+    (c.tipo||'').toLowerCase().includes(q) ||
+    (c.prezzo||'').toLowerCase().includes(q)
+  ) : contratti;
+
+  document.getElementById('cont-count').textContent  = list.length + ' contratti';
+  document.getElementById('cont-footer').textContent = list.length + ' contratti';
+
+  var tbody = document.getElementById('cont-tbody');
+  if(!list.length) {
+    tbody.innerHTML = '<tr><td colspan="8"><div class="empty-state"><div class="empty-icon">' +
+      (q ? '🔍' : '📋') + '</div><h3>' +
+      (q ? 'Nessun risultato' : 'Nessun contratto') + '</h3><p>' +
+      (q ? 'Modifica la ricerca.' : 'Importa Excel o aggiungi manualmente.') +
+      '</p></div></td></tr>';
+    return;
+  }
+  tbody.innerHTML = list.map(c => `
+    <tr>
+      <td><strong>${esc(c.nome)}</strong></td>
+      <td>${esc(c.produttore)||'—'}</td>
+      <td>${esc(c.mezzo)||'—'}</td>
+      <td><span style="color:var(--green);font-weight:700">${esc(c.prezzo)||'—'}</span></td>
+      <td>${esc(c.destino)||'—'}</td>
+      <td><button class="use-btn" onclick="usaContratto(${c.id})">↗ Usa</button></td>
+      <td><button class="use-btn" onclick="modificaContratto(${c.id})" style="background:var(--blue-50);border-color:var(--blue-200);color:var(--blue-700)">✏️</button></td>
+      <td style="text-align:center;white-space:nowrap">
+        ${_updatedIds.cont.has(c.id)?'<span class="badge-updated">✓</span>':''}
+        <button class="del-btn" onclick="eliminaContratto(${c.id})" style="background:#fee2e2;border-color:#fca5a5;color:#dc2626;font-size:14px;padding:3px 8px" title="Elimina contratto">🗑</button>
+      </td>
+    </tr>`).join('');
+}
+
+// ── Prezzo hint nel form ──
+function aggiornaPrezzoHint(nomeVettore, prezzo) {
+  var hint = document.getElementById('prezzo-hint');
+  if(!hint) return;
+  if(nomeVettore && prezzo) {
+    hint.textContent = '📋 da contratto: ' + prezzo;
+    hint.style.color = 'var(--green)';
+  } else {
+    hint.textContent = '';
+  }
+}
+
+// Auto-compila prezzo quando cambia il destinatario
+function cercaPrezzoContratto(nomeVettore) {
+  aggiornaPrezzoContratto();
+}
+
+function aggiornaPrezzoContratto(matchOverride) {
+  var nomeVettore    = (document.getElementById('d-nome')?.value    || '').trim().toLowerCase();
+  var nomeProduttore = (document.getElementById('s-ditta')?.value   || '').trim().toLowerCase();
+  var nomeImpianto   = (document.getElementById('s-impianto')?.value|| '').trim().toLowerCase();
+  var nomeMezzo      = (document.getElementById('s-mezzo')?.value   || '').trim().toLowerCase();
+
+  if (!nomeProduttore && !nomeVettore) return;
+
+  // Cerca il contratto più specifico usando PRODUTTORE come chiave primaria
+  var bestMatch = null;
+  var bestScore = -1;
+
+  contratti.forEach(function(c) {
+    let score = 0;
+
+    // Corrispondenza produttore (chiave primaria)
+    const cProd = (c.produttore || '').trim().toLowerCase();
+    if (cProd) {
+      if (nomeProduttore && (nomeProduttore === cProd || nomeProduttore.includes(cProd) || cProd.includes(nomeProduttore))) {
+        score += 10;
+      } else {
+        return; // produttore specificato ma non corrisponde: salta
+      }
+    }
+
+    // Corrispondenza vettore (secondaria)
+    const cVett = (c.nome || '').trim().toLowerCase();
+    if (cVett && nomeVettore) {
+      if (nomeVettore === cVett || nomeVettore.includes(cVett) || cVett.includes(nomeVettore)) {
+        score += 5;
+      }
+    }
+
+    // Corrispondenza mezzo
+    const cMezzo = (c.mezzo || '').trim().toLowerCase();
+    if (cMezzo && nomeMezzo) {
+      if (nomeMezzo.includes(cMezzo) || cMezzo.includes(nomeMezzo)) score += 3;
+    }
+
+    // Corrispondenza destino/impianto
+    const cDest = (c.destino || '').trim().toLowerCase();
+    if (cDest && nomeImpianto) {
+      if (nomeImpianto.includes(cDest) || cDest.includes(nomeImpianto)) score += 2;
+    }
+
+    if (score > bestScore) { bestScore = score; bestMatch = c; }
+  });
+
+  if (!bestMatch) {
+    aggiornaPrezzoHint('', '');
+    // Prezzo non pre-compilato automaticamente
+    return;
+  }
+
+  // Scegli il prezzo in base al destino
+  var cDest = (bestMatch.destino || '').trim().toLowerCase();
+  var hasDestino = cDest && nomeImpianto && (nomeImpianto.includes(cDest) || cDest.includes(nomeImpianto));
+
+  var prezzo = bestMatch.prezzo;
+  var hint   = 'prezzo base';
+
+  if (hasDestino && bestMatch.prezzoDestino) {
+    prezzo = bestMatch.prezzoDestino;
+    hint   = 'destino: ' + bestMatch.destino;
+  }
+
+  // Prezzo concordato: non pre-compilato, da inserire manualmente
+  aggiornaPrezzoHint(bestMatch.nome, prezzo + ' (' + hint + ')');
+}
+
+function onFileSelectCont(e) { const f=e.target.files[0]; if(f) importaExcelCont(f); e.target.value=''; }
+function onFileDropCont(e) {
+  e.preventDefault();
+  document.getElementById('drop-zone-cont').classList.remove('drag-over');
+  var f = e.dataTransfer.files[0];
+  if(f) importaExcelCont(f);
+}
+
+function importaExcelCont(file) {
+  if(!window.XLSX) { showToast('Libreria Excel non pronta, riprova', 'error'); return; }
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const wb   = XLSX.read(e.target.result, { type: 'binary' });
+      const ws   = wb.Sheets[wb.SheetNames[0]];
+      const rows = XLSX.utils.sheet_to_json(ws, { defval: '' });
+      if(!rows.length) { showToast('File vuoto o formato non riconosciuto', 'error'); return; }
+      const norm = s => String(s).toLowerCase().replace(/[\s_\-]/g,'');
+      const colMap = {
+        vettore:'nome', trasportatore:'nome', destinatario:'nome', nome:'nome', ragionesociale:'nome',
+        prezzo:'prezzo', tariffa:'prezzo', importo:'prezzo', costo:'prezzo', prezzoconc:'prezzo',
+        tipo:'tipo', tiposervizio:'tipo', servizio:'tipo',
+        validita:'validita', validità:'validita', scadenza:'validita',
+        note:'note', nota:'note',
+      };
+      let added=0, updated=0, skipped=0;
+      rows.forEach(row => {
+        const rec = {};
+        Object.entries(row).forEach(([k,v]) => {
+          const mapped = colMap[norm(k)];
+          if(mapped) rec[mapped] = String(v).trim();
+        });
+        if(!rec.nome || !rec.prezzo) { skipped++; return; }
+        const idx = contratti.findIndex(c => c.nome.toLowerCase() === rec.nome.toLowerCase());
+        const record = {
+          id: idx >= 0 ? contratti[idx].id : Date.now()+Math.random(),
+          nome:     rec.nome,
+          prezzo:   rec.prezzo,
+          tipo:     rec.tipo     || '',
+          validita: rec.validita || '',
+          note:     rec.note     || '',
+        };
+        if(idx >= 0) { contratti[idx] = record; updated++; }
+        else         { contratti.push(record);  added++;   }
+      });
+      saveContratti();
+      renderContratti();
+      const st = document.getElementById('import-status-cont');
+      st.style.display = 'block';
+      st.style.color   = (added+updated) > 0 ? 'var(--green)' : 'var(--gray-500)';
+      st.textContent   = '✓ ' + added + ' aggiunti, ' + updated + ' aggiornati' + (skipped ? ' · ' + skipped + ' ignorati (mancano vettore o prezzo)' : '');
+      showToast('✓ ' + (added+updated) + ' contratti importati', 'success');
+    } catch(err) {
+      showToast('Errore lettura file: ' + err.message, 'error');
+    }
+  };
+  reader.readAsBinaryString(file);
+}
+
+// INIT CONTRATTI
+loadContratti();
+updateContBadge();
+renderContratti();
+
+
+
+
+// ── Autocomplete Impianti sul campo "Destino" nei contratti ──
+function acSearchContDestino() {
+  var q = (document.getElementById('cont-destino')?.value || '').toLowerCase().trim();
+  var drop = document.getElementById('ac-drop-cont-destino');
+  if (!q || !rubricaImp.length) { drop.classList.remove('open'); return; }
+  const matches = rubricaImp.filter(r => {
+    const nome = r.nome.toLowerCase();
+    if (nome.startsWith(q)) return true;
+    return nome.split(/[\s,\.&]/).some(p => p.startsWith(q));
+  }).slice(0, 8);
+  if (!matches.length) { drop.classList.remove('open'); return; }
+  drop.innerHTML = '';
+  matches.forEach(function(r) {
+    var div = document.createElement('div');
+    div.className = 'ac-item';
+    div.style.cursor = 'pointer';
+    div.innerHTML = '<span class="ac-name">' + esc(r.nome) + '</span>' +
+      '<span class="ac-addr">' + (esc(addrStrImp(r)) || '—') + '</span>';
+    div.addEventListener('click', function() {
+      document.getElementById('cont-destino').value = r.nome;
+      drop.classList.remove('open');
+    });
+    drop.appendChild(div);
+  });
+  drop.classList.add('open');
+}
+
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#ac-drop-cont-destino') && !e.target.closest('#cont-destino')) {
+    const d = document.getElementById('ac-drop-cont-destino');
+    if (d) d.classList.remove('open');
+  }
+});
+
+
+// ── Autocomplete Produttori nel campo contratti ──
+function acSearchContProd() {
+  var q = (document.getElementById('cont-produttore')?.value || '').toLowerCase().trim();
+  var drop = document.getElementById('ac-drop-cont-prod');
+  if (!q || !rubricaProd.length) { drop.classList.remove('open'); return; }
+  const matches = rubricaProd.filter(r => {
+    const nome = r.nome.toLowerCase();
+    if (nome.startsWith(q)) return true;
+    return nome.split(/[\s,\.&]/).some(p => p.startsWith(q));
+  }).slice(0, 8);
+  if (!matches.length) { drop.classList.remove('open'); return; }
+  drop.innerHTML = '';
+  matches.forEach(function(r) {
+    var div = document.createElement('div');
+    div.className = 'ac-item';
+    div.style.cursor = 'pointer';
+    div.innerHTML = '<span class="ac-name">' + esc(r.nome) + '</span>' +
+      '<span class="ac-addr">' + (esc(addrStrProd(r)) || '—') + '</span>';
+    div.addEventListener('click', function() {
+      document.getElementById('cont-produttore').value = r.nome;
+      drop.classList.remove('open');
+    });
+    drop.appendChild(div);
+  });
+  drop.classList.add('open');
+}
+document.addEventListener('click', function(e) {
+  if (!e.target.closest('#ac-drop-cont-prod') && !e.target.closest('#cont-produttore')) {
+    const d = document.getElementById('ac-drop-cont-prod');
+    if (d) d.classList.remove('open');
+  }
+});
+
+
+function debugPrezzo() {
+  var vettore    = (document.getElementById('d-nome')?.value    || '').trim();
+  var produttore = (document.getElementById('s-ditta')?.value   || '').trim();
+  var impianto   = (document.getElementById('s-impianto')?.value|| '').trim();
+  var mezzo      = (document.getElementById('s-mezzo')?.value   || '').trim();
+  
+  var msg = '=== DEBUG PREZZO ===\n';
+  msg += 'Vettore: "' + vettore + '"\n';
+  msg += 'Produttore: "' + produttore + '"\n';
+  msg += 'Impianto: "' + impianto + '"\n';
+  msg += 'Mezzo: "' + mezzo + '"\n';
+  msg += 'Contratti totali: ' + contratti.length + '\n\n';
+  
+  if (contratti.length === 0) {
+    msg += '❌ NESSUN CONTRATTO IN MEMORIA!\nVerifica di aver caricato i dati (Backup o inserimento manuale)';
+  } else {
+    var trovati = contratti.filter(function(c) {
+      return c.nome.trim().toLowerCase() === vettore.toLowerCase();
+    });
+    msg += 'Contratti per "' + vettore + '": ' + trovati.length + '\n';
+    trovati.forEach(function(c, i) {
+      msg += '  #' + (i+1) + ': nome="' + c.nome + '" prezzo="' + c.prezzo + '" produttore="' + (c.produttore||'') + '" mezzo="' + (c.mezzo||'') + '"\n';
+    });
+    if (trovati.length === 0) {
+      msg += '\nNomi contratti esistenti:\n';
+      contratti.slice(0,10).forEach(function(c) { msg += '  "' + c.nome + '"\n'; });
+    }
+  }
+  alert(msg);
+}
+
+// ── Duplica ordine ──
+function duplicaOrdine(id) {
+  var r = archivio.find(function(x){ return x.id === id; });
+  if (!r) return;
+
+  // Mostra popup per scegliere la nuova data
+  var oggi = new Date().toISOString().slice(0,10);
+  var nuovaData = prompt(
+    'Duplica ordine: ' + (r.rif||'') + '\n' +
+    'Destinatario: ' + (r.destinatario||'') + '\n\n' +
+    'Inserisci la nuova data documento (formato AAAA-MM-GG):',
+    oggi
+  );
+  if (!nuovaData) return;
+
+  // Valida formato data
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(nuovaData)) {
+    showToast('Formato data non valido. Usa AAAA-MM-GG', 'error');
+    return;
+  }
+
+  // Crea il duplicato
+  var nuovo = JSON.parse(JSON.stringify(r)); // deep copy
+  nuovo.id   = Date.now();
+  nuovo.data = nuovaData;
+  // Azzera il riferimento per evitare duplicati
+  nuovo.rif  = '';
+
+  archivio.push(nuovo);
+  saveArchivio();
+  aggiornaPreviewRif();
+  refreshArchive();
+  showToast('✓ Ordine duplicato con data ' + nuovaData, 'success');
+}
+
+
+// ── Barra scorrimento superiore archivio ──────────────────────────────────
+function initArchScrollSync() {
+  var top  = document.getElementById('arch-scroll-top');
+  var main = document.getElementById('arch-scroll-main');
+  var tbl  = document.getElementById('arch-table');
+  var phm  = document.getElementById('arch-scroll-phantom');
+  if (!top || !main || !tbl || !phm) return;
+  phm.style.width = Math.max(tbl.scrollWidth, main.scrollWidth) + 'px';
+  top.addEventListener('scroll', function() { main.scrollLeft = top.scrollLeft; });
+  main.addEventListener('scroll', function() { top.scrollLeft = main.scrollLeft; });
+}
+
+// ── PREFILL DA PROGRAMMAZIONE VIAGGI ─────────────────
+window.addEventListener('message', function(e) {
+  if (!e.data || e.data.type !== 'prefill_ordine') return;
+  const p = e.data.payload;
+  if (!p) return;
+
+  const tabForm = document.getElementById('tab-form');
+  if (tabForm) showView('form', tabForm);
+
+  setTimeout(function() {
+    // Data viaggio
+    if (p.data) {
+      const el = document.getElementById('doc-data');
+      if (el) el.value = p.data;
+    }
+
+    // TRASPORTATORE — cerca per nome in rubrica destinatari
+    if (p.trasportatore) {
+      const q = p.trasportatore.toLowerCase().trim();
+      const match = rubrica && rubrica.find(r =>
+        r.nome && r.nome.toLowerCase().includes(q) ||
+        q.includes((r.nome||'').toLowerCase())
+      );
+      if (match) {
+        // Usa la funzione nativa che compila anche indirizzo e P.IVA
+        usaContatto(match.id);
+      } else {
+        // Fallback: scrivi direttamente il nome
+        const el = document.getElementById('d-nome');
+        if (el) el.value = p.trasportatore;
+      }
+    }
+
+    // CLIENTE (produttore) — cerca per nome in rubrica produttori
+    if (p.cliente) {
+      const q = p.cliente.toLowerCase().trim();
+      const match = rubricaProd && rubricaProd.find(r =>
+        r.nome && r.nome.toLowerCase().includes(q) ||
+        q.includes((r.nome||'').toLowerCase())
+      );
+      if (match) {
+        // Usa la funzione nativa che compila anche sede e altri campi
+        usaProduttore(match.id);
+      } else {
+        // Fallback: scrivi direttamente il nome
+        const el = document.getElementById('s-ditta');
+        if (el) el.value = p.cliente;
+      }
+    }
+
+    // Tipo mezzo
+    if (p.tipoMezzo) {
+      const el = document.getElementById('s-mezzo');
+      if (el) el.value = p.tipoMezzo;
+    }
+
+    // Origine/Destinazione/Note → materiale
+    if (p.origine || p.dest || p.note) {
+      const el = document.getElementById('s-materiale');
+      if (el) {
+        const parts = [];
+        if (p.origine) parts.push('Da: ' + p.origine);
+        if (p.dest)    parts.push('A: '  + p.dest);
+        if (p.note)    parts.push(p.note);
+        el.value = parts.join('\n');
+      }
+    }
+
+    window.scrollTo(0, 0);
+    if (typeof showToast === 'function') showToast('✓ Dati viaggio importati dall\'anagrafica', 'success');
+  }, 200);
+});
+</script>
+</body>
+</html>
