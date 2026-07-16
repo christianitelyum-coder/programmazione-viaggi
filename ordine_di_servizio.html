@@ -3828,73 +3828,31 @@ function initArchScrollSync() {
 // ── PREFILL DA PROGRAMMAZIONE VIAGGI ─────────────────
 window.addEventListener('message', function(e) {
   if (!e.data || e.data.type !== 'prefill_ordine') return;
-  const p = e.data.payload;
+  var p = e.data.payload;
   if (!p) return;
-
-  const tabForm = document.getElementById('tab-form');
+  var tabForm = document.getElementById('tab-form');
   if (tabForm) showView('form', tabForm);
-
   setTimeout(function() {
-    // Data viaggio
-    if (p.data) {
-      const el = document.getElementById('doc-data');
-      if (el) el.value = p.data;
-    }
-
-    // TRASPORTATORE — cerca per nome in rubrica destinatari
+    if (p.data) { var el=document.getElementById('doc-data'); if(el) el.value=p.data; }
     if (p.trasportatore) {
-      const q = p.trasportatore.toLowerCase().trim();
-      const match = rubrica && rubrica.find(r =>
-        r.nome && r.nome.toLowerCase().includes(q) ||
-        q.includes((r.nome||'').toLowerCase())
-      );
-      if (match) {
-        // Usa la funzione nativa che compila anche indirizzo e P.IVA
-        usaContatto(match.id);
-      } else {
-        // Fallback: scrivi direttamente il nome
-        const el = document.getElementById('d-nome');
-        if (el) el.value = p.trasportatore;
-      }
+      var q = p.trasportatore.toLowerCase().trim();
+      var match = rubrica && rubrica.find(function(r){ return r.nome && r.nome.toLowerCase().includes(q); });
+      if (match) { usaContatto(match.id); }
+      else { var el=document.getElementById('d-nome'); if(el) el.value=p.trasportatore; }
     }
-
-    // CLIENTE (produttore) — cerca per nome in rubrica produttori
     if (p.cliente) {
-      const q = p.cliente.toLowerCase().trim();
-      const match = rubricaProd && rubricaProd.find(r =>
-        r.nome && r.nome.toLowerCase().includes(q) ||
-        q.includes((r.nome||'').toLowerCase())
-      );
-      if (match) {
-        // Usa la funzione nativa che compila anche sede e altri campi
-        usaProduttore(match.id);
-      } else {
-        // Fallback: scrivi direttamente il nome
-        const el = document.getElementById('s-ditta');
-        if (el) el.value = p.cliente;
-      }
+      var q = p.cliente.toLowerCase().trim();
+      var match = rubricaProd && rubricaProd.find(function(r){ return r.nome && r.nome.toLowerCase().includes(q); });
+      if (match) { usaProduttore(match.id); }
+      else { var el=document.getElementById('s-ditta'); if(el) el.value=p.cliente; }
     }
-
-    // Tipo mezzo
-    if (p.tipoMezzo) {
-      const el = document.getElementById('s-mezzo');
-      if (el) el.value = p.tipoMezzo;
+    if (p.tipoMezzo) { var el=document.getElementById('s-mezzo'); if(el) el.value=p.tipoMezzo; }
+    if (p.origine||p.dest||p.note) {
+      var el=document.getElementById('s-materiale');
+      if(el){ var parts=[]; if(p.origine)parts.push('Da: '+p.origine); if(p.dest)parts.push('A: '+p.dest); if(p.note)parts.push(p.note); el.value=parts.join('\n'); }
     }
-
-    // Origine/Destinazione/Note → materiale
-    if (p.origine || p.dest || p.note) {
-      const el = document.getElementById('s-materiale');
-      if (el) {
-        const parts = [];
-        if (p.origine) parts.push('Da: ' + p.origine);
-        if (p.dest)    parts.push('A: '  + p.dest);
-        if (p.note)    parts.push(p.note);
-        el.value = parts.join('\n');
-      }
-    }
-
-    window.scrollTo(0, 0);
-    if (typeof showToast === 'function') showToast('✓ Dati viaggio importati dall\'anagrafica', 'success');
+    window.scrollTo(0,0);
+    if(typeof showToast==='function') showToast('\u2713 Dati viaggio importati', 'success');
   }, 200);
 });
 </script>
