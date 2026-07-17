@@ -1362,13 +1362,13 @@ const MESI_SHORT = ['Gen','Feb','Mar','Apr','Mag','Giu','Lug','Ago','Set','Ott',
 function getLunedi(offsetSettimane) {
   const oggi = new Date();
   oggi.setHours(0,0,0,0);
-  // Lunedì della settimana corrente
   const dow = oggi.getDay() || 7; // 1=lun .. 7=dom
   const lunediCorrente = new Date(oggi);
   lunediCorrente.setDate(oggi.getDate() - dow + 1);
-  // Settimana 0 = settimana corrente, 1 = prossima, ecc.
+  // Venerdì (dow=5) con offset 0 → salta direttamente alla settimana prossima
+  const baseOffset = (dow === 5 && offsetSettimane === 0) ? 1 : offsetSettimane;
   const target = new Date(lunediCorrente);
-  target.setDate(lunediCorrente.getDate() + 7 * offsetSettimane);
+  target.setDate(lunediCorrente.getDate() + 7 * baseOffset);
   return target;
 }
 
