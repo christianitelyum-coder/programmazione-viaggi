@@ -278,12 +278,54 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     </button>
   </nav>
   <div class="sidebar-bottom">
-    <div class="fb-dot" id="fb-dot" title="Firebase"></div>
   </div>
 </aside>
 
 <!-- CONTENT -->
 <div class="content" id="app-content">
+<div style="line-height:0;flex-shrink:0">
+<svg width="100%" viewBox="0 0 680 120" role="img" style="display:block">
+<title>Centrale Operativa - Centro Risorse S.p.A.</title>
+<rect x="0" y="0" width="680" height="120" fill="#e8ecf0"/>
+<rect x="0" y="0" width="680" height="4" fill="#0b7c6e"/>
+<text x="340" y="54" text-anchor="middle" font-family="system-ui,sans-serif" font-size="36" font-weight="900" letter-spacing="8" fill="#0f1923" stroke="#38bdf8" stroke-width="3" paint-order="stroke fill">CENTRALE OPERATIVA</text>
+<text x="340" y="72" text-anchor="middle" font-family="system-ui,sans-serif" font-size="11" font-weight="500" letter-spacing="4" fill="#4a5568">CENTRO RISORSE S.P.A.</text>
+<rect x="0" y="80" width="680" height="40" fill="#d0d5de"/>
+<rect x="20"  y="98" width="40" height="3" fill="#fff" opacity="0.7"/>
+<rect x="80"  y="98" width="40" height="3" fill="#fff" opacity="0.7"/>
+<rect x="140" y="98" width="40" height="3" fill="#fff" opacity="0.7"/>
+<rect x="200" y="98" width="40" height="3" fill="#fff" opacity="0.7"/>
+<rect x="260" y="98" width="40" height="3" fill="#fff" opacity="0.7"/>
+<rect x="320" y="98" width="40" height="3" fill="#fff" opacity="0.7"/>
+<rect x="380" y="98" width="40" height="3" fill="#fff" opacity="0.7"/>
+<rect x="440" y="98" width="40" height="3" fill="#fff" opacity="0.7"/>
+<rect x="448" y="82" width="115" height="27" rx="3" fill="#1a4f8a"/>
+<rect x="449" y="83" width="113" height="5" fill="#2563a8"/>
+<line x1="483" y1="82" x2="483" y2="109" stroke="#0f3060" stroke-width="1.2"/>
+<line x1="518" y1="82" x2="518" y2="109" stroke="#0f3060" stroke-width="1.2"/>
+<line x1="553" y1="82" x2="553" y2="109" stroke="#0f3060" stroke-width="1.2"/>
+<text x="503" y="100" text-anchor="middle" font-family="system-ui" font-size="7.5" font-weight="700" fill="#ffffff" letter-spacing="1">CENTRO RISORSE</text>
+<rect x="561" y="95" width="8" height="5" rx="1" fill="#8896aa"/>
+<rect x="567" y="84" width="46" height="25" rx="3" fill="#0b7c6e"/>
+<rect x="571" y="80" width="38" height="6" rx="2" fill="#0b7c6e"/>
+<rect x="591" y="86" width="19" height="14" rx="2" fill="#c8e6f5" opacity="0.9"/>
+<rect x="609" y="98" width="6" height="4" rx="1" fill="#fff9c4"/>
+<rect x="609" y="87" width="4" height="6" rx="1" fill="#086055"/>
+<rect x="569" y="89" width="19" height="16" rx="1" fill="#086055"/>
+<rect x="572" y="92" width="8" height="9" rx="1" fill="#0a6e62" opacity="0.5"/>
+<rect x="585" y="97" width="2" height="5" rx="1" fill="#0b7c6e"/>
+<circle cx="470" cy="111" r="7" fill="#2d3748" stroke="#4a5568" stroke-width="1.5"/>
+<circle cx="470" cy="111" r="3" fill="#4a5568"/>
+<circle cx="536" cy="111" r="7" fill="#2d3748" stroke="#4a5568" stroke-width="1.5"/>
+<circle cx="536" cy="111" r="3" fill="#4a5568"/>
+<circle cx="578" cy="111" r="7" fill="#2d3748" stroke="#4a5568" stroke-width="1.5"/>
+<circle cx="578" cy="111" r="3" fill="#4a5568"/>
+<circle cx="601" cy="111" r="7" fill="#2d3748" stroke="#4a5568" stroke-width="1.5"/>
+<circle cx="601" cy="111" r="3" fill="#4a5568"/>
+<rect x="0" y="116" width="680" height="4" fill="#0b7c6e"/>
+<circle cx="660" cy="12" r="5" id="fb-dot" fill="#cbd5e1"/>
+</svg>
+</div>
 
 <!-- ══ MESE ════════════════════════════════════════════ -->
 <div class="view" id="view-mese">
@@ -1489,7 +1531,9 @@ async function connectFirebase(cfg) {
   try {
     const app = initializeApp(cfg);
     db = getDatabase(app);
-    document.getElementById('fb-dot').className = 'fb-dot on';
+    const dot = document.getElementById('fb-dot');
+    if (dot) dot.setAttribute('fill', '#0b7c6e');
+    if (dot) dot.setAttribute('title','Firebase: connesso');
     onValue(ref(db,'viaggi_programmazione'), snap => {
       STATE.viaggi = snap.val() || {};
       renderAll();
@@ -1501,7 +1545,8 @@ async function connectFirebase(cfg) {
     return true;
   } catch(e) {
     console.error('Firebase error:', e);
-    document.getElementById('fb-dot').className = 'fb-dot err';
+    const dot = document.getElementById('fb-dot');
+    if (dot) dot.setAttribute('fill', '#c0392b');
     return false;
   }
 }
