@@ -5,33 +5,33 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Centrale Operativa — Programmazione Viaggi</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css">
 <style>
 :root {
-  --ink:    #0f1923;
-  --ink2:   #4a5568;
-  --ink3:   #8896aa;
-  --bg:     #f2f4f8;
+  --ink:    #0f3350;
+  --ink2:   #35566d;
+  --ink3:   #7b93a3;
+  --bg:     #eef6f5;
   --surface:#ffffff;
-  --s2:     #f7f9fc;
-  --border: #dde3ef;
+  --s2:     #f2f8f7;
+  --border: #d7e6e3;
 
-  --teal:   #0b7c6e;
-  --teal-l: #e0f5f2;
-  --teal-d: #075549;
-  --amber:  #f97316;
-  --amber-l:#fff7ed;
+  --teal:   #2fae9e;
+  --teal-l: #dbf3ef;
+  --teal-d: #1f8a7c;
+  --amber:  #b45309;
+  --amber-l:#fef3c7;
   --red:    #c0392b;
   --red-l:  #fdf0ee;
-  --blue:   #1a4f8a;
-  --blue-l: #e8f0fc;
+  --blue:   #3d6c8a;
+  --blue-l: #e4eef2;
 
-  --mono: 'IBM Plex Mono', monospace;
-  --sans: 'IBM Plex Sans', system-ui, sans-serif;
+  --mono: 'Inter', system-ui, sans-serif;
+  --sans: 'Inter', system-ui, sans-serif;
   --r:    8px;
-  --sh:   0 2px 12px rgba(15,25,35,.08);
-  --sh2:  0 6px 28px rgba(15,25,35,.13);
+  --sh:   0 2px 12px rgba(15,51,80,.08);
+  --sh2:  0 6px 28px rgba(15,51,80,.13);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
@@ -57,8 +57,8 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .map-toolbar{display:flex;align-items:center;gap:8px;margin-bottom:.75rem;flex-wrap:wrap}
 .map-legend{display:flex;gap:12px;align-items:center;padding:6px 12px;background:var(--surface);border-radius:var(--r);border:1px solid var(--border);font-size:11px;font-weight:600}
 .leg-dot{width:10px;height:10px;border-radius:50%;display:inline-block;margin-right:4px}
-.leg-done{background:#0b7c6e}
-.leg-partial{background:#f97316}
+.leg-done{background:#2fae9e}
+.leg-partial{background:#b45309}
 .leg-none{background:#c0392b}
 /* Popup Leaflet custom */
 .leaflet-popup-content-wrapper{border-radius:10px!important;box-shadow:0 4px 20px rgba(15,25,35,.18)!important;padding:0!important;overflow:hidden}
@@ -68,7 +68,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .map-popup-task{display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #f3f4f6}
 .map-popup-task:last-child{border-bottom:none}
 .prossimi-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:.85rem;overflow:hidden;box-shadow:var(--sh)}
-.prossimi-header{padding:.6rem 1rem;background:var(--blue,#1a4f8a);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.prossimi-header{padding:.6rem 1rem;background:var(--blue,#3d6c8a);color:#fff;font-size:12px;font-weight:700;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
 .prossimi-nav{display:flex;align-items:center;gap:6px;margin-left:auto}
 .prossimi-nav button{background:rgba(255,255,255,.2);border:none;color:#fff;padding:3px 10px;border-radius:5px;cursor:pointer;font-size:12px;font-weight:700;font-family:var(--sans)}
 .prossimi-nav button:hover{background:rgba(255,255,255,.35)}
@@ -81,17 +81,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 /* ------- */
 
 
-/* ------- */
-.header{background:var(--ink);color:#fff;padding:0 1.5rem;height:54px;display:flex;align-items:center;gap:0;position:sticky;top:0;z-index:100;box-shadow:0 2px 8px rgba(0,0,0,.3)}
-.logo{font-family:var(--mono);font-size:13px;font-weight:600;letter-spacing:.08em;margin-right:auto;display:flex;align-items:center;gap:8px}
-.logo em{background:var(--teal);color:#fff;padding:2px 8px;border-radius:4px;font-style:normal;font-size:10px;letter-spacing:.1em}
-.nav-pills{display:flex;gap:2px}
-.npill{padding:6px 14px;border-radius:6px;font-size:12px;font-weight:500;cursor:pointer;border:none;background:none;color:rgba(255,255,255,.5);transition:all .15s;font-family:var(--sans)}
-.npill.act{background:rgba(255,255,255,.12);color:#fff}
-.npill:hover:not(.act){color:rgba(255,255,255,.8)}
-.fb-dot{width:7px;height:7px;border-radius:50%;background:#444;margin-left:14px;transition:background .3s;flex-shrink:0}
-.fb-dot.on{background:var(--teal)}
-.fb-dot.err{background:var(--red)}
+/* ── TOPBAR ────────────────────────────────────────── */
+.topbar{background:var(--ink);color:#fff;padding:0 1.25rem;height:52px;display:flex;align-items:center;gap:12px;flex-shrink:0;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+.topbar-brand{font-size:15px;font-weight:800;letter-spacing:-.01em;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.topbar-brand span{background:var(--teal);padding:3px 8px;border-radius:5px;font-size:11px;font-weight:800;letter-spacing:.06em}
+.topbar-sub{font-size:12px;color:rgba(255,255,255,.55);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.brand-mark{display:inline-block;width:0;height:0;border-top:7px solid transparent;border-bottom:7px solid transparent;border-left:9px solid var(--teal);transform:skewY(-10deg);flex-shrink:0}
 
 /* ------- */
 .view{display:none;padding:1.25rem 1.5rem;max-width:1400px;margin:0 auto}
@@ -200,19 +195,16 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 
 /* ── SIDEBAR ─────────────────────────────────────────── */
 .app-shell{display:flex;height:100vh;overflow:hidden}
-.sidebar{width:64px;background:#fff;display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px;flex-shrink:0;z-index:100;box-shadow:2px 0 12px rgba(0,0,0,.08);border-right:1px solid #e5e9f0}
-.sidebar-logo{width:40px;height:40px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:700;color:#fff;margin-bottom:8px;flex-shrink:0}
+.sidebar{width:64px;background:var(--ink);display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px;flex-shrink:0;z-index:100;box-shadow:2px 0 12px rgba(0,0,0,.2)}
+.sidebar-logo{width:40px;height:40px;background:var(--teal);border-radius:8px;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;font-weight:800;color:#fff;margin-bottom:8px;flex-shrink:0}
 .snav{display:flex;flex-direction:column;align-items:center;gap:2px;width:100%;flex:1}
-.sbtn{width:52px;height:52px;border-radius:10px;border:none;background:none;color:#94a3b8;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:all .15s;position:relative;font-family:var(--sans)}
-.sbtn:hover{background:#f1f5f9;color:#475569}
-.sbtn.act{background:var(--teal-l);color:var(--teal-d);box-shadow:none}
+.sbtn{width:52px;height:52px;border-radius:10px;border:none;background:none;color:rgba(255,255,255,.55);cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:all .15s;position:relative;font-family:var(--sans)}
+.sbtn:hover{background:rgba(255,255,255,.08);color:#fff}
+.sbtn.act{background:var(--teal);color:#fff;box-shadow:none}
 .sbtn-ico{font-size:18px;line-height:1}
 .sbtn-lbl{font-size:8px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;line-height:1}
-.sbtn-sep{width:36px;height:1px;background:#e5e9f0;margin:4px 0}
+.sbtn-sep{width:36px;height:1px;background:rgba(255,255,255,.15);margin:4px 0}
 .sidebar-bottom{margin-top:auto;padding-bottom:4px}
-.fb-dot{width:8px;height:8px;border-radius:50%;background:#cbd5e1;margin:8px auto 0;transition:background .3s}
-.fb-dot.on{background:var(--teal)}
-.fb-dot.err{background:var(--red)}
 
 /* ── CONTENT AREA ────────────────────────────────────── */
 .content{flex:1;overflow-y:auto;position:relative}
@@ -232,9 +224,6 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .mvc-partial{background:#fef3c7;color:#92400e}
 .mvc-none{background:#fdf0ee;color:#9b1c1c}
 .month-more{font-size:9px;color:var(--ink3);font-weight:600;padding:1px 4px}
-
-</head>
-<body>
 
 </style>
 </head>
@@ -283,48 +272,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 
 <!-- CONTENT -->
 <div class="content" id="app-content">
-<div style="line-height:0;flex-shrink:0">
-<svg width="100%" viewBox="0 0 680 77" role="img" style="display:block">
-<title>Centrale Operativa - Centro Risorse S.p.A.</title>
-<rect x="0" y="0" width="680" height="77" fill="#e8ecf0"/>
-<rect x="0" y="0" width="680" height="2.6" fill="#0b7c6e"/>
-<text x="340" y="34.7" text-anchor="middle" font-family="system-ui,sans-serif" font-size="23.1" font-weight="900" letter-spacing="8" fill="#ffffff" stroke="#38bdf8" stroke-width="1.9" paint-order="stroke fill">CENTRALE OPERATIVA</text>
-<text x="340" y="46.2" text-anchor="middle" font-family="system-ui,sans-serif" font-size="7.1" font-weight="500" letter-spacing="4" fill="#4a5568">CENTRO RISORSE S.P.A.</text>
-<rect x="0" y="51.3" width="680" height="25.7" fill="#d0d5de"/>
-<rect x="20"  y="62.9" width="40" height="1.9" fill="#fff" opacity="0.7"/>
-<rect x="80"  y="62.9" width="40" height="1.9" fill="#fff" opacity="0.7"/>
-<rect x="140" y="62.9" width="40" height="1.9" fill="#fff" opacity="0.7"/>
-<rect x="200" y="62.9" width="40" height="1.9" fill="#fff" opacity="0.7"/>
-<rect x="260" y="62.9" width="40" height="1.9" fill="#fff" opacity="0.7"/>
-<rect x="320" y="62.9" width="40" height="1.9" fill="#fff" opacity="0.7"/>
-<rect x="380" y="62.9" width="40" height="1.9" fill="#fff" opacity="0.7"/>
-<rect x="440" y="62.9" width="40" height="1.9" fill="#fff" opacity="0.7"/>
-<rect x="448" y="52.6" width="115" height="17.3" rx="3" fill="#1a4f8a"/>
-<rect x="449" y="53.3" width="113" height="3.2" fill="#2563a8"/>
-<line x1="483" y1="52.6" x2="483" y2="69.9" stroke="#0f3060" stroke-width="0.8"/>
-<line x1="518" y1="52.6" x2="518" y2="69.9" stroke="#0f3060" stroke-width="0.8"/>
-<line x1="553" y1="52.6" x2="553" y2="69.9" stroke="#0f3060" stroke-width="0.8"/>
-<text x="503" y="64.2" text-anchor="middle" font-family="system-ui" font-size="4.8" font-weight="700" fill="#ffffff" letter-spacing="1">CENTRO RISORSE</text>
-<rect x="561" y="61" width="8" height="3.2" rx="1" fill="#8896aa"/>
-<rect x="567" y="53.9" width="46" height="16" rx="3" fill="#0b7c6e"/>
-<rect x="571" y="51.3" width="38" height="3.9" rx="2" fill="#0b7c6e"/>
-<rect x="591" y="55.2" width="19" height="9" rx="2" fill="#c8e6f5" opacity="0.9"/>
-<rect x="609" y="62.9" width="6" height="2.6" rx="1" fill="#fff9c4"/>
-<rect x="609" y="55.8" width="4" height="3.9" rx="1" fill="#086055"/>
-<rect x="569" y="57.1" width="19" height="10.3" rx="1" fill="#086055"/>
-<rect x="572" y="59" width="8" height="5.8" rx="1" fill="#0a6e62" opacity="0.5"/>
-<rect x="585" y="62.2" width="2" height="3.2" rx="1" fill="#0b7c6e"/>
-<circle cx="470" cy="71.2" r="4.5" fill="#2d3748" stroke="#4a5568" stroke-width="1"/>
-<circle cx="470" cy="71.2" r="1.9" fill="#4a5568"/>
-<circle cx="536" cy="71.2" r="4.5" fill="#2d3748" stroke="#4a5568" stroke-width="1"/>
-<circle cx="536" cy="71.2" r="1.9" fill="#4a5568"/>
-<circle cx="578" cy="71.2" r="4.5" fill="#2d3748" stroke="#4a5568" stroke-width="1"/>
-<circle cx="578" cy="71.2" r="1.9" fill="#4a5568"/>
-<circle cx="601" cy="71.2" r="4.5" fill="#2d3748" stroke="#4a5568" stroke-width="1"/>
-<circle cx="601" cy="71.2" r="1.9" fill="#4a5568"/>
-<rect x="0" y="74.4" width="680" height="2.6" fill="#0b7c6e"/>
-<circle cx="660" cy="7.7" r="3.2" id="fb-dot" fill="#cbd5e1"/>
-</svg>
+<div class="topbar">
+  <div class="topbar-brand">📅 <span>CENTRALE</span> Operativa <i class="brand-mark"></i></div>
+  <div class="topbar-sub">Centro Risorse S.p.A. — Programmazione Viaggi</div>
+  <svg width="10" height="10" viewBox="0 0 10 10" style="margin-left:auto;flex-shrink:0">
+    <circle cx="5" cy="5" r="4" id="fb-dot" fill="#cbd5e1"/>
+  </svg>
 </div>
 
 <!-- ══ MESE ════════════════════════════════════════════ -->
@@ -531,7 +484,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="chiudiModal()">Annulla</button>
-      <button class="btn btn-ghost" style="color:var(--blue,#1a4f8a);border-color:var(--blue,#1a4f8a)" onclick="apriOrdineServizio()" title="Crea ordine di servizio con i dati di questo viaggio">📋 Ordine di servizio</button>
+      <button class="btn btn-ghost" style="color:var(--blue,#3d6c8a);border-color:var(--blue,#3d6c8a)" onclick="apriOrdineServizio()" title="Crea ordine di servizio con i dati di questo viaggio">📋 Ordine di servizio</button>
       <button class="btn btn-primary" onclick="salvaViaggio()">✓ Salva viaggio</button>
     </div>
   </div>
@@ -832,7 +785,7 @@ window.renderLista = function() {
     return `<tr style="${rowStyle}">
       <td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${fmtDate(v.data)}${v.ora?' <span style="color:var(--ink3)">'+v.ora+'</span>':''}</td>
       <td style="font-weight:600${eff?';text-decoration:line-through;color:var(--ink3)':''}">${v.cliente||'—'}</td>
-      <td style="color:var(--ink2)">${v.trasportatore||'—'}${v.targa?' <span style="font-size:10px;color:var(--ink3)">'+v.targa+'</span>':''}${v.tipoMezzo?' <span style="font-size:10px;background:var(--blue-l,#e8f0fc);color:var(--blue,#1a4f8a);padding:1px 5px;border-radius:4px">'+v.tipoMezzo+'</span>':''}</td>
+      <td style="color:var(--ink2)">${v.trasportatore||'—'}${v.targa?' <span style="font-size:10px;color:var(--ink3)">'+v.targa+'</span>':''}${v.tipoMezzo?' <span style="font-size:10px;background:var(--blue-l,#e4eef2);color:var(--blue,#3d6c8a);padding:1px 5px;border-radius:4px">'+v.tipoMezzo+'</span>':''}</td>
       <td style="font-size:12px;color:var(--ink2)">${v.origine||'—'} → ${v.dest||'—'}</td>
       <td>
         ${eff
@@ -1532,7 +1485,7 @@ async function connectFirebase(cfg) {
     const app = initializeApp(cfg);
     db = getDatabase(app);
     const dot = document.getElementById('fb-dot');
-    if (dot) dot.setAttribute('fill', '#0b7c6e');
+    if (dot) dot.setAttribute('fill', '#2fae9e');
     if (dot) dot.setAttribute('title','Firebase: connesso');
     onValue(ref(db,'viaggi_programmazione'), snap => {
       STATE.viaggi = snap.val() || {};
