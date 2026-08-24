@@ -345,6 +345,7 @@ body.role-lettore .btn-primary,body.role-lettore .vc-del{display:none!important}
     </div>
     <div class="auth-sep">oppure</div>
     <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="loginGoogle()">Accedi con Google</button>
+    <div style="text-align:center;margin-top:14px;font-family:var(--mono);font-size:9px;color:var(--ink3)">versione 8 · 24/08/2026</div>
   </div>
 </section>
 <div class="app-shell">
@@ -752,7 +753,18 @@ async function handleAuthState(user) {
   }
   try {
     const snap = await ref(db, `utenti_ruoli/${user.uid}`).once('value');
-    const role = String(snap.val() || '').trim().toLowerCase();
+    let role = String(snap.val() || '').trim().toLowerCase().replace(/^["']+|["']+$/g,'');
+    // Verifica alternativa sul medesimo database, autenticata con il token
+    // dell'utente. Gestisce eventuali problemi di cache/istanza del client SDK.
+    if (!['admin','operatore','lettore'].includes(role)) {
+      const token = await user.getIdToken(true);
+      const roleUrl = `https://cassoni-centrorisorse-default-rtdb.europe-west1.firebasedatabase.app/utenti_ruoli/${encodeURIComponent(user.uid)}.json?auth=${encodeURIComponent(token)}`;
+      const response = await fetch(roleUrl, {cache:'no-store'});
+      if (response.ok) {
+        const remoteRole = await response.json();
+        role = String(remoteRole || '').trim().toLowerCase().replace(/^["']+|["']+$/g,'');
+      }
+    }
     if (!['admin','operatore','lettore'].includes(role)) {
       screen.classList.remove('hidden');
       showAuthError(`Utente autenticato ma non autorizzato. Comunica all’amministratore questo UID: ${user.uid}`);
