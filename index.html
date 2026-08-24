@@ -478,7 +478,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     <p style="font-size:12px;color:var(--ink2);margin-bottom:.75rem">Queste attività appaiono nella checklist di ogni viaggio.</p>
     <div id="tasks-editor" style="display:flex;flex-direction:column;gap:6px"></div>
     <div style="display:flex;gap:8px;margin-top:8px">
-      <input class="form-ctrl" id="new-task-input" placeholder="Nuova attività..." style="flex:1;font-size:13px;padding:7px 10px">
+      <input class="form-ctrl" id="new-task-input" maxlength="120" placeholder="Nuova attività..." style="flex:1;font-size:13px;padding:7px 10px">
       <button class="btn btn-primary btn-sm" onclick="aggiungiTask()">+ Aggiungi</button>
     </div>
     <button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%" onclick="salvaTaskConfig()">💾 Salva attività</button>
@@ -507,16 +507,16 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
       </div>
       <div class="form-row" style="margin-top:1rem">
         <label class="form-lbl">Cliente <span>*</span></label>
-        <input class="form-ctrl" id="m-cliente" placeholder="Ragione sociale cliente">
+        <input class="form-ctrl" id="m-cliente" maxlength="120" autocomplete="organization" placeholder="Ragione sociale cliente">
       </div>
       <div class="form-row-2">
         <div class="form-row" style="margin-bottom:0">
           <label class="form-lbl">Trasportatore</label>
-          <input class="form-ctrl" id="m-trasportatore" placeholder="Vettore / Autista">
+          <input class="form-ctrl" id="m-trasportatore" maxlength="120" placeholder="Vettore / Autista">
         </div>
         <div class="form-row" style="margin-bottom:0">
           <label class="form-lbl">Targa / Mezzo</label>
-          <input class="form-ctrl" id="m-targa" placeholder="es. FW361VJ">
+          <input class="form-ctrl" id="m-targa" maxlength="30" autocapitalize="characters" placeholder="es. FW361VJ">
         </div>
         <div class="form-row" style="margin-bottom:0">
           <label class="form-lbl">Tipologia mezzo</label>
@@ -531,22 +531,22 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
             <option>IDROSPURGO 25 MC</option>
             <option value="ALTRO">ALTRO</option>
           </select>
-          <input class="form-ctrl" id="m-tipo-mezzo-altro" placeholder="Specifica tipologia..." style="display:none;margin-top:6px">
+          <input class="form-ctrl" id="m-tipo-mezzo-altro" maxlength="80" placeholder="Specifica tipologia..." style="display:none;margin-top:6px">
         </div>
       </div>
       <div class="form-row-2" style="margin-top:1rem">
         <div class="form-row" style="margin-bottom:0">
           <label class="form-lbl">Origine</label>
-          <input class="form-ctrl" id="m-origine" placeholder="Luogo di partenza">
+          <input class="form-ctrl" id="m-origine" maxlength="180" placeholder="Luogo di partenza">
         </div>
         <div class="form-row" style="margin-bottom:0">
           <label class="form-lbl">Destinazione</label>
-          <input class="form-ctrl" id="m-dest" placeholder="Luogo di arrivo">
+          <input class="form-ctrl" id="m-dest" maxlength="180" placeholder="Luogo di arrivo">
         </div>
       </div>
       <div class="form-row" style="margin-top:1rem">
         <label class="form-lbl">Note</label>
-        <textarea class="form-ctrl" id="m-note" rows="2" placeholder="Riferimenti, istruzioni speciali..."></textarea>
+        <textarea class="form-ctrl" id="m-note" rows="2" maxlength="1000" placeholder="Riferimenti, istruzioni speciali..."></textarea>
       </div>
       <div class="form-row" style="margin-top:1rem">
         <label class="form-lbl">Checklist attività</label>
@@ -604,6 +604,23 @@ function toast(msg, type='') {
   const el = document.getElementById('toast');
   el.textContent = msg; el.className = 'toast show' + (type?' '+type:'');
   clearTimeout(el._t); el._t = setTimeout(() => el.classList.remove('show'), 2800);
+}
+
+// Converte qualsiasi valore in testo sicuro prima di inserirlo nell'HTML.
+// I dati restano invariati nel database, ma non possono essere interpretati
+// dal browser come tag, attributi o codice eseguibile.
+function escapeHTML(value) {
+  return String(value ?? '')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+function safeText(value, fallback='—') {
+  const text = String(value ?? '').trim();
+  return escapeHTML(text || fallback);
 }
 
 function fmtDate(iso) {
@@ -744,7 +761,7 @@ function makeMonthCell(iso, dayNum, otherMonth, isToday) {
     const dot = sem === 'done' ? '✅' : sem === 'partial' ? '🟡' : sem === 'effettuato' ? '✓' : '🔴';
     const el  = document.createElement('div');
     el.className = `month-vcard ${cls}`;
-    el.innerHTML = `<span>${dot}</span><span style="overflow:hidden;text-overflow:ellipsis${sem==='effettuato'?';text-decoration:line-through':''}">${v.ora?v.ora+' ':''}${v.cliente||'—'}${v.trasportatore?' · 🚛'+v.trasportatore:''}${v.tipoMezzo?' · '+v.tipoMezzo:''}</span>`;
+    el.innerHTML = `<span>${dot}</span><span style="overflow:hidden;text-overflow:ellipsis${sem==='effettuato'?';text-decoration:line-through':''}">${v.ora?escapeHTML(v.ora)+' ':''}${safeText(v.cliente)}${v.trasportatore?' · 🚛'+escapeHTML(v.trasportatore):''}${v.tipoMezzo?' · '+escapeHTML(v.tipoMezzo):''}</span>`;
     el.onclick = (e) => { e.stopPropagation(); openModal(null, id); };
     cell.appendChild(el);
   });
@@ -807,17 +824,17 @@ function vcardHTML(id, v) {
   const pills = tasks.map(t => {
     const done = v.checks && v.checks[slugify(t)];
     const short = t.split(' ').slice(0,2).join(' ');
-    return `<span class="chk-pill ${done?'chk-done':'chk-todo'}">${short}</span>`;
+    return `<span class="chk-pill ${done?'chk-done':'chk-todo'}">${escapeHTML(short)}</span>`;
   }).join('');
   return `<div class="vcard ${sem}" onclick="openModal(null,'${id}')">
     <button class="vc-del" onclick="event.stopPropagation();eliminaViaggio('${id}')" title="Elimina">×</button>
     <div class="vc-top">
       <div class="vc-sem sem-${sem}"></div>
-      <div class="vc-client">${v.ora?'<span style="font-family:var(--mono);font-size:10px;color:var(--ink3);margin-right:4px">'+v.ora+'</span>':''}${v.cliente||'—'}</div>
+      <div class="vc-client">${v.ora?'<span style="font-family:var(--mono);font-size:10px;color:var(--ink3);margin-right:4px">'+escapeHTML(v.ora)+'</span>':''}${safeText(v.cliente)}</div>
     </div>
-    ${v.trasportatore?`<div class="vc-carrier">🚛 ${v.trasportatore}${v.targa?' · '+v.targa:''}${v.tipoMezzo?' · <em>'+v.tipoMezzo+'</em>':''}</div>`:
-      v.tipoMezzo?`<div class="vc-carrier">🚛 ${v.tipoMezzo}</div>`:''}
-    ${v.origine||v.dest?`<div class="vc-carrier" style="font-size:9px">📍 ${v.origine||'—'} → ${v.dest||'—'}</div>`:''}
+    ${v.trasportatore?`<div class="vc-carrier">🚛 ${escapeHTML(v.trasportatore)}${v.targa?' · '+escapeHTML(v.targa):''}${v.tipoMezzo?' · <em>'+escapeHTML(v.tipoMezzo)+'</em>':''}</div>`:
+      v.tipoMezzo?`<div class="vc-carrier">🚛 ${escapeHTML(v.tipoMezzo)}</div>`:''}
+    ${v.origine||v.dest?`<div class="vc-carrier" style="font-size:9px">📍 ${safeText(v.origine)} → ${safeText(v.dest)}</div>`:''}
     <div class="vc-checks">${pills}</div>
   </div>`;
 }
@@ -854,10 +871,10 @@ window.renderLista = function() {
     const fillCls = eff?'fill-effettuato':sem==='done'?'fill-done':sem==='partial'?'fill-partial':'fill-none';
     const rowStyle = eff ? 'opacity:.7;background:#f8f8f8' : '';
     return `<tr style="${rowStyle}">
-      <td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${fmtDate(v.data)}${v.ora?' <span style="color:var(--ink3)">'+v.ora+'</span>':''}</td>
-      <td style="font-weight:600${eff?';text-decoration:line-through;color:var(--ink3)':''}">${v.cliente||'—'}</td>
-      <td style="color:var(--ink2)">${v.trasportatore||'—'}${v.targa?' <span style="font-size:10px;color:var(--ink3)">'+v.targa+'</span>':''}${v.tipoMezzo?' <span style="font-size:10px;background:var(--blue-l,#e8f0fc);color:var(--blue,#1a4f8a);padding:1px 5px;border-radius:4px">'+v.tipoMezzo+'</span>':''}</td>
-      <td style="font-size:12px;color:var(--ink2)">${v.origine||'—'} → ${v.dest||'—'}</td>
+      <td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${escapeHTML(fmtDate(v.data))}${v.ora?' <span style="color:var(--ink3)">'+escapeHTML(v.ora)+'</span>':''}</td>
+      <td style="font-weight:600${eff?';text-decoration:line-through;color:var(--ink3)':''}">${safeText(v.cliente)}</td>
+      <td style="color:var(--ink2)">${safeText(v.trasportatore)}${v.targa?' <span style="font-size:10px;color:var(--ink3)">'+escapeHTML(v.targa)+'</span>':''}${v.tipoMezzo?' <span style="font-size:10px;background:var(--blue-l,#e8f0fc);color:var(--blue,#1a4f8a);padding:1px 5px;border-radius:4px">'+escapeHTML(v.tipoMezzo)+'</span>':''}</td>
+      <td style="font-size:12px;color:var(--ink2)">${safeText(v.origine)} → ${safeText(v.dest)}</td>
       <td>
         ${eff
           ? `<span style="font-size:11px;font-weight:700;color:#888;background:#eee;padding:3px 8px;border-radius:10px">✓ Effettuato</span>`
@@ -914,7 +931,7 @@ window.openModal = function(data, id) {
     const done = v?.checks?.[key] || false;
     return `<label class="chk-item ${done?'checked':''}" id="cli-${key}">
       <input type="checkbox" ${done?'checked':''} onchange="toggleCheck('${key}',this)">
-      <span class="chk-label">${t}</span>
+      <span class="chk-label">${escapeHTML(t)}</span>
     </label>`;
   }).join('');
 
@@ -986,7 +1003,7 @@ function renderTaskEditor() {
   const tasks = STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS;
   document.getElementById('tasks-editor').innerHTML = tasks.map((t,i) =>
     `<div style="display:flex;align-items:center;gap:6px;padding:6px 10px;background:var(--s2);border-radius:6px;border:1px solid var(--border)">
-      <span style="flex:1;font-size:13px">${t}</span>
+      <span style="flex:1;font-size:13px">${escapeHTML(t)}</span>
       <button onclick="rimuoviTask(${i})" style="background:none;border:none;color:var(--ink3);cursor:pointer;font-size:14px" title="Rimuovi">×</button>
     </div>`
   ).join('');
@@ -1037,7 +1054,13 @@ window.exportCSV = function() {
       const checks = tasks.map(t => (v.checks?.[slugify(t)] ? 'SI' : 'NO'));
       rows.push([v.data,v.ora||'',v.cliente||'',v.trasportatore||'',v.targa||'',v.tipoMezzo||'',v.origine||'',v.dest||'',v.note||'',...checks,progress(v)+'%']);
     });
-  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(';')).join('\n');
+  const csvSafe = value => {
+    let text = String(value ?? '');
+    // Impedisce a Excel/LibreOffice di eseguire formule provenienti dai dati.
+    if (/^[=+\-@\t\r]/.test(text)) text = "'" + text;
+    return `"${text.replace(/"/g,'""')}"`;
+  };
+  const csv = rows.map(r => r.map(csvSafe).join(';')).join('\n');
   const a = document.createElement('a');
   a.href = URL.createObjectURL(new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'}));
   a.download = 'viaggi_' + toISO(new Date()) + '.csv';
@@ -1221,7 +1244,7 @@ function makeMarkerIcon(col, isOrig, cliente) {
     iconSize: [32, 42],
     iconAnchor: [16, 42],
     popupAnchor: [0, -42],
-    html: `<div title="${isOrig && cliente ? cliente : ''}" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,.4));position:relative">${svg}${isOrig && cliente ? `<div class="marker-tooltip">${cliente}</div>` : ''}</div>`
+    html: `<div title="${isOrig && cliente ? escapeHTML(cliente) : ''}" style="filter:drop-shadow(0 3px 6px rgba(0,0,0,.4));position:relative">${svg}${isOrig && cliente ? `<div class="marker-tooltip">${escapeHTML(cliente)}</div>` : ''}</div>`
   });
 }
 
@@ -1233,17 +1256,17 @@ function popupHTML(v, tipo, col) {
     const done = v.checks?.[slugify(t)];
     return `<div class="map-popup-task">
       <span style="font-size:14px">${done?'✅':'⬜'}</span>
-      <span style="color:${done?'#065f46':'#9ca3af'};${done?'':'text-decoration:line-through'}">${t}</span>
+      <span style="color:${done?'#065f46':'#9ca3af'};${done?'':'text-decoration:line-through'}">${escapeHTML(t)}</span>
     </div>`;
   }).join('');
   return `<div class="map-popup-header" style="background:${col}">
-    ${label} — <strong>${v.cliente||'—'}</strong>
+    ${label} — <strong>${safeText(v.cliente)}</strong>
   </div>
   <div class="map-popup-body">
-    <div style="font-size:11px;color:#6b7280;margin-bottom:6px">${fmtDate(v.data)}${v.ora?' · '+v.ora:''} ${v.trasportatore?'· 🚛 '+v.trasportatore:''}</div>
-    <div style="font-weight:600;margin-bottom:8px">${luogo}</div>
+    <div style="font-size:11px;color:#6b7280;margin-bottom:6px">${escapeHTML(fmtDate(v.data))}${v.ora?' · '+escapeHTML(v.ora):''} ${v.trasportatore?'· 🚛 '+escapeHTML(v.trasportatore):''}</div>
+    <div style="font-weight:600;margin-bottom:8px">${safeText(luogo)}</div>
     <div>${taskRows}</div>
-    ${v.note?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid #f3f4f6;font-size:11px;color:#6b7280">📝 ${v.note}</div>`:''}
+    ${v.note?`<div style="margin-top:8px;padding-top:8px;border-top:1px solid #f3f4f6;font-size:11px;color:#6b7280">📝 ${escapeHTML(v.note)}</div>`:''}
   </div>`;
 }
 
@@ -1324,11 +1347,11 @@ function renderOggiPanel() {
     return `<div class="oggi-card" id="oggi-card-${id}" onclick="geoLocalizzaViaggio('${id}')">
       <div class="oggi-sem" style="background:${semCol}"></div>
       <div class="oggi-info">
-        <div class="oggi-cliente">${v.cliente||'—'}</div>
-        <div class="oggi-sub">${v.trasportatore||''}${v.origine?' · '+v.origine+' → '+(v.dest||'?'):''}</div>
-        <div style="font-size:10px;color:var(--ink3);margin-top:2px">${fatti}/${tasks.length} attività · ${v.tipoMezzo||'—'}</div>
+        <div class="oggi-cliente">${safeText(v.cliente)}</div>
+        <div class="oggi-sub">${escapeHTML(v.trasportatore||'')}${v.origine?' · '+escapeHTML(v.origine)+' → '+escapeHTML(v.dest||'?'):''}</div>
+        <div style="font-size:10px;color:var(--ink3);margin-top:2px">${fatti}/${tasks.length} attività · ${safeText(v.tipoMezzo)}</div>
       </div>
-      <span class="oggi-ora">${v.ora||''}</span>
+      <span class="oggi-ora">${escapeHTML(v.ora||'')}</span>
       <span class="oggi-pin">📍</span>
     </div>`;
   }).join('')}</div>`;
@@ -1448,11 +1471,11 @@ function renderProssimiPanel() {
         return `<div class="oggi-card" id="oggi-card-${id}" onclick="geoLocalizzaViaggio('${id}')">
           <div class="oggi-sem" style="background:${semCol}"></div>
           <div class="oggi-info">
-            <div class="oggi-cliente">${v.cliente||'—'}</div>
-            <div class="oggi-sub">${v.trasportatore||''}${v.origine?' · '+v.origine+' → '+(v.dest||'?'):''}</div>
-            <div style="font-size:10px;color:var(--ink3);margin-top:2px">${fatti}/${tasks.length} att. · ${v.tipoMezzo||'—'}</div>
+            <div class="oggi-cliente">${safeText(v.cliente)}</div>
+            <div class="oggi-sub">${escapeHTML(v.trasportatore||'')}${v.origine?' · '+escapeHTML(v.origine)+' → '+escapeHTML(v.dest||'?'):''}</div>
+            <div style="font-size:10px;color:var(--ink3);margin-top:2px">${fatti}/${tasks.length} att. · ${safeText(v.tipoMezzo)}</div>
           </div>
-          <span class="oggi-ora">${v.ora||''}</span>
+          <span class="oggi-ora">${escapeHTML(v.ora||'')}</span>
           <span class="oggi-pin">📍</span>
         </div>`;
       }).join('');
