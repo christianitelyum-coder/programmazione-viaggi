@@ -752,7 +752,7 @@ async function handleAuthState(user) {
   }
   try {
     const snap = await ref(db, `utenti_ruoli/${user.uid}`).once('value');
-    const role = snap.val();
+    const role = String(snap.val() || '').trim().toLowerCase();
     if (!['admin','operatore','lettore'].includes(role)) {
       screen.classList.remove('hidden');
       showAuthError(`Utente autenticato ma non autorizzato. Comunica all’amministratore questo UID: ${user.uid}`);
@@ -1784,7 +1784,10 @@ document.getElementById('auth-password').addEventListener('keydown', e => { if(e
     databaseURL: 'https://cassoni-centrorisorse-default-rtdb.europe-west1.firebasedatabase.app',
     projectId:   'cassoni-centrorisorse',
   };
-  const cfg = loadCfg() || hardcoded;
+  // Questo gestionale deve usare sempre il database aziendale previsto.
+  // Ignoriamo eventuali configurazioni obsolete rimaste nel browser.
+  const cfg = hardcoded;
+  saveCfg(hardcoded);
   document.getElementById('cfg-apikey').value  = cfg.apiKey     || '';
   document.getElementById('cfg-domain').value  = cfg.authDomain || '';
   document.getElementById('cfg-dburl').value   = cfg.databaseURL|| '';
