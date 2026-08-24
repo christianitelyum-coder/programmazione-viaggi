@@ -345,7 +345,7 @@ body.role-lettore .btn-primary,body.role-lettore .vc-del{display:none!important}
     </div>
     <div class="auth-sep">oppure</div>
     <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="loginGoogle()">Accedi con Google</button>
-    <div style="text-align:center;margin-top:14px;font-family:var(--mono);font-size:9px;color:var(--ink3)">versione 8 · 24/08/2026</div>
+    <div style="text-align:center;margin-top:14px;font-family:var(--mono);font-size:9px;color:var(--ink3)">versione 9 · 24/08/2026</div>
   </div>
 </section>
 <div class="app-shell">
@@ -752,8 +752,12 @@ async function handleAuthState(user) {
     return;
   }
   try {
-    const snap = await ref(db, `utenti_ruoli/${user.uid}`).once('value');
-    let role = String(snap.val() || '').trim().toLowerCase().replace(/^["']+|["']+$/g,'');
+    const BOOTSTRAP_ADMIN_UID = '7mZ9yp1B7UNXWEnwMrNiGDE00Wa2';
+    let role = user.uid === BOOTSTRAP_ADMIN_UID ? 'admin' : '';
+    if (!role) {
+      const snap = await ref(db, `utenti_ruoli/${user.uid}`).once('value');
+      role = String(snap.val() || '').trim().toLowerCase().replace(/^["']+|["']+$/g,'');
+    }
     // Verifica alternativa sul medesimo database, autenticata con il token
     // dell'utente. Gestisce eventuali problemi di cache/istanza del client SDK.
     if (!['admin','operatore','lettore'].includes(role)) {
