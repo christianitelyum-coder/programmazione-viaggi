@@ -9,29 +9,29 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.css">
 <style>
 :root {
-  --ink:    #0f1923;
-  --ink2:   #4a5568;
-  --ink3:   #8896aa;
-  --bg:     #f2f4f8;
+  --ink:    #123754;
+  --ink2:   #537086;
+  --ink3:   #8da3b3;
+  --bg:     #edf6f5;
   --surface:#ffffff;
   --s2:     #f7f9fc;
-  --border: #dde3ef;
+  --border: #d5e4e5;
 
-  --teal:   #0b7c6e;
-  --teal-l: #e0f5f2;
-  --teal-d: #075549;
+  --teal:   #2fb5a5;
+  --teal-l: #dcf5f1;
+  --teal-d: #168b80;
   --amber:  #b45309;
   --amber-l:#fef3c7;
   --red:    #c0392b;
   --red-l:  #fdf0ee;
-  --blue:   #1a4f8a;
-  --blue-l: #e8f0fc;
+  --blue:   #123754;
+  --blue-l: #e5eef3;
 
   --mono: 'IBM Plex Mono', monospace;
   --sans: 'IBM Plex Sans', system-ui, sans-serif;
-  --r:    8px;
-  --sh:   0 2px 12px rgba(15,25,35,.08);
-  --sh2:  0 6px 28px rgba(15,25,35,.13);
+  --r:    9px;
+  --sh:   0 2px 12px rgba(18,55,84,.07);
+  --sh2:  0 8px 30px rgba(18,55,84,.14);
 }
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;-webkit-font-smoothing:antialiased}
@@ -235,6 +235,34 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .mvc-none{background:#fdf0ee;color:#9b1c1c}
 .month-more{font-size:9px;color:var(--ink3);font-weight:600;padding:1px 4px}
 
+/* ── TEMA CORPORATE: ispirazione ambientale/industriale ─ */
+.app-shell{background:var(--bg)}
+.sidebar{width:68px;background:#123754;border-right:0;box-shadow:3px 0 18px rgba(18,55,84,.18);padding-top:7px}
+.sidebar-logo{width:44px;height:44px;background:var(--teal);border-radius:10px;color:#fff;margin-bottom:10px}
+.sbtn{width:58px;height:58px;color:#9eb7c9;border-radius:10px}
+.sbtn:hover{background:rgba(255,255,255,.08);color:#fff}
+.sbtn.act{background:var(--teal);color:#fff;box-shadow:0 6px 14px rgba(47,181,165,.25)}
+.sbtn-lbl{font-size:8px;letter-spacing:.035em}
+.sbtn-sep{background:rgba(255,255,255,.12);width:42px}
+.content{background:linear-gradient(135deg,#f5fbfa 0%,#edf6f5 56%,#e9f3f4 100%)}
+.view{padding:1.45rem 1.7rem}
+.toolbar{gap:9px}
+.btn{border-radius:9px}
+.btn-primary{box-shadow:0 4px 10px rgba(47,181,165,.18)}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 6px 14px rgba(47,181,165,.25)}
+.lista-filters input,.lista-filters select,.form-ctrl{border-color:#cfe0e2;background:#fff}
+.vtable{border-radius:10px;border:1px solid #d6e5e6;box-shadow:0 4px 18px rgba(18,55,84,.08)}
+.vtable thead th{background:#123754;padding:11px 13px}
+.vtable tbody tr{border-bottom-color:#d6e5e6}
+.vtable tbody tr:hover{background:#f0faf8}
+.vtable td{padding:11px 13px}
+.oggi-panel,.prossimi-panel,.day-col,.setup-card{border-color:#d4e4e5;box-shadow:0 4px 16px rgba(18,55,84,.07)}
+.oggi-header{background:#123754}
+.prossimi-header{background:#1b526e}
+.map-legend{color:#34566d}
+.modal-header{background:#f5fbfa}
+.modal-icon{background:var(--teal);color:#fff}
+
 /* ── RESPONSIVE ─────────────────────────────────────── */
 @media (max-width: 980px) {
   .week-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -316,54 +344,12 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     </button>
   </nav>
   <div class="sidebar-bottom">
+    <span class="fb-dot" id="fb-dot" title="Stato connessione Firebase" aria-hidden="true"></span>
   </div>
 </aside>
 
 <!-- CONTENT -->
 <div class="content" id="app-content">
-<div style="line-height:0;flex-shrink:0">
-<svg width="100%" viewBox="0 0 680 77" role="img" style="display:block">
-<title>Centrale Operativa - Centro Risorse S.p.A.</title>
-<rect x="0" y="0" width="680" height="77" fill="#e8ecf0"/>
-<rect x="0" y="0" width="680" height="2.6" fill="#0b7c6e"/>
-<text x="340" y="34.7" text-anchor="middle" font-family="system-ui,sans-serif" font-size="23.1" font-weight="900" letter-spacing="8" fill="#0f1923" stroke="#38bdf8" stroke-width="1.9" paint-order="stroke fill">CENTRALE OPERATIVA</text>
-<text x="340" y="46.2" text-anchor="middle" font-family="system-ui,sans-serif" font-size="7.1" font-weight="500" letter-spacing="4" fill="#4a5568">CENTRO RISORSE S.P.A.</text>
-<rect x="0" y="51.3" width="680" height="25.7" fill="#d0d5de"/>
-<rect x="20"  y="62.9" width="40" height="1.9" fill="#fff" opacity="0.7"/>
-<rect x="80"  y="62.9" width="40" height="1.9" fill="#fff" opacity="0.7"/>
-<rect x="140" y="62.9" width="40" height="1.9" fill="#fff" opacity="0.7"/>
-<rect x="200" y="62.9" width="40" height="1.9" fill="#fff" opacity="0.7"/>
-<rect x="260" y="62.9" width="40" height="1.9" fill="#fff" opacity="0.7"/>
-<rect x="320" y="62.9" width="40" height="1.9" fill="#fff" opacity="0.7"/>
-<rect x="380" y="62.9" width="40" height="1.9" fill="#fff" opacity="0.7"/>
-<rect x="440" y="62.9" width="40" height="1.9" fill="#fff" opacity="0.7"/>
-<rect x="448" y="52.6" width="115" height="17.3" rx="3" fill="#1a4f8a"/>
-<rect x="449" y="53.3" width="113" height="3.2" fill="#2563a8"/>
-<line x1="483" y1="52.6" x2="483" y2="69.9" stroke="#0f3060" stroke-width="0.8"/>
-<line x1="518" y1="52.6" x2="518" y2="69.9" stroke="#0f3060" stroke-width="0.8"/>
-<line x1="553" y1="52.6" x2="553" y2="69.9" stroke="#0f3060" stroke-width="0.8"/>
-<text x="503" y="64.2" text-anchor="middle" font-family="system-ui" font-size="4.8" font-weight="700" fill="#ffffff" letter-spacing="1">CENTRO RISORSE</text>
-<rect x="561" y="61" width="8" height="3.2" rx="1" fill="#8896aa"/>
-<rect x="567" y="53.9" width="46" height="16" rx="3" fill="#0b7c6e"/>
-<rect x="571" y="51.3" width="38" height="3.9" rx="2" fill="#0b7c6e"/>
-<rect x="591" y="55.2" width="19" height="9" rx="2" fill="#c8e6f5" opacity="0.9"/>
-<rect x="609" y="62.9" width="6" height="2.6" rx="1" fill="#fff9c4"/>
-<rect x="609" y="55.8" width="4" height="3.9" rx="1" fill="#086055"/>
-<rect x="569" y="57.1" width="19" height="10.3" rx="1" fill="#086055"/>
-<rect x="572" y="59" width="8" height="5.8" rx="1" fill="#0a6e62" opacity="0.5"/>
-<rect x="585" y="62.2" width="2" height="3.2" rx="1" fill="#0b7c6e"/>
-<circle cx="470" cy="71.2" r="4.5" fill="#2d3748" stroke="#4a5568" stroke-width="1"/>
-<circle cx="470" cy="71.2" r="1.9" fill="#4a5568"/>
-<circle cx="536" cy="71.2" r="4.5" fill="#2d3748" stroke="#4a5568" stroke-width="1"/>
-<circle cx="536" cy="71.2" r="1.9" fill="#4a5568"/>
-<circle cx="578" cy="71.2" r="4.5" fill="#2d3748" stroke="#4a5568" stroke-width="1"/>
-<circle cx="578" cy="71.2" r="1.9" fill="#4a5568"/>
-<circle cx="601" cy="71.2" r="4.5" fill="#2d3748" stroke="#4a5568" stroke-width="1"/>
-<circle cx="601" cy="71.2" r="1.9" fill="#4a5568"/>
-<rect x="0" y="74.4" width="680" height="2.6" fill="#0b7c6e"/>
-<circle cx="660" cy="7.7" r="3.2" id="fb-dot" fill="#cbd5e1"/>
-</svg>
-</div>
 
 <!-- ══ MESE ════════════════════════════════════════════ -->
 <div class="view" id="view-mese">
@@ -1570,7 +1556,7 @@ async function connectFirebase(cfg) {
     const app = initializeApp(cfg);
     db = getDatabase(app);
     const dot = document.getElementById('fb-dot');
-    if (dot) dot.setAttribute('fill', '#0b7c6e');
+    if (dot) dot.style.background = '#2fb5a5';
     if (dot) dot.setAttribute('title','Firebase: connesso');
     onValue(ref(db,'viaggi_programmazione'), snap => {
       STATE.viaggi = snap.val() || {};
@@ -1584,7 +1570,7 @@ async function connectFirebase(cfg) {
   } catch(e) {
     console.error('Firebase error:', e);
     const dot = document.getElementById('fb-dot');
-    if (dot) dot.setAttribute('fill', '#c0392b');
+    if (dot) dot.style.background = '#c0392b';
     return false;
   }
 }
