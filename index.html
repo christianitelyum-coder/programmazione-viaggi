@@ -179,8 +179,21 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .vtable tbody tr:hover{background:var(--s2)}
 .vtable td{padding:10px 12px;vertical-align:middle}
 .vcard.effettuato{background:#f0f0f0;border-color:#ccc;opacity:.75}
+.vcard.rinviato{background:#f4efff;border-color:#c9b7f2}
+.vcard.annullato{background:#f8eeee;border-color:#e7b9b5;opacity:.72}
 .sem-effettuato{background:#999}
+.sem-rinviato{background:#7c5ac7}
+.sem-annullato{background:#c0392b}
 .mvc-effettuato{background:#e8e8e8;color:#888}
+.mvc-rinviato{background:#eee8fb;color:#6244a3}
+.mvc-annullato{background:#f8e5e3;color:#9b1c1c}
+.stato-pill{display:inline-flex;align-items:center;gap:5px;padding:3px 8px;border-radius:12px;font-size:10px;font-weight:700;white-space:nowrap}
+.stato-pianificato{background:#e5eef3;color:#1b526e}
+.stato-confermato{background:#dcf5f1;color:#08776d}
+.stato-in_corso{background:#fef3c7;color:#92400e}
+.stato-completato{background:#d1fae5;color:#065f46}
+.stato-rinviato{background:#eee8fb;color:#6244a3}
+.stato-annullato{background:#f8e5e3;color:#9b1c1c}
 .fill-effettuato{background:#999}
 .progress-fill{height:100%;border-radius:3px;transition:width .3s}
 .progress-bar{width:100%;min-width:90px;height:6px;border-radius:3px;background:#e5e7eb;overflow:hidden}
@@ -345,7 +358,7 @@ body.role-lettore .btn-primary,body.role-lettore .vc-del{display:none!important}
     </div>
     <div class="auth-sep">oppure</div>
     <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="loginGoogle()">Accedi con Google</button>
-    <div style="text-align:center;margin-top:14px;font-family:var(--mono);font-size:9px;color:var(--ink3)">versione 10 · 24/08/2026</div>
+    <div style="text-align:center;margin-top:14px;font-family:var(--mono);font-size:9px;color:var(--ink3)">versione 11 · 24/08/2026</div>
   </div>
 </section>
 <div class="app-shell">
@@ -435,10 +448,12 @@ body.role-lettore .btn-primary,body.role-lettore .vc-del{display:none!important}
     <input type="text" id="f-cerca" placeholder="🔍 Cliente, trasportatore..." oninput="renderLista()" style="flex:1;min-width:180px">
     <select id="f-stato" onchange="renderLista()">
       <option value="">Tutti gli stati</option>
-      <option value="effettuato">✓ Effettuati</option>
-      <option value="done">✅ Completati</option>
-      <option value="partial">🟡 Parziali</option>
-      <option value="none">🔴 Da iniziare</option>
+      <option value="pianificato">📅 Pianificati</option>
+      <option value="confermato">✓ Confermati</option>
+      <option value="in_corso">● In corso</option>
+      <option value="completato">✅ Completati</option>
+      <option value="rinviato">↻ Rinviati</option>
+      <option value="annullato">✕ Annullati</option>
     </select>
     <input type="date" id="f-dal" onchange="renderLista()">
     <input type="date" id="f-al"  onchange="renderLista()">
@@ -550,6 +565,17 @@ body.role-lettore .btn-primary,body.role-lettore .vc-del{display:none!important}
         </div>
       </div>
       <div class="form-row" style="margin-top:1rem">
+        <label class="form-lbl">Stato viaggio <span>*</span></label>
+        <select class="form-ctrl" id="m-stato">
+          <option value="pianificato">📅 Pianificato</option>
+          <option value="confermato">✓ Confermato</option>
+          <option value="in_corso">● In corso</option>
+          <option value="completato">✅ Completato</option>
+          <option value="rinviato">↻ Rinviato</option>
+          <option value="annullato">✕ Annullato</option>
+        </select>
+      </div>
+      <div class="form-row" style="margin-top:1rem">
         <label class="form-lbl">Cliente <span>*</span></label>
         <input class="form-ctrl" id="m-cliente" maxlength="120" autocomplete="organization" placeholder="Ragione sociale cliente">
       </div>
@@ -633,6 +659,7 @@ let db = null;
 let auth = null;
 let currentRole = null;
 let _dataListenersStarted = false;
+let _stateMigrationDone = false;
 let STATE = { viaggi: {}, tasks: [] };
 let _editId  = null;
 let _weekOffset = 0;
@@ -734,6 +761,7 @@ function startDataListeners() {
   _dataListenersStarted = true;
   onValue(ref(db,'viaggi_programmazione'), snap => {
     STATE.viaggi = snap.val() || {};
+    migraStatiLegacy();
     renderAll();
   });
   onValue(ref(db,'viaggi_tasks'), snap => {
@@ -815,18 +843,54 @@ function toISO(d) {
   return `${y}-${m}-${g}`;
 }
 
-function isEffettuato(viaggio) {
-  if (!viaggio.data) return false;
-  const now  = new Date();
-  const [y, m, g] = viaggio.data.split('-').map(Number);
-  const soglia = new Date(y, m - 1, g, 16, 0, 0);
-  const result = now >= soglia;
-  return result;
+const STATI_VIAGGIO = ['pianificato','confermato','in_corso','completato','rinviato','annullato'];
+
+function getStatoViaggio(viaggio) {
+  return STATI_VIAGGIO.includes(viaggio?.statoViaggio) ? viaggio.statoViaggio : 'pianificato';
+}
+
+function isEffettuato(viaggio) { return getStatoViaggio(viaggio) === 'completato'; }
+function isViaggioAttivo(viaggio) { return !['completato','annullato'].includes(getStatoViaggio(viaggio)); }
+
+function statoLabel(stato) {
+  return ({
+    pianificato:'📅 Pianificato', confermato:'✓ Confermato', in_corso:'● In corso',
+    completato:'✅ Completato', rinviato:'↻ Rinviato', annullato:'✕ Annullato'
+  })[stato] || '📅 Pianificato';
+}
+
+function statoPill(stato) {
+  return `<span class="stato-pill stato-${stato}">${statoLabel(stato)}</span>`;
+}
+
+async function migraStatiLegacy() {
+  if (_stateMigrationDone || !db || !canWrite()) return;
+  _stateMigrationDone = true;
+  const patch = {};
+  const now = new Date();
+  Object.entries(STATE.viaggi).forEach(([id, viaggio]) => {
+    if (STATI_VIAGGIO.includes(viaggio?.statoViaggio) || !viaggio?.data) return;
+    const [y,m,g] = viaggio.data.split('-').map(Number);
+    const vecchiaSoglia = new Date(y, m - 1, g, 16, 0, 0);
+    const stato = now >= vecchiaSoglia ? 'completato' : 'pianificato';
+    viaggio.statoViaggio = stato;
+    patch[`${id}/statoViaggio`] = stato;
+  });
+  if (!Object.keys(patch).length) return;
+  try {
+    await update(ref(db,'viaggi_programmazione'), patch);
+    toast('Stati dei viaggi esistenti inizializzati', 'ok');
+  } catch (e) {
+    console.error('Migrazione stati:', e);
+    toast('Impossibile inizializzare alcuni stati esistenti', 'err');
+  }
 }
 
 function semaforo(viaggio) {
-  const eff = isEffettuato(viaggio);
-  if (eff) return 'effettuato';
+  const stato = getStatoViaggio(viaggio);
+  if (stato === 'completato') return 'effettuato';
+  if (stato === 'rinviato') return 'rinviato';
+  if (stato === 'annullato') return 'annullato';
   const tasks = STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS;
   const done = tasks.filter(t => viaggio.checks && viaggio.checks[slugify(t)]).length;
   if (done === 0) return 'none';
@@ -836,6 +900,8 @@ function semaforo(viaggio) {
 
 function semLabel(s) {
   if (s === 'effettuato') return '✓ Effettuato';
+  if (s === 'rinviato') return '↻ Rinviato';
+  if (s === 'annullato') return '✕ Annullato';
   return s === 'done' ? '✅ Completo' : s === 'partial' ? '🟡 In corso' : '🔴 Da iniziare';
 }
 
@@ -922,8 +988,8 @@ function makeMonthCell(iso, dayNum, otherMonth, isToday) {
   const MAX_SHOW = 3;
   viaggi.slice(0, MAX_SHOW).forEach(([id, v]) => {
     const sem = semaforo(v);
-    const cls = sem === 'done' ? 'mvc-done' : sem === 'partial' ? 'mvc-partial' : sem === 'effettuato' ? 'mvc-effettuato' : 'mvc-none';
-    const dot = sem === 'done' ? '✅' : sem === 'partial' ? '🟡' : sem === 'effettuato' ? '✓' : '🔴';
+    const cls = sem === 'done' ? 'mvc-done' : sem === 'partial' ? 'mvc-partial' : sem === 'effettuato' ? 'mvc-effettuato' : sem === 'rinviato' ? 'mvc-rinviato' : sem === 'annullato' ? 'mvc-annullato' : 'mvc-none';
+    const dot = sem === 'done' ? '✅' : sem === 'partial' ? '🟡' : sem === 'effettuato' ? '✓' : sem === 'rinviato' ? '↻' : sem === 'annullato' ? '✕' : '🔴';
     const el  = document.createElement('div');
     el.className = `month-vcard ${cls}`;
     el.innerHTML = `<span>${dot}</span><span style="overflow:hidden;text-overflow:ellipsis${sem==='effettuato'?';text-decoration:line-through':''}">${v.ora?escapeHTML(v.ora)+' ':''}${safeText(v.cliente)}${v.trasportatore?' · 🚛'+escapeHTML(v.trasportatore):''}${v.tipoMezzo?' · '+escapeHTML(v.tipoMezzo):''}</span>`;
@@ -1019,7 +1085,7 @@ window.renderLista = function() {
     (v.trasportatore||'').toLowerCase().includes(cerca) ||
     (v.origine||'').toLowerCase().includes(cerca) ||
     (v.dest||'').toLowerCase().includes(cerca));
-  if (stato) rows = rows.filter(([,v]) => semaforo(v) === stato);
+  if (stato) rows = rows.filter(([,v]) => getStatoViaggio(v) === stato);
   if (dal)   rows = rows.filter(([,v]) => (v.data||'') >= dal);
   if (al)    rows = rows.filter(([,v]) => (v.data||'') <= al);
 
@@ -1031,29 +1097,24 @@ window.renderLista = function() {
   }
   tbody.innerHTML = rows.map(([id,v]) => {
     const sem  = semaforo(v);
+    const statoViaggio = getStatoViaggio(v);
     const eff  = sem === 'effettuato';
     const pct  = progress(v);
-    const fillCls = eff?'fill-effettuato':sem==='done'?'fill-done':sem==='partial'?'fill-partial':'fill-none';
-    const rowStyle = eff ? 'opacity:.7;background:#f8f8f8' : '';
+    const fillCls = sem==='done'||eff?'fill-done':sem==='partial'?'fill-partial':'fill-none';
+    const rowStyle = statoViaggio === 'annullato' ? 'opacity:.65;background:#fff8f7' : '';
     return `<tr style="${rowStyle}">
       <td style="font-family:var(--mono);font-size:12px;white-space:nowrap">${escapeHTML(fmtDate(v.data))}${v.ora?' <span style="color:var(--ink3)">'+escapeHTML(v.ora)+'</span>':''}</td>
-      <td style="font-weight:600${eff?';text-decoration:line-through;color:var(--ink3)':''}">${safeText(v.cliente)}</td>
+      <td style="font-weight:600${statoViaggio==='annullato'?';text-decoration:line-through;color:var(--ink3)':''}">${safeText(v.cliente)}</td>
       <td style="color:var(--ink2)">${safeText(v.trasportatore)}${v.targa?' <span style="font-size:10px;color:var(--ink3)">'+escapeHTML(v.targa)+'</span>':''}${v.tipoMezzo?' <span style="font-size:10px;background:var(--blue-l,#e8f0fc);color:var(--blue,#1a4f8a);padding:1px 5px;border-radius:4px">'+escapeHTML(v.tipoMezzo)+'</span>':''}</td>
       <td style="font-size:12px;color:var(--ink2)">${safeText(v.origine)} → ${safeText(v.dest)}</td>
       <td>
-        ${eff
-          ? `<span style="font-size:11px;font-weight:700;color:#888;background:#eee;padding:3px 8px;border-radius:10px">✓ Effettuato</span>`
-          : `<div class="progress-bar"><div class="progress-fill ${fillCls}" style="width:${pct}%"></div></div>
-             <div style="font-size:10px;color:var(--ink3);margin-top:2px">${pct}%</div>`
-        }
+        <div class="progress-bar"><div class="progress-fill ${fillCls}" style="width:${pct}%"></div></div>
+        <div style="font-size:10px;color:var(--ink3);margin-top:2px">${pct}%</div>
       </td>
-      <td><span style="font-size:11px;font-weight:600${eff?';color:#999':''}">${semLabel(sem)}</span></td>
+      <td>${statoPill(statoViaggio)}</td>
       <td style="white-space:nowrap">
-        ${eff
-          ? `<button class="btn btn-ghost btn-sm" onclick="mostraSuMappa('${id}')" title="Mostra su mappa">🗺</button>`
-          : `<button class="btn btn-ghost btn-sm" onclick="openModal(null,'${id}')">✏️</button>`
-        }
-        <button class="btn btn-ghost btn-sm" onclick="mostraSuMappa('${id}')" title="Mostra su mappa" style="${eff?'display:none':''}">🗺</button>
+        <button class="btn btn-ghost btn-sm" onclick="openModal(null,'${id}')" title="Modifica viaggio">✏️</button>
+        <button class="btn btn-ghost btn-sm" onclick="mostraSuMappa('${id}')" title="Mostra su mappa">🗺</button>
         <button class="btn btn-ghost btn-sm" onclick="eliminaViaggio('${id}')" style="color:var(--red)">🗑</button>
       </td>
     </tr>`;
@@ -1071,6 +1132,7 @@ window.openModal = function(data, id) {
   document.getElementById('modal-title').textContent = v ? 'Modifica viaggio' : 'Nuovo viaggio';
   document.getElementById('m-data').value         = v?.data  || data || toISO(new Date());
   document.getElementById('m-ora').value          = v?.ora   || '';
+  document.getElementById('m-stato').value        = v ? getStatoViaggio(v) : 'pianificato';
   document.getElementById('m-cliente').value      = v?.cliente || '';
   document.getElementById('m-trasportatore').value= v?.trasportatore || '';
   document.getElementById('m-targa').value        = v?.targa || '';
@@ -1133,6 +1195,7 @@ window.salvaViaggio = async function() {
 
   const obj = {
     data, ora: document.getElementById('m-ora').value,
+    statoViaggio: document.getElementById('m-stato').value,
     cliente, trasportatore: document.getElementById('m-trasportatore').value.trim(),
     targa: document.getElementById('m-targa').value.trim(),
     tipoMezzo: (function(){
@@ -1217,12 +1280,12 @@ window.resetFiltri = function() {
 // ── CSV ────────────────────────────────────────────────
 window.exportCSV = function() {
   const tasks = STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS;
-  const rows  = [['Data','Ora','Cliente','Trasportatore','Targa','Tipologia mezzo','Origine','Destinazione','Note',...tasks,'% Completamento']];
+  const rows  = [['Data','Ora','Stato','Cliente','Trasportatore','Targa','Tipologia mezzo','Origine','Destinazione','Note',...tasks,'% Completamento']];
   Object.values(STATE.viaggi)
     .sort((a,b) => a.data < b.data ? -1 : 1)
     .forEach(v => {
       const checks = tasks.map(t => (v.checks?.[slugify(t)] ? 'SI' : 'NO'));
-      rows.push([v.data,v.ora||'',v.cliente||'',v.trasportatore||'',v.targa||'',v.tipoMezzo||'',v.origine||'',v.dest||'',v.note||'',...checks,progress(v)+'%']);
+      rows.push([v.data,v.ora||'',statoLabel(getStatoViaggio(v)).replace(/^[^A-Za-zÀ-ÿ]+/,'').trim(),v.cliente||'',v.trasportatore||'',v.targa||'',v.tipoMezzo||'',v.origine||'',v.dest||'',v.note||'',...checks,progress(v)+'%']);
     });
   const csvSafe = value => {
     let text = String(value ?? '');
@@ -1501,7 +1564,7 @@ function renderOggiPanel() {
   lbl.textContent = d.toLocaleDateString('it-IT', {weekday:'long', day:'numeric', month:'long', year:'numeric'});
 
   const viaggiOggi = Object.entries(STATE.viaggi)
-    .filter(([,v]) => v.data === oggi && !isEffettuato(v))
+    .filter(([,v]) => v.data === oggi && isViaggioAttivo(v))
     .sort((a,b) => (a[1].ora||'') < (b[1].ora||'') ? -1 : 1);
 
   if (!viaggiOggi.length) {
@@ -1519,7 +1582,7 @@ function renderOggiPanel() {
       <div class="oggi-info">
         <div class="oggi-cliente">${safeText(v.cliente)}</div>
         <div class="oggi-sub">${escapeHTML(v.trasportatore||'')}${v.origine?' · '+escapeHTML(v.origine)+' → '+escapeHTML(v.dest||'?'):''}</div>
-        <div style="font-size:10px;color:var(--ink3);margin-top:2px">${fatti}/${tasks.length} attività · ${safeText(v.tipoMezzo)}</div>
+        <div style="font-size:10px;color:var(--ink3);margin-top:2px">${fatti}/${tasks.length} attività · ${safeText(v.tipoMezzo)} · ${statoLabel(getStatoViaggio(v))}</div>
       </div>
       <span class="oggi-ora">${escapeHTML(v.ora||'')}</span>
       <span class="oggi-pin">📍</span>
@@ -1614,7 +1677,7 @@ function renderProssimiPanel() {
   // Escludi oggi (già nel pannello sopra) e viaggi effettuati
   const oggi = toISO(new Date());
   const viaggiSett = Object.entries(STATE.viaggi)
-    .filter(([,v]) => v.data > oggi && v.data >= isoLun && v.data <= isoDom && !isEffettuato(v))
+    .filter(([,v]) => v.data > oggi && v.data >= isoLun && v.data <= isoDom && isViaggioAttivo(v))
     .sort((a,b) => (a[1].data + (a[1].ora||'')) < (b[1].data + (b[1].ora||'')) ? -1 : 1);
 
   if (!viaggiSett.length) {
@@ -1643,7 +1706,7 @@ function renderProssimiPanel() {
           <div class="oggi-info">
             <div class="oggi-cliente">${safeText(v.cliente)}</div>
             <div class="oggi-sub">${escapeHTML(v.trasportatore||'')}${v.origine?' · '+escapeHTML(v.origine)+' → '+escapeHTML(v.dest||'?'):''}</div>
-            <div style="font-size:10px;color:var(--ink3);margin-top:2px">${fatti}/${tasks.length} att. · ${safeText(v.tipoMezzo)}</div>
+            <div style="font-size:10px;color:var(--ink3);margin-top:2px">${fatti}/${tasks.length} att. · ${safeText(v.tipoMezzo)} · ${statoLabel(getStatoViaggio(v))}</div>
           </div>
           <span class="oggi-ora">${escapeHTML(v.ora||'')}</span>
           <span class="oggi-pin">📍</span>
