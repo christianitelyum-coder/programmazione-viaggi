@@ -230,6 +230,19 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .user-btn{border:0;background:none;color:#9eb7c9;cursor:pointer;font-size:18px;padding:6px;border-radius:8px;display:block;margin:auto}
 .user-btn:hover{color:#fff;background:rgba(255,255,255,.08)}
 body.role-lettore .btn-primary,body.role-lettore .vc-del{display:none!important}
+.reminders-box{margin-top:1rem;padding:12px;border:1px solid var(--border);border-radius:10px;background:#f8fbfc}
+.reminders-head{display:flex;align-items:center;gap:8px;margin-bottom:8px}
+.reminders-head .form-lbl{margin:0;flex:1}
+.reminder-row{display:grid;grid-template-columns:minmax(130px,1fr) minmax(170px,1fr) auto;gap:7px;align-items:center;margin-top:7px}
+.reminder-row .form-ctrl{padding:7px 9px;font-size:12px}
+.reminder-remove{width:34px;height:34px;border:1px solid #efc7c3;border-radius:8px;background:#fff;color:var(--red);cursor:pointer;font-size:15px}
+.reminder-empty{font-size:11px;color:var(--ink3);font-style:italic;padding:4px 0}
+.reminder-popups{position:fixed;right:18px;top:18px;z-index:2500;width:min(380px,calc(100vw - 36px));display:flex;flex-direction:column;gap:10px}
+.reminder-popup{background:#fff;border:1px solid #f0cf85;border-left:5px solid var(--amber);border-radius:10px;box-shadow:0 12px 36px rgba(18,55,84,.22);padding:13px 14px;animation:reminderIn .25s ease-out}
+.reminder-popup-head{display:flex;align-items:flex-start;gap:8px;font-size:13px;font-weight:800;color:var(--ink)}
+.reminder-popup-close{margin-left:auto;border:0;background:none;color:var(--ink3);cursor:pointer;font-size:18px;line-height:1}
+.reminder-popup-body{font-size:12px;color:var(--ink2);line-height:1.45;margin:7px 0 10px}
+@keyframes reminderIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:none}}
 
 /* ── SIDEBAR ─────────────────────────────────────────── */
 .app-shell{display:flex;height:100vh;overflow:hidden}
@@ -332,6 +345,8 @@ body.role-lettore .btn-primary,body.role-lettore .vc-del{display:none!important}
   .form-row-2,.checklist-grid{grid-template-columns:1fr}
   .modal-footer{flex-wrap:wrap}
   .modal-footer .btn{flex:1;justify-content:center}
+  .reminder-row{grid-template-columns:1fr}
+  .reminder-remove{width:100%}
   .lista-filters>*{width:100%;margin-left:0}
 }
 
@@ -358,7 +373,7 @@ body.role-lettore .btn-primary,body.role-lettore .vc-del{display:none!important}
     </div>
     <div class="auth-sep">oppure</div>
     <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="loginGoogle()">Accedi con Google</button>
-    <div style="text-align:center;margin-top:14px;font-family:var(--mono);font-size:9px;color:var(--ink3)">versione 11 · 24/08/2026</div>
+    <div style="text-align:center;margin-top:14px;font-family:var(--mono);font-size:9px;color:var(--ink3)">versione 12 · 24/08/2026</div>
   </div>
 </section>
 <div class="app-shell">
@@ -622,9 +637,18 @@ body.role-lettore .btn-primary,body.role-lettore .vc-del{display:none!important}
         <label class="form-lbl">Checklist attività</label>
         <div class="checklist-grid" id="modal-checklist"></div>
       </div>
+      <div class="reminders-box">
+        <div class="reminders-head">
+          <label class="form-lbl">🔔 Promemoria attività</label>
+          <button class="btn btn-ghost btn-sm" type="button" onclick="aggiungiPromemoria()">+ Aggiungi</button>
+        </div>
+        <div style="font-size:11px;color:var(--ink2);line-height:1.4">Puoi impostare più date e orari per qualsiasi attività. Il promemoria viene ignorato quando l’attività risulta completata.</div>
+        <div id="modal-reminders"></div>
+      </div>
     </div>
     <div class="modal-footer">
       <button class="btn btn-ghost" onclick="chiudiModal()">Annulla</button>
+      <button class="btn btn-ghost" style="color:#174d68;border-color:#8fb5c5" onclick="esportaOutlook()" title="Scarica i promemoria per Outlook">📅 Outlook (.ics)</button>
       <button class="btn btn-ghost" style="color:var(--blue,#1a4f8a);border-color:var(--blue,#1a4f8a)" onclick="apriOrdineServizio()" title="Crea ordine di servizio con i dati di questo viaggio">📋 Ordine di servizio</button>
       <button class="btn btn-primary" onclick="salvaViaggio()">✓ Salva viaggio</button>
     </div>
@@ -635,6 +659,7 @@ body.role-lettore .btn-primary,body.role-lettore .vc-del{display:none!important}
 </div><!-- /app-shell -->
 
 <div class="toast" id="toast"></div>
+<div class="reminder-popups" id="reminder-popups" aria-live="assertive"></div>
 
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
@@ -1124,6 +1149,121 @@ window.renderLista = function() {
 function renderLista() { window.renderLista(); }
 
 // ── MODAL ──────────────────────────────────────────────
+function reminderId() {
+  return (window.crypto?.randomUUID?.() || `r-${Date.now()}-${Math.random().toString(36).slice(2,8)}`);
+}
+
+function reminderRowHTML(reminder={}) {
+  const tasks = STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS;
+  const selectedKey = reminder.taskKey || slugify(tasks[0] || 'attivita');
+  const options = tasks.map(t => {
+    const key = slugify(t);
+    return `<option value="${key}" ${key===selectedKey?'selected':''}>${escapeHTML(t)}</option>`;
+  }).join('');
+  return `<div class="reminder-row" data-reminder-id="${escapeHTML(reminder.id || reminderId())}">
+    <select class="form-ctrl reminder-task" aria-label="Attività del promemoria">${options}</select>
+    <input class="form-ctrl reminder-at" type="datetime-local" value="${escapeHTML(reminder.at || '')}" aria-label="Data e ora del promemoria">
+    <button class="reminder-remove" type="button" onclick="rimuoviPromemoria(this)" title="Rimuovi promemoria">×</button>
+  </div>`;
+}
+
+function renderPromemoriaEditor(reminders=[]) {
+  const box = document.getElementById('modal-reminders');
+  box.innerHTML = reminders.length
+    ? reminders.map(reminderRowHTML).join('')
+    : '<div class="reminder-empty">Nessun promemoria configurato</div>';
+}
+
+window.aggiungiPromemoria = function() {
+  const box = document.getElementById('modal-reminders');
+  box.querySelector('.reminder-empty')?.remove();
+  box.insertAdjacentHTML('beforeend', reminderRowHTML());
+};
+
+window.rimuoviPromemoria = function(button) {
+  const box = document.getElementById('modal-reminders');
+  button.closest('.reminder-row')?.remove();
+  if (!box.querySelector('.reminder-row')) renderPromemoriaEditor([]);
+};
+
+function leggiPromemoriaEditor() {
+  return [...document.querySelectorAll('#modal-reminders .reminder-row')]
+    .map(row => ({
+      id: row.dataset.reminderId || reminderId(),
+      taskKey: row.querySelector('.reminder-task').value,
+      at: row.querySelector('.reminder-at').value
+    }))
+    .filter(r => r.taskKey && r.at)
+    .sort((a,b) => a.at.localeCompare(b.at));
+}
+
+function icsEscape(value) {
+  return String(value ?? '')
+    .replace(/\\/g,'\\\\')
+    .replace(/\r?\n/g,'\\n')
+    .replace(/,/g,'\\,')
+    .replace(/;/g,'\\;');
+}
+
+function icsDateUTC(date) {
+  return date.toISOString().replace(/[-:]/g,'').replace(/\.\d{3}Z$/,'Z');
+}
+
+window.esportaOutlook = function() {
+  const reminders = leggiPromemoriaEditor();
+  if (!reminders.length) {
+    toast('Aggiungi almeno un promemoria con data e ora', 'err');
+    return;
+  }
+  const cliente = document.getElementById('m-cliente').value.trim() || 'Cliente non indicato';
+  const data = document.getElementById('m-data').value;
+  const ora = document.getElementById('m-ora').value;
+  const origine = document.getElementById('m-origine').value.trim();
+  const dest = document.getElementById('m-dest').value.trim();
+  const trasportatore = document.getElementById('m-trasportatore').value.trim();
+  const note = document.getElementById('m-note').value.trim();
+  const created = icsDateUTC(new Date());
+  const events = reminders.map((reminder, index) => {
+    const start = new Date(reminder.at);
+    if (!Number.isFinite(start.getTime())) return '';
+    const end = new Date(start.getTime() + 30 * 60000);
+    const task = nomeAttivita(reminder.taskKey);
+    const description = [
+      `Viaggio: ${data ? fmtDate(data) : '—'}${ora ? ' alle '+ora : ''}`,
+      origine || dest ? `Tratta: ${origine || '—'} → ${dest || '—'}` : '',
+      trasportatore ? `Trasportatore: ${trasportatore}` : '',
+      note ? `Note: ${note}` : ''
+    ].filter(Boolean).join('\n');
+    const uidBase = _editId || `${data}-${slugify(cliente)}`;
+    return [
+      'BEGIN:VEVENT',
+      `UID:${icsEscape(uidBase)}-${icsEscape(reminder.id || index)}@centrale-operativa`,
+      `DTSTAMP:${created}`,
+      `DTSTART:${icsDateUTC(start)}`,
+      `DTEND:${icsDateUTC(end)}`,
+      `SUMMARY:${icsEscape('Promemoria: '+task+' — '+cliente)}`,
+      `DESCRIPTION:${icsEscape(description)}`,
+      'STATUS:CONFIRMED',
+      'BEGIN:VALARM',
+      'ACTION:DISPLAY',
+      'TRIGGER:PT0M',
+      `DESCRIPTION:${icsEscape(task+' — '+cliente)}`,
+      'END:VALARM',
+      'END:VEVENT'
+    ].join('\r\n');
+  }).filter(Boolean).join('\r\n');
+  const calendar = ['BEGIN:VCALENDAR','VERSION:2.0','PRODID:-//Centro Risorse//Centrale Operativa//IT','CALSCALE:GREGORIAN','METHOD:PUBLISH',events,'END:VCALENDAR'].join('\r\n');
+  const blob = new Blob(['\uFEFF'+calendar], {type:'text/calendar;charset=utf-8'});
+  const link = document.createElement('a');
+  link.href = URL.createObjectURL(blob);
+  link.download = `promemoria_${slugify(cliente)}_${data || toISO(new Date())}.ics`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  setTimeout(() => URL.revokeObjectURL(link.href), 1000);
+  toast(`📅 Creati ${reminders.length} eventi per Outlook`, 'ok');
+};
+
 window.openModal = function(data, id) {
   _editId = id || null;
   const v  = id ? STATE.viaggi[id] : null;
@@ -1161,6 +1301,7 @@ window.openModal = function(data, id) {
       <span class="chk-label">${escapeHTML(t)}</span>
     </label>`;
   }).join('');
+  renderPromemoriaEditor(Array.isArray(v?.promemoria) ? v.promemoria : []);
 
   document.getElementById('modal-overlay').classList.add('open');
   setTimeout(() => document.getElementById('m-data').focus(), 100);
@@ -1208,6 +1349,7 @@ window.salvaViaggio = async function() {
     origine: document.getElementById('m-origine').value.trim(),
     dest: document.getElementById('m-dest').value.trim(),
     note: document.getElementById('m-note').value.trim(),
+    promemoria: leggiPromemoriaEditor(),
     checks, updatedAt: new Date().toISOString()
   };
 
@@ -1326,7 +1468,7 @@ async function richiediPermessoNotifiche() {
   return perm === 'granted';
 }
 
-function schedulaPromemoria() {
+function schedulaPromemoriaLegacy() {
   if (!('Notification' in window)) return;
   const ora = new Date();
 
@@ -1381,6 +1523,80 @@ function schedulaPromemoria() {
   });
 }
 
+// ── PROMEMORIA CONFIGURABILI PER TUTTE LE ATTIVITÀ ────
+const _reminderTimers = {};
+let _reminderShown = new Set();
+try { _reminderShown = new Set(JSON.parse(localStorage.getItem('viaggi_reminders_v1') || '[]')); } catch {}
+
+function nomeAttivita(taskKey) {
+  const tasks = STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS;
+  return tasks.find(t => slugify(t) === taskKey) || taskKey.replace(/_/g,' ');
+}
+
+function salvaReminderMostrato(key) {
+  _reminderShown.add(key);
+  localStorage.setItem('viaggi_reminders_v1', JSON.stringify([..._reminderShown].slice(-500)));
+}
+
+async function mostraPromemoria(viaggioId, reminder, reminderKey) {
+  if (_reminderShown.has(reminderKey)) return;
+  const viaggio = STATE.viaggi[viaggioId];
+  if (!viaggio || !isViaggioAttivo(viaggio) || viaggio.checks?.[reminder.taskKey]) return;
+  salvaReminderMostrato(reminderKey);
+  const attivita = nomeAttivita(reminder.taskKey);
+  const quando = new Date(reminder.at).toLocaleString('it-IT', {dateStyle:'short',timeStyle:'short'});
+  const title = `⏰ ${attivita}`;
+  const body = `${viaggio.cliente || 'Cliente non indicato'} · viaggio ${fmtDate(viaggio.data)}${viaggio.ora?' alle '+viaggio.ora:''}\nScadenza promemoria: ${quando}`;
+
+  const container = document.getElementById('reminder-popups');
+  const card = document.createElement('div');
+  card.className = 'reminder-popup';
+  card.innerHTML = `<div class="reminder-popup-head"><span>🔔</span><span>${escapeHTML(attivita)}</span><button class="reminder-popup-close" type="button">×</button></div>
+    <div class="reminder-popup-body"><strong>${safeText(viaggio.cliente)}</strong><br>Viaggio ${escapeHTML(fmtDate(viaggio.data))}${viaggio.ora?' alle '+escapeHTML(viaggio.ora):''}<br>Promemoria: ${escapeHTML(quando)}</div>
+    <button class="btn btn-primary btn-sm" type="button">Apri viaggio</button>`;
+  card.querySelector('.reminder-popup-close').onclick = () => card.remove();
+  card.querySelector('.btn').onclick = () => { card.remove(); openModal(null, viaggioId); };
+  container.appendChild(card);
+
+  if ('Notification' in window && Notification.permission === 'granted') {
+    const notification = new Notification(title, {
+      body,
+      icon:'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="12" fill="%23b45309"/><text y="44" x="32" text-anchor="middle" font-size="36">🔔</text></svg>',
+      tag:`viaggio-reminder-${reminderKey}`,
+      requireInteraction:true
+    });
+    notification.onclick = () => { window.focus(); openModal(null, viaggioId); notification.close(); };
+  }
+}
+
+function schedulaPromemoria() {
+  const now = Date.now();
+  const activeKeys = new Set();
+  Object.entries(STATE.viaggi).forEach(([viaggioId, viaggio]) => {
+    if (!isViaggioAttivo(viaggio) || !Array.isArray(viaggio.promemoria)) return;
+    viaggio.promemoria.forEach(reminder => {
+      if (!reminder?.id || !reminder?.taskKey || !reminder?.at || viaggio.checks?.[reminder.taskKey]) return;
+      const at = new Date(reminder.at).getTime();
+      if (!Number.isFinite(at)) return;
+      const key = `${viaggioId}:${reminder.id}:${reminder.at}`;
+      if (_reminderShown.has(key)) return;
+      const delay = at - now;
+      if (delay < -12 * 3600 * 1000 || delay > 7 * 24 * 3600 * 1000) return;
+      activeKeys.add(key);
+      if (_reminderTimers[key]) return;
+      _reminderTimers[key] = setTimeout(() => {
+        delete _reminderTimers[key];
+        mostraPromemoria(viaggioId, reminder, key);
+      }, Math.max(50, delay));
+    });
+  });
+  Object.keys(_reminderTimers).forEach(key => {
+    if (!activeKeys.has(key)) { clearTimeout(_reminderTimers[key]); delete _reminderTimers[key]; }
+  });
+}
+
+setInterval(schedulaPromemoria, 60 * 1000);
+
 // Avvisa l'utente se le notifiche non sono abilitate
 async function verificaNotifiche() {
   if (!('Notification' in window)) return;
@@ -1389,11 +1605,11 @@ async function verificaNotifiche() {
     const banner = document.createElement('div');
     banner.id = 'notif-banner';
     banner.style.cssText = 'position:fixed;bottom:1.5rem;left:50%;transform:translateX(-50%);background:var(--amber,#b45309);color:#fff;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;z-index:999;cursor:pointer;box-shadow:0 4px 16px rgba(0,0,0,.2);display:flex;align-items:center;gap:10px';
-    banner.innerHTML = '🔔 <span>Abilita le notifiche per i promemoria FAC SIMILE</span> <button style="background:rgba(255,255,255,.25);border:none;color:#fff;padding:3px 10px;border-radius:5px;cursor:pointer;font-weight:700">Abilita</button>';
+    banner.innerHTML = '🔔 <span>Abilita le notifiche per i promemoria attività</span> <button style="background:rgba(255,255,255,.25);border:none;color:#fff;padding:3px 10px;border-radius:5px;cursor:pointer;font-weight:700">Abilita</button>';
     banner.onclick = async () => {
       const ok = await richiediPermessoNotifiche();
       banner.remove();
-      if (ok) toast('✅ Notifiche abilitate — riceverai i promemoria FAC SIMILE');
+      if (ok) toast('✅ Notifiche abilitate — riceverai i promemoria attività');
     };
     document.body.appendChild(banner);
     setTimeout(() => banner?.remove(), 12000);
