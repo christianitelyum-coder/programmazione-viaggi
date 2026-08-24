@@ -200,6 +200,24 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 .toast.ok{background:var(--teal)}
 .toast.err{background:var(--red)}
 
+/* ── ACCESSO E RUOLI ────────────────────────────────── */
+.auth-screen{position:fixed;inset:0;z-index:3000;background:linear-gradient(135deg,#123754 0%,#174d68 55%,#168b80 100%);display:flex;align-items:center;justify-content:center;padding:20px}
+.auth-screen.hidden{display:none}
+.auth-card{width:min(420px,100%);background:#fff;border-radius:16px;padding:28px;box-shadow:0 24px 70px rgba(3,24,40,.32)}
+.auth-brand{display:flex;align-items:center;gap:12px;margin-bottom:20px}
+.auth-logo{width:46px;height:46px;border-radius:11px;background:var(--teal);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-family:var(--mono)}
+.auth-card h1{font-size:20px;color:#123754}
+.auth-card p{font-size:13px;color:var(--ink2);line-height:1.5;margin-top:3px}
+.auth-error{display:none;margin:12px 0;padding:9px 11px;border-radius:8px;background:var(--red-l);color:var(--red);font-size:12px;line-height:1.4}
+.auth-error.show{display:block}
+.auth-sep{display:flex;align-items:center;gap:10px;color:var(--ink3);font-size:11px;margin:15px 0}
+.auth-sep:before,.auth-sep:after{content:"";height:1px;background:var(--border);flex:1}
+.auth-actions{display:flex;gap:8px;margin-top:14px}
+.auth-actions .btn{flex:1;justify-content:center}
+.user-btn{border:0;background:none;color:#9eb7c9;cursor:pointer;font-size:18px;padding:6px;border-radius:8px;display:block;margin:auto}
+.user-btn:hover{color:#fff;background:rgba(255,255,255,.08)}
+body.role-lettore .btn-primary,body.role-lettore .vc-del{display:none!important}
+
 /* ── SIDEBAR ─────────────────────────────────────────── */
 .app-shell{display:flex;height:100vh;overflow:hidden}
 .sidebar{width:64px;background:#fff;display:flex;flex-direction:column;align-items:center;padding:8px 0;gap:4px;flex-shrink:0;z-index:100;box-shadow:2px 0 12px rgba(0,0,0,.08);border-right:1px solid #e5e9f0}
@@ -276,7 +294,9 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
   .app-shell{height:auto;min-height:100vh;display:block;padding-bottom:64px}
   .content{overflow:visible}
   .sidebar{position:fixed;z-index:1000;left:0;right:0;bottom:0;width:100%;height:64px;flex-direction:row;padding:4px 6px;border-right:0;border-top:1px solid #e5e9f0;box-shadow:0 -2px 12px rgba(0,0,0,.1)}
-  .sidebar-logo,.sbtn-sep,.sidebar-bottom{display:none}
+  .sidebar-logo,.sbtn-sep{display:none}
+  .sidebar-bottom{display:block;margin:0;padding:0}
+  .sidebar-bottom .fb-dot{display:none}
   .snav{flex-direction:row;justify-content:space-around;gap:0}
   .sbtn{width:auto;min-width:44px;height:54px;flex:1}
   .sbtn-ico{font-size:17px}
@@ -305,6 +325,28 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 </style>
 </head>
 <body>
+<section class="auth-screen" id="auth-screen" aria-label="Accesso riservato">
+  <div class="auth-card">
+    <div class="auth-brand">
+      <div class="auth-logo">CR</div>
+      <div><h1>Centrale Operativa</h1><p>Programmazione viaggi — accesso riservato</p></div>
+    </div>
+    <div class="form-row">
+      <label class="form-lbl" for="auth-email">Email</label>
+      <input class="form-ctrl" id="auth-email" type="email" autocomplete="username" maxlength="180" placeholder="nome@azienda.it">
+    </div>
+    <div class="form-row">
+      <label class="form-lbl" for="auth-password">Password</label>
+      <input class="form-ctrl" id="auth-password" type="password" autocomplete="current-password" maxlength="128" placeholder="Password">
+    </div>
+    <div class="auth-error" id="auth-error" role="alert"></div>
+    <div class="auth-actions">
+      <button class="btn btn-primary" id="auth-login" onclick="loginEmail()">Accedi</button>
+    </div>
+    <div class="auth-sep">oppure</div>
+    <button class="btn btn-ghost" style="width:100%;justify-content:center" onclick="loginGoogle()">Accedi con Google</button>
+  </div>
+</section>
 <div class="app-shell">
 
 <!-- SIDEBAR -->
@@ -344,6 +386,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
     </button>
   </nav>
   <div class="sidebar-bottom">
+    <button class="user-btn" id="user-btn" onclick="logoutApp()" title="Disconnetti">↪</button>
     <span class="fb-dot" id="fb-dot" title="Stato connessione Firebase" aria-hidden="true"></span>
   </div>
 </aside>
@@ -568,6 +611,7 @@ body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:10
 
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.min.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-database-compat.js"></script>
 <script>
 // Firebase compat SDK — funziona in iframe e senza type="module"
@@ -585,6 +629,9 @@ function onValue(r, cb)     { r.on('value', snap => cb(snap)); }
 
 // ── STATE ──────────────────────────────────────────────
 let db = null;
+let auth = null;
+let currentRole = null;
+let _dataListenersStarted = false;
 let STATE = { viaggi: {}, tasks: [] };
 let _editId  = null;
 let _weekOffset = 0;
@@ -621,6 +668,105 @@ function escapeHTML(value) {
 function safeText(value, fallback='—') {
   const text = String(value ?? '').trim();
   return escapeHTML(text || fallback);
+}
+
+function showAuthError(message) {
+  const el = document.getElementById('auth-error');
+  el.textContent = message || '';
+  el.classList.toggle('show', Boolean(message));
+}
+
+function friendlyAuthError(error) {
+  const code = error?.code || '';
+  if (code.includes('invalid-credential') || code.includes('wrong-password') || code.includes('user-not-found')) return 'Email o password non corrette.';
+  if (code.includes('too-many-requests')) return 'Troppi tentativi. Riprova più tardi.';
+  if (code.includes('popup-blocked')) return 'Il browser ha bloccato la finestra Google.';
+  if (code.includes('operation-not-allowed')) return 'Questo metodo di accesso non è ancora abilitato in Firebase.';
+  return error?.message || 'Accesso non riuscito.';
+}
+
+window.loginEmail = async function() {
+  if (!auth) return showAuthError('Connessione Firebase non disponibile.');
+  const email = document.getElementById('auth-email').value.trim();
+  const password = document.getElementById('auth-password').value;
+  if (!email || !password) return showAuthError('Inserisci email e password.');
+  showAuthError('');
+  const btn = document.getElementById('auth-login');
+  btn.disabled = true; btn.textContent = 'Accesso...';
+  try { await auth.signInWithEmailAndPassword(email, password); }
+  catch (e) { showAuthError(friendlyAuthError(e)); }
+  finally { btn.disabled = false; btn.textContent = 'Accedi'; }
+};
+
+window.loginGoogle = async function() {
+  if (!auth) return showAuthError('Connessione Firebase non disponibile.');
+  showAuthError('');
+  try {
+    const provider = new firebase.auth.GoogleAuthProvider();
+    provider.setCustomParameters({prompt:'select_account'});
+    await auth.signInWithPopup(provider);
+  } catch (e) { showAuthError(friendlyAuthError(e)); }
+};
+
+window.logoutApp = async function() {
+  if (auth) await auth.signOut();
+};
+
+function canWrite() { return currentRole === 'admin' || currentRole === 'operatore'; }
+function requireWrite() {
+  if (canWrite()) return true;
+  toast('Il tuo profilo è abilitato alla sola lettura', 'err');
+  return false;
+}
+
+function applyRole(role, user) {
+  currentRole = role;
+  document.body.classList.toggle('role-lettore', role === 'lettore');
+  const setupBtn = document.getElementById('snav-setup');
+  if (setupBtn) setupBtn.style.display = role === 'admin' ? '' : 'none';
+  const userBtn = document.getElementById('user-btn');
+  if (userBtn) userBtn.title = `${user.email || 'Utente'} · ${role} · Disconnetti`;
+}
+
+function startDataListeners() {
+  if (_dataListenersStarted) return;
+  _dataListenersStarted = true;
+  onValue(ref(db,'viaggi_programmazione'), snap => {
+    STATE.viaggi = snap.val() || {};
+    renderAll();
+  });
+  onValue(ref(db,'viaggi_tasks'), snap => {
+    STATE.tasks = snap.val() || [];
+    renderTaskEditor();
+  });
+}
+
+async function handleAuthState(user) {
+  const screen = document.getElementById('auth-screen');
+  if (!user) {
+    currentRole = null;
+    document.body.classList.remove('role-lettore');
+    screen.classList.remove('hidden');
+    showAuthError('');
+    return;
+  }
+  try {
+    const snap = await ref(db, `utenti_ruoli/${user.uid}`).once('value');
+    const role = snap.val();
+    if (!['admin','operatore','lettore'].includes(role)) {
+      screen.classList.remove('hidden');
+      showAuthError(`Utente autenticato ma non autorizzato. Comunica all’amministratore questo UID: ${user.uid}`);
+      return;
+    }
+    applyRole(role, user);
+    screen.classList.add('hidden');
+    startDataListeners();
+    switchView('mappa');
+    verificaNotifiche();
+  } catch (e) {
+    console.error(e);
+    showAuthError('Impossibile verificare il ruolo utente. Controlla le regole Firebase.');
+  }
 }
 
 function fmtDate(iso) {
@@ -950,6 +1096,7 @@ window.chiudiModal = function() {
 };
 
 window.salvaViaggio = async function() {
+  if (!requireWrite()) return;
   if (!db) { toast('Firebase non connesso', 'err'); return; }
   const data     = document.getElementById('m-data').value;
   const cliente  = document.getElementById('m-cliente').value.trim();
@@ -993,6 +1140,7 @@ window.salvaViaggio = async function() {
 };
 
 window.eliminaViaggio = async function(id) {
+  if (!requireWrite()) return;
   if (!confirm('Eliminare questo viaggio?')) return;
   await remove(ref(db, `viaggi_programmazione/${id}`));
   toast('Viaggio eliminato');
@@ -1010,6 +1158,7 @@ function renderTaskEditor() {
 }
 
 window.aggiungiTask = function() {
+  if (currentRole !== 'admin') { toast('Solo l’amministratore può modificare le attività', 'err'); return; }
   const inp = document.getElementById('new-task-input');
   const val = inp.value.trim();
   if (!val) return;
@@ -1021,6 +1170,7 @@ window.aggiungiTask = function() {
 };
 
 window.rimuoviTask = function(i) {
+  if (currentRole !== 'admin') { toast('Solo l’amministratore può modificare le attività', 'err'); return; }
   const tasks = STATE.tasks.length ? [...STATE.tasks] : [...DEFAULT_TASKS];
   tasks.splice(i,1);
   STATE.tasks = tasks;
@@ -1028,6 +1178,7 @@ window.rimuoviTask = function(i) {
 };
 
 window.salvaTaskConfig = async function() {
+  if (currentRole !== 'admin') { toast('Solo l’amministratore può modificare le attività', 'err'); return; }
   if (!db) { toast('Firebase non connesso', 'err'); return; }
   await set(ref(db, 'viaggi_tasks'), STATE.tasks.length ? STATE.tasks : DEFAULT_TASKS);
   toast('✓ Attività salvate', 'ok');
@@ -1532,6 +1683,10 @@ window.apriOrdineServizio = function() {
 };
 
 window.switchView = function(name) {
+  if (name === 'setup' && currentRole !== 'admin') {
+    toast('Configurazione riservata all’amministratore', 'err');
+    return;
+  }
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
   document.querySelectorAll('.sbtn').forEach(b => b.classList.remove('act'));
   document.getElementById('view-'+name).classList.add('active');
@@ -1578,17 +1733,12 @@ async function connectFirebase(cfg) {
   try {
     const app = initializeApp(cfg);
     db = getDatabase(app);
+    auth = app.auth();
+    await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
     const dot = document.getElementById('fb-dot');
     if (dot) dot.style.background = '#2fb5a5';
     if (dot) dot.setAttribute('title','Firebase: connesso');
-    onValue(ref(db,'viaggi_programmazione'), snap => {
-      STATE.viaggi = snap.val() || {};
-      renderAll();
-    });
-    onValue(ref(db,'viaggi_tasks'), snap => {
-      STATE.tasks = snap.val() || [];
-      renderTaskEditor();
-    });
+    auth.onAuthStateChanged(handleAuthState);
     return true;
   } catch(e) {
     console.error('Firebase error:', e);
@@ -1599,6 +1749,7 @@ async function connectFirebase(cfg) {
 }
 
 window.salvaConfig = async function() {
+  if (currentRole !== 'admin') { toast('Operazione riservata all’amministratore', 'err'); return; }
   const cfg = {
     apiKey:      document.getElementById('cfg-apikey').value.trim(),
     authDomain:  document.getElementById('cfg-domain').value.trim(),
@@ -1612,6 +1763,7 @@ window.salvaConfig = async function() {
 };
 
 window.testConn = async function() {
+  if (currentRole !== 'admin') { toast('Operazione riservata all’amministratore', 'err'); return; }
   const cfg = loadCfg();
   if (!cfg) { document.getElementById('cfg-status').textContent='⚠️ Nessuna config salvata'; return; }
   document.getElementById('cfg-status').textContent='🔄 Connessione...';
@@ -1621,6 +1773,7 @@ window.testConn = async function() {
 
 // ── ESC ────────────────────────────────────────────────
 document.addEventListener('keydown', e => { if(e.key==='Escape') chiudiModal(); });
+document.getElementById('auth-password').addEventListener('keydown', e => { if(e.key==='Enter') loginEmail(); });
 
 // ── BOOT ───────────────────────────────────────────────
 (async function boot() {
@@ -1637,8 +1790,6 @@ document.addEventListener('keydown', e => { if(e.key==='Escape') chiudiModal(); 
   document.getElementById('cfg-dburl').value   = cfg.databaseURL|| '';
   document.getElementById('cfg-pid').value     = cfg.projectId  || '';
   await connectFirebase(cfg);
-  switchView('mappa');
-  verificaNotifiche();
 })();
 </script>
 </body>
